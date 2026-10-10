@@ -4,6 +4,7 @@
     "paths": {
       "@components/*": ["./src/components/*"],
       "@layouts/*": ["./src/layouts/*"],
+      "@pages/*": ["./src/pages/*"],
       "@styles/*": ["./src/styles/*"],
       "@icons/*": ["./src/icons/*"],
       "@i18n": ["./src/i18n/index.ts"],

@@ -1,7 +1,7 @@
+import fr from "@i18n/fr";
+import HomePage from "@pages/[lang]/index.astro";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { describe, expect, it } from "vitest";
-import fr from "../src/i18n/fr";
-import HomePage from "../src/pages/[lang]/index.astro";
 
 type PageComponent = Parameters<
   Awaited<ReturnType<typeof AstroContainer.create>>["renderToString"]
