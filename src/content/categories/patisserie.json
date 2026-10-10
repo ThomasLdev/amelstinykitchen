@@ -1,0 +1,11 @@
+{
+  "title": { "fr": "Pâtisserie", "en": "Baking" },
+  "paths": { "fr": "patisserie", "en": "baking" },
+  "description": {
+    "fr": "Gâteaux, tartes et douceurs à partager.",
+    "en": "Cakes, tarts and sweet treats to share."
+  },
+  "isFeatured": true,
+  "position": 1,
+  "image": "../../assets/categories/patisserie.png"
+}

@@ -1,0 +1,219 @@
+---
+import { Image } from "astro:assets";
+import { type CollectionEntry, getCollection, getEntries, getEntry } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import Chip from "@components/Chip.astro";
+import Container from "@components/Container.astro";
+import Kicker from "@components/Kicker.astro";
+import Section from "@components/Section.astro";
+import { type Locale, languages, useTranslations } from "@i18n";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { translate } from "@lib/content/i18n";
+import { formatDuration, ingredientCount, totalTime } from "@lib/content/recipe";
+
+export async function getStaticPaths() {
+  const recipes = await getCollection("recipes", ({ data }) =>
+    import.meta.env.PROD ? !data.draft : true,
+  );
+  const locales = Object.keys(languages) as Locale[];
+
+  return recipes.flatMap((recipe) =>
+    locales.map((locale) => ({
+      params: { lang: locale, slug: recipe.data.paths[locale] },
+      props: { recipe, locale },
+    })),
+  );
+}
+
+interface Props {
+  recipe: CollectionEntry<"recipes">;
+  locale: Locale;
+}
+
+const { recipe, locale } = Astro.props;
+const t = useTranslations(locale);
+const data = recipe.data;
+
+const category = await getEntry(data.category);
+const tags = await getEntries(data.tags);
+
+const cookingTime = formatDuration(data.cookingTime, locale);
+const preparationTime = formatDuration(data.preparationTime, locale);
+const totalRecipeTime = formatDuration(totalTime(data.preparationTime, data.cookingTime), locale);
+const ingredients = ingredientCount(data.ingredientGroups);
+---
+
+<BaseLayout
+  title={translate(data.title, locale)}
+  description={translate(data.excerpt, locale)}
+  locale={locale}
+>
+  <Container>
+    <nav aria-label="Breadcrumb">
+      <ol>
+        <li>
+          <a href={getRelativeLocaleUrl(locale, "")}>{t.recipe.breadcrumb.home}</a>
+        </li>
+        <li>
+          <a href={getRelativeLocaleUrl(locale, "recipes")}>{t.recipe.breadcrumb.recipes}</a>
+        </li>
+        {category && (
+          <li>
+            <a href={getRelativeLocaleUrl(locale, `recipes/${category.data.paths[locale]}`)}>
+              {translate(category.data.title, locale)}
+            </a>
+          </li>
+        )}
+        <li aria-current="page">{translate(data.title, locale)}</li>
+      </ol>
+    </nav>
+
+    <header>
+      {data.isFeatured && <Kicker>{t.hero.badge}</Kicker>}
+      <h1>{translate(data.title, locale)}</h1>
+
+      <p>
+        {category && <span>{translate(category.data.title, locale)}</span>}
+        <span>{t.recipe.difficulty[data.difficulty]}</span>
+        {data.steps.length > 0 && (
+          <span>
+            {data.steps.length} {t.recipe.steps.title}
+          </span>
+        )}
+        {ingredients > 0 && (
+          <span>
+            {ingredients} {t.recipe.ingredients}
+          </span>
+        )}
+      </p>
+
+      {tags.length > 0 && (
+        <ul>
+          {tags.map((tag) => (
+            <li>
+              <Chip>{translate(tag.data.title, locale)}</Chip>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {translate(data.excerpt, locale) && <p>{translate(data.excerpt, locale)}</p>}
+    </header>
+
+    {data.hero && (
+      <figure>
+        <Image src={data.hero.src} alt={translate(data.hero.alt, locale)} />
+        {data.hero.title && <figcaption>{translate(data.hero.title, locale)}</figcaption>}
+      </figure>
+    )}
+
+    <dl>
+      {preparationTime && (
+        <div>
+          <dt>{t.recipe.prep}</dt>
+          <dd>{preparationTime}</dd>
+        </div>
+      )}
+      {cookingTime && (
+        <div>
+          <dt>{t.recipe.cook}</dt>
+          <dd>{cookingTime}</dd>
+        </div>
+      )}
+      {totalRecipeTime && (
+        <div>
+          <dt>{t.recipe.total}</dt>
+          <dd>{totalRecipeTime}</dd>
+        </div>
+      )}
+      <div>
+        <dt>{t.recipe.difficultyLabel}</dt>
+        <dd>{t.recipe.difficulty[data.difficulty]}</dd>
+      </div>
+      <div>
+        <dt>{t.recipe.servings}</dt>
+        <dd>{data.servings}</dd>
+      </div>
+    </dl>
+  </Container>
+
+  {data.steps.length > 0 ? (
+    <Section>
+      <Container>
+        <aside>
+          <h2>{t.recipe.ingredients}</h2>
+          {data.ingredientGroups.map((group) => (
+            <div>
+              {translate(group.label, locale) && <h3>{translate(group.label, locale)}</h3>}
+              <ul>
+                {group.ingredients.map((ingredient) => (
+                  <li>
+                    <span>
+                      {ingredient.display ? (
+                        translate(ingredient.display, locale)
+                      ) : (
+                        <>
+                          {ingredient.quantity !== null && `${ingredient.quantity} `}
+                          {translate(ingredient.unit, locale)}
+                        </>
+                      )}
+                    </span>{" "}
+                    <span>{translate(ingredient.name, locale)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </aside>
+
+        <ol>
+          {data.steps.map((step, index) => (
+            <li>
+              <article>
+                <h3>
+                  {index + 1}. {translate(step.title, locale)}
+                </h3>
+                <Fragment set:html={translate(step.content, locale)} />
+                {step.image && (
+                  <Image src={step.image.src} alt={translate(step.image.alt, locale)} />
+                )}
+                {step.tip && (
+                  <aside>
+                    <strong>
+                      {step.tip.type === "warning" ? t.recipe.steps.warning : t.recipe.steps.tip}
+                    </strong>
+                    <p>{translate(step.tip.text, locale)}</p>
+                  </aside>
+                )}
+              </article>
+            </li>
+          ))}
+        </ol>
+
+        {data.chefNote && (
+          <aside>
+            <h2>{t.recipe.chefNote}</h2>
+            <h3>{translate(data.chefNote.title, locale)}</h3>
+            <p>{translate(data.chefNote.body, locale)}</p>
+          </aside>
+        )}
+      </Container>
+    </Section>
+  ) : (
+    data.sections.length > 0 && (
+      <Section>
+        <Container>
+          {data.sections.map((section) => (
+            <section>
+              {translate(section.title, locale) && <h2>{translate(section.title, locale)}</h2>}
+              <Fragment set:html={translate(section.content, locale)} />
+              {section.image && (
+                <Image src={section.image.src} alt={translate(section.image.alt, locale)} />
+              )}
+            </section>
+          ))}
+        </Container>
+      </Section>
+    )
+  )}
+</BaseLayout>

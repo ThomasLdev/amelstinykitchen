@@ -34,7 +34,6 @@ out/
 # Astro / framework generated
 # =========================
 .env.d.ts
-src/env.d.ts
 public/_astro/
 .astro/
 
