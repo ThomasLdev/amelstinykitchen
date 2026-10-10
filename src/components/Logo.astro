@@ -1,0 +1,93 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import { type Locale, useTranslations } from "../i18n";
+
+interface Props {
+  locale: Locale;
+  variant?: "header" | "footer";
+  href?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { locale, variant = "header", href, class: className, ...rest } = Astro.props;
+const t = useTranslations(locale);
+const to = href ?? getRelativeLocaleUrl(locale, "");
+---
+
+<a
+  href={to}
+  class:list={["logo", variant === "footer" && "logo--footer", className]}
+  aria-label={`${t.brand.name} ${t.brand.nameAccent}`}
+  {...rest}
+>
+  <span class="logo__mark" aria-hidden="true">{t.brand.mark}</span>
+  <span class="logo__text">
+    {t.brand.name} <span class="logo__brand">{t.brand.nameAccent}</span>
+  </span>
+</a>
+
+<style>
+@layer components {
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-family: var(--font-serif);
+    font-size: clamp(1.0625rem, 4.5vw, 1.375rem);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .logo__mark {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    font-style: italic;
+    font-size: 1.0625rem;
+    flex-shrink: 0;
+
+    @media (min-width: 600px) {
+      width: 2.25rem;
+      height: 2.25rem;
+      font-size: 1.125rem;
+    }
+  }
+
+  .logo__text {
+    display: none;
+    color: var(--ink-3);
+    font-style: italic;
+    font-weight: 400;
+
+    @media (min-width: 900px) {
+      display: block;
+    }
+  }
+
+  .logo__brand {
+    margin-inline-start: 0.125rem;
+    color: var(--ink);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .logo--footer {
+    color: var(--on-ink);
+
+    .logo__mark {
+      background: var(--accent);
+      color: var(--on-accent);
+    }
+
+    .logo__text,
+    .logo__brand {
+      color: var(--on-ink);
+    }
+  }
+}
+</style>

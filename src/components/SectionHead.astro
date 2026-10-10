@@ -1,0 +1,71 @@
+---
+import Kicker from "./Kicker.astro";
+
+interface Props {
+  kicker?: string;
+  title: string;
+  titleEm?: string;
+  sub?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { kicker, title, titleEm, sub, class: className, ...rest } = Astro.props;
+---
+
+<header class:list={["section-head", className]} {...rest}>
+  <div class="section-head__titles">
+    {kicker && <Kicker>{kicker}</Kicker>}
+    <h2 class="section-head__title">
+      {title}
+      {titleEm && <em>{titleEm}</em>}
+    </h2>
+  </div>
+  {sub && <p class="section-head__sub">{sub}</p>}
+  <slot name="action" />
+</header>
+
+<style>
+@layer components {
+  .section-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-block-end: var(--space-4);
+
+    @media (min-width: 720px) {
+      flex-direction: row;
+      align-items: end;
+      justify-content: space-between;
+      gap: var(--space-4);
+    }
+  }
+
+  .section-head__titles {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .section-head__title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.625rem, 5.5vw, 3.25rem);
+    font-weight: 400;
+    line-height: 1.05;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+
+  .section-head__title em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--accent-ink);
+  }
+
+  .section-head__sub {
+    max-width: 50ch;
+    color: var(--ink-3);
+    text-wrap: pretty;
+  }
+}
+</style>

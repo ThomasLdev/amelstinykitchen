@@ -1,0 +1,42 @@
+---
+interface Props {
+  variant?: "default" | "dark" | "filled";
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { variant = "default", class: className, ...rest } = Astro.props;
+---
+
+<span class:list={["chip", variant !== "default" && `chip--${variant}`, className]} {...rest}>
+  <slot />
+</span>
+
+<style>
+@layer components {
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding-block: 0.4375rem;
+    padding-inline: 0.875rem;
+    border: 1px solid var(--accent-soft);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    white-space: nowrap;
+
+    &.chip--dark {
+      background: var(--ink);
+      color: var(--on-ink);
+      border-color: var(--ink);
+    }
+
+    &.chip--filled {
+      background: var(--accent-bg);
+    }
+  }
+}
+</style>

@@ -1,0 +1,38 @@
+---
+interface Props {
+  href?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { href = "#main", class: className, ...rest } = Astro.props;
+---
+
+<a href={href} class:list={["skip-link", className]} {...rest}>
+  <slot />
+</a>
+
+<style>
+@layer components {
+  .skip-link {
+    position: absolute;
+    inset-block-start: -6.25rem;
+    inset-inline-start: var(--gutter);
+    z-index: 100;
+    padding-block: 0.75rem;
+    padding-inline: 1.125rem;
+    border-end-start-radius: var(--radius-sm);
+    border-end-end-radius: var(--radius-sm);
+    background: var(--ink);
+    color: var(--on-ink);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    transition: inset-block-start var(--transition-base);
+
+    &:focus-visible {
+      inset-block-start: 0;
+    }
+  }
+}
+</style>

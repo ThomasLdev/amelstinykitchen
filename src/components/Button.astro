@@ -1,0 +1,87 @@
+---
+interface Props {
+  variant?: "primary" | "ghost" | "soft";
+  size?: "sm" | "md";
+  href?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { variant = "primary", size = "md", href, class: className, ...rest } = Astro.props;
+const classes = ["btn", `btn--${variant}`, size !== "md" && `btn--${size}`, className];
+---
+
+{href ? (
+  <a class:list={classes} href={href} {...rest}>
+    <slot />
+  </a>
+) : (
+  <button class:list={classes} type="button" {...rest}>
+    <slot />
+  </button>
+)}
+
+<style>
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    min-height: 3rem;
+    padding-block: 0.875rem;
+    padding-inline: 1.375rem;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition:
+      transform var(--transition-fast),
+      box-shadow var(--transition-base),
+      background var(--transition-base),
+      border-color var(--transition-base),
+      color var(--transition-base);
+
+    &.btn--sm {
+      min-height: 2.5rem;
+      padding-block: 0.625rem;
+      padding-inline: 1rem;
+      font-size: 0.625rem;
+    }
+
+    &.btn--primary {
+      background: var(--accent);
+      color: var(--on-accent);
+
+      &:hover {
+        background: var(--accent-ink);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-soft);
+      }
+    }
+
+    &.btn--ghost {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--line);
+
+      &:hover {
+        border-color: var(--accent);
+        color: var(--accent-ink);
+      }
+    }
+
+    &.btn--soft {
+      background: var(--accent-soft);
+      color: var(--accent-ink);
+
+      &:hover {
+        background: var(--accent);
+        color: var(--on-accent);
+      }
+    }
+  }
+}
+</style>

@@ -1,0 +1,78 @@
+---
+interface Props {
+  name: string;
+  meta?: string;
+  imageSrc?: string;
+  imageAlt?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { name, meta, imageSrc, imageAlt = "", class: className, ...rest } = Astro.props;
+---
+
+<article class:list={["tag-card", className]} {...rest}>
+  <div class="tag-card__media">
+    {imageSrc && <img class="tag-card__image" src={imageSrc} alt={imageAlt} loading="lazy" />}
+  </div>
+  <div class="tag-card__body">
+    <h3 class="tag-card__name">{name}</h3>
+    {meta && <span class="tag-card__meta">{meta}</span>}
+  </div>
+</article>
+
+<style>
+@layer components {
+  .tag-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.875rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    transition:
+      transform var(--transition-base),
+      border-color var(--transition-base),
+      box-shadow var(--transition-base);
+
+    &:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent-soft);
+      box-shadow: var(--shadow-soft);
+    }
+
+    @media (min-width: 900px) {
+      padding: 1rem;
+    }
+  }
+
+  .tag-card__media {
+    aspect-ratio: 4 / 3;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--accent-bg);
+  }
+
+  .tag-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .tag-card__name {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+
+  .tag-card__meta {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+}
+</style>

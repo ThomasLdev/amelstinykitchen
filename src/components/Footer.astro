@@ -1,0 +1,285 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import { type Locale, useTranslations } from "../i18n";
+import Container from "./Container.astro";
+import Icon from "./Icon.astro";
+import Logo from "./Logo.astro";
+
+interface Props {
+  locale: Locale;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { locale, class: className, ...rest } = Astro.props;
+const t = useTranslations(locale);
+const year = new Date().getFullYear();
+const homeHref = getRelativeLocaleUrl(locale, "");
+const recipesHref = getRelativeLocaleUrl(locale, "recipes");
+const socials = [
+  { label: t.footer.instagram, href: "#" },
+  { label: t.footer.pinterest, href: "#" },
+];
+---
+
+<footer class:list={["footer", className]} {...rest}>
+  <Container>
+    <div class="footer__top">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <div class="footer__logo">
+            <Logo locale={locale} variant="footer" />
+          </div>
+          <p class="footer__tagline">{t.footer.tagline}</p>
+        </div>
+
+        <details class="footer__col" open>
+          <summary class="footer__head">
+            <span>{t.footer.recipesTitle}</span>
+            <span class="footer__chev" aria-hidden="true">
+              <Icon name="plus" size={18} />
+            </span>
+          </summary>
+          <div class="footer__body">
+            <ul class="footer__links" aria-label={t.footer.recipesAriaLabel}>
+              {t.footer.recipesLinks.map((label) => (
+                <li>
+                  <a href={recipesHref} class="footer__link">
+                    {label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <span class="footer__copy">
+        &copy; {year}
+        <a class="footer__home" href={homeHref}>{t.brand.name} {t.brand.nameAccent}</a>
+        {" · "}
+        {t.footer.copyright}
+      </span>
+      <ul class="footer__socials" aria-label={t.footer.socialsAriaLabel}>
+        {socials.map((social) => (
+          <li class="footer__socials-item">
+            <a href={social.href} class="footer__social">
+              {social.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </Container>
+</footer>
+
+<style>
+@layer components {
+  .footer {
+    margin-block-start: var(--space-6);
+    padding-block: var(--space-5) var(--space-3);
+    padding-block-end: 4.5rem;
+    background: var(--ink);
+    color: var(--on-ink-soft);
+  }
+
+  .footer__top {
+    padding-block-end: var(--space-4);
+  }
+
+  .footer__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .footer__brand {
+    padding-block-end: var(--space-4);
+    border-block-end: 1px solid var(--on-ink-line);
+    margin-block-end: var(--space-2);
+  }
+
+  .footer__logo {
+    margin-block-end: 0.875rem;
+  }
+
+  .footer__tagline {
+    max-width: 36ch;
+    color: var(--on-ink-muted);
+    font-size: 0.875rem;
+  }
+
+  .footer__col {
+    border-block-end: 1px solid var(--on-ink-line);
+    interpolate-size: allow-keywords;
+  }
+
+  .footer__col::details-content {
+    block-size: 0;
+    overflow: clip;
+    opacity: 0;
+    transition:
+      content-visibility var(--transition-drawer) allow-discrete,
+      block-size var(--transition-drawer),
+      opacity var(--transition-drawer);
+  }
+
+  .footer__col[open]::details-content {
+    block-size: auto;
+    opacity: 1;
+  }
+
+  .footer__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding-block: 1.125rem;
+    list-style: none;
+    cursor: pointer;
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    color: var(--on-ink);
+  }
+
+  .footer__head::-webkit-details-marker {
+    display: none;
+  }
+
+  .footer__chev {
+    display: inline-flex;
+    color: var(--accent-soft);
+    transition: transform var(--transition-base);
+  }
+
+  .footer__col[open] .footer__chev {
+    transform: rotate(45deg);
+  }
+
+  .footer__body {
+    padding-block-end: 1.125rem;
+  }
+
+  .footer__links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .footer__link,
+  .footer__home,
+  .footer__social {
+    transition: color var(--transition-base);
+  }
+
+  .footer__link {
+    color: var(--on-ink-muted);
+    font-size: 0.875rem;
+  }
+
+  .footer__link:hover,
+  .footer__link:focus-visible {
+    color: var(--accent-soft);
+  }
+
+  .footer__bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    margin-block-start: var(--space-3);
+    padding-block-start: var(--space-3);
+    border-block-start: 1px solid var(--on-ink-line);
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    color: var(--on-ink-dim);
+  }
+
+  .footer__home {
+    color: var(--on-ink-muted);
+  }
+
+  .footer__home:hover,
+  .footer__home:focus-visible {
+    color: var(--accent-soft);
+  }
+
+  .footer__socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+  }
+
+  .footer__socials-item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  .footer__socials-item:not(:last-child)::after {
+    content: "·";
+    color: var(--on-ink-dim);
+  }
+
+  .footer__social {
+    color: var(--on-ink-muted);
+  }
+
+  .footer__social:hover,
+  .footer__social:focus-visible {
+    color: var(--accent-soft);
+  }
+
+  @media (min-width: 720px) {
+    .footer {
+      padding-block: var(--space-6) var(--space-3);
+    }
+
+    .footer__grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: var(--space-4);
+    }
+
+    .footer__brand {
+      grid-column: 1;
+      border: 0;
+      padding: 0;
+      margin: 0;
+    }
+
+    .footer__col {
+      border: 0;
+    }
+
+    .footer__col::details-content,
+    .footer__col[open]::details-content {
+      block-size: auto;
+      opacity: 1;
+    }
+
+    .footer__head {
+      padding-block: 0 1.125rem;
+      pointer-events: none;
+      cursor: default;
+    }
+
+    .footer__chev {
+      display: none;
+    }
+
+    .footer__body {
+      display: block;
+      padding-block-end: 0;
+    }
+
+    .footer__bottom {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+}
+</style>
