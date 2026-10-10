@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!dist", "!.astro", "!coverage", "!public"]
+    "includes": ["**", "!dist", "!.astro", "!coverage", "!public", "!src/icons"]
   },
   "formatter": {
     "enabled": true,
@@ -51,6 +51,26 @@
           "correctness": {
             "noUnusedVariables": "off",
             "noUnusedImports": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/components/SkipLink.astro"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useAnchorContent": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/styles/theme.css"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noImportantStyles": "off"
           }
         }
       }

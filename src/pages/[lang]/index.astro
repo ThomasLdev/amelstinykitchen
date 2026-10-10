@@ -1,0 +1,67 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import Container from "@components/Container.astro";
+import Hero from "@components/Hero.astro";
+import QuoteStrip from "@components/QuoteStrip.astro";
+import Section from "@components/Section.astro";
+import SectionHead from "@components/SectionHead.astro";
+import TagGrid from "@components/TagGrid.astro";
+import { defaultLocale, isLocale, languages, useTranslations } from "@i18n";
+import BaseLayout from "@layouts/BaseLayout.astro";
+
+export function getStaticPaths() {
+  return Object.keys(languages).map((lang) => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+const locale = isLocale(lang) ? lang : defaultLocale;
+const t = useTranslations(locale);
+const hero = t.home.hero;
+const ctaHref = getRelativeLocaleUrl(locale, "");
+---
+
+<BaseLayout title={t.meta.title} description={t.meta.description} locale={locale}>
+  <Section>
+    <Container>
+      <Hero
+        badge={t.hero.badge}
+        kicker={t.hero.kicker}
+        title={hero.title}
+        description={hero.description}
+        prep={hero.prep}
+        cook={hero.cook}
+        total={hero.total}
+        prepLabel={t.recipe.prep}
+        cookLabel={t.recipe.cook}
+        totalLabel={t.recipe.total}
+        tags={hero.tags}
+        ctaHref={ctaHref}
+        ctaLabel={t.hero.cta}
+      />
+    </Container>
+  </Section>
+
+  <Section>
+    <Container>
+      <SectionHead
+        kicker={t.home.tags.kicker}
+        title={t.home.tags.title}
+        titleEm={t.home.tags.titleEm}
+        sub={t.home.tags.sub}
+      />
+    </Container>
+    <Container>
+      <TagGrid items={t.home.tags.items} />
+    </Container>
+  </Section>
+
+  <Section>
+    <Container>
+      <QuoteStrip
+        kicker={t.home.philosophy.kicker}
+        quote={t.home.philosophy.quote}
+        author={t.home.philosophy.author}
+      />
+    </Container>
+  </Section>
+</BaseLayout>

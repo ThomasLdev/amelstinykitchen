@@ -1,0 +1,28 @@
+---
+interface Props {
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { class: className, ...rest } = Astro.props;
+---
+
+<span class:list={["kicker", className]} {...rest}>
+  <slot />
+</span>
+
+<style>
+@layer components {
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+
+    @media (min-width: 600px) {
+      font-size: 0.6875rem;
+    }
+  }
+}
+</style>

@@ -1,0 +1,61 @@
+---
+import Kicker from "@components/Kicker.astro";
+
+interface Props {
+  kicker?: string;
+  quote: string;
+  author?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { kicker, quote, author, class: className, ...rest } = Astro.props;
+---
+
+<figure class:list={["quote-strip", className]} {...rest}>
+  {kicker && <Kicker>{kicker}</Kicker>}
+  <blockquote class="quote-strip__quote">{quote}</blockquote>
+  {author && <figcaption class="quote-strip__author">{author}</figcaption>}
+</figure>
+
+<style>
+@layer components {
+  .quote-strip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.875rem;
+    margin: 0;
+    padding: var(--space-5) var(--gutter);
+    border-radius: var(--radius-lg);
+    background: var(--bg-deep);
+    text-align: center;
+
+    @media (min-width: 720px) {
+      padding-block: var(--space-6);
+    }
+  }
+
+  .quote-strip__quote {
+    max-width: 28ch;
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(1.25rem, 5.4vw, 2.25rem);
+    font-style: italic;
+    line-height: 1.3;
+    color: var(--ink);
+    text-wrap: balance;
+
+    @media (min-width: 720px) {
+      max-width: 22ch;
+    }
+  }
+
+  .quote-strip__author {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+  }
+}
+</style>
