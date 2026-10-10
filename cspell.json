@@ -1,0 +1,30 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "import": ["@cspell/dict-fr-fr/cspell-ext.json"],
+  "dictionaries": ["fr-fr", "typescript", "node", "html", "css", "npm"],
+  "words": [
+    "amelstinykitchen",
+    "astro",
+    "astrojs",
+    "bakerie",
+    "biome",
+    "biomejs",
+    "knip",
+    "opencode",
+    "tinie",
+    "tinybakery"
+  ],
+  "ignorePaths": [
+    "dist",
+    "node_modules",
+    ".astro",
+    "coverage",
+    "package-lock.json",
+    ".github",
+    ".opencode",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "README.md"
+  ]
+}

@@ -8,7 +8,13 @@ Projet de blog construit en astro
 npm run dev        # ou: npx astro dev --background (voir ci-dessous)
 npm run build      # build de production
 npm run preview    # prévisualiser le build
-npx astro check    # type-check des .astro et du contenu
+npm run check      # type-check (.astro + collections) via astro check
+npm run lint       # Biome (lint + format check)
+npm run lint:fix   # Biome, applique les corrections
+npm run test       # Vitest (unit + Container API)
+npm run test:e2e   # Playwright (e2e)
+npm run knip       # fichiers/exports/deps morts
+npm run spell      # cspell FR/EN
 ```
 
 Le serveur de dev tourne en arrière-plan :
@@ -17,6 +23,17 @@ Le serveur de dev tourne en arrière-plan :
 npx astro dev --background
 npx astro dev status | stop | logs
 ```
+
+## Tooling & qualité
+
+- **Biome** (lint + format) pour TS/CSS/JSON et `.astro` (support expérimental
+  activé) — `biome.json`. Pas d'ESLint ni de Prettier.
+- **`astro check`** pour les types (Biome ne type-check pas).
+- **Vitest** (`vitest.config.ts`, via `getViteConfig`) pour l'unit/intégration ;
+  les composants `.astro` se testent avec la **Container API**
+  (`astro/container`). Tests dans `tests/**/*.test.ts`.
+- **Playwright** (`playwright.config.ts`) pour l'e2e, dans `e2e/**/*.spec.ts`
+  (penser à `npx playwright install chromium`).
 
 ## Stack & conventions
 
