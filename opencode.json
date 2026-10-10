@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "watcher": {
+    "ignore": [
+      "node_modules/**",
+      "dist/**",
+      ".astro/**",
+      ".git/**",
+      "coverage/**",
+      "build/**"
+    ]
+  }
+}

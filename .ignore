@@ -1,0 +1,61 @@
+# ripgrep / opencode search ignore (git keeps these files, but we don't want to
+# read or explore them -> saves tokens). Higher precedence than .gitignore.
+
+# ---- Lockfiles (huge, machine-generated) ----
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+bun.lockb
+composer.lock
+
+# ---- Generated / minified assets ----
+*.min.js
+*.min.css
+*.map
+*.chunk.js
+*.bundle.js
+
+# ---- Vendored code ----
+vendor/
+legacy/
+node_modules/
+
+# ---- Binary / media (unsearchable, heavy) ----
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.avif
+*.ico
+*.svg
+*.woff
+*.woff2
+*.ttf
+*.eot
+*.pdf
+*.zip
+*.gz
+*.mp4
+*.mov
+*.mp3
+
+# ---- Test fixtures & snapshots ----
+__snapshots__/
+*.snap
+fixtures/
+test-results/
+coverage/
+
+# ---- Build / cache ----
+dist/
+build/
+.astro/
+.cache/
+.turbo/
+
+# ---- Data dumps ----
+*.sql
+*.sqlite
+*.sqlite3
+*.dump
