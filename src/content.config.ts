@@ -15,7 +15,7 @@ const sectionType = z.enum(["default", "two_columns", "two_columns_media_left"])
 const difficulty = z.enum(["easy", "medium", "advanced"]);
 
 /** Shared media + narrative-section schemas, bound to the collection image helper. */
-function sharedSchemas(image: () => z.ZodType) {
+function sharedSchemas<T extends z.ZodType>(image: () => T) {
   const media = z.object({
     src: image(),
     alt: localizedString,
