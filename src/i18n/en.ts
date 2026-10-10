@@ -66,6 +66,15 @@ const en: Dictionary = {
     prep: "Prep",
     cook: "Cook",
     total: "Total",
+    difficulty: {
+      easy: "Easy",
+      medium: "Medium",
+      advanced: "Advanced",
+    },
+    steps: {
+      tip: "Tip",
+      warning: "Careful",
+    },
   },
 };
 

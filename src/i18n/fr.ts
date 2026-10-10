@@ -64,6 +64,15 @@ const fr = {
     prep: "Prépa.",
     cook: "Cuisson",
     total: "Total",
+    difficulty: {
+      easy: "Facile",
+      medium: "Intermédiaire",
+      advanced: "Avancé",
+    },
+    steps: {
+      tip: "Astuce",
+      warning: "Attention",
+    },
   },
 };
 
