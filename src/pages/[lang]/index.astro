@@ -1,13 +1,13 @@
 ---
 import { getRelativeLocaleUrl } from "astro:i18n";
-import Container from "../../components/Container.astro";
-import Hero from "../../components/Hero.astro";
-import QuoteStrip from "../../components/QuoteStrip.astro";
-import Section from "../../components/Section.astro";
-import SectionHead from "../../components/SectionHead.astro";
-import TagGrid from "../../components/TagGrid.astro";
-import { defaultLocale, isLocale, languages, useTranslations } from "../../i18n";
-import BaseLayout from "../../layouts/BaseLayout.astro";
+import Container from "@components/Container.astro";
+import Hero from "@components/Hero.astro";
+import QuoteStrip from "@components/QuoteStrip.astro";
+import Section from "@components/Section.astro";
+import SectionHead from "@components/SectionHead.astro";
+import TagGrid from "@components/TagGrid.astro";
+import { defaultLocale, isLocale, languages, useTranslations } from "@i18n";
+import BaseLayout from "@layouts/BaseLayout.astro";
 
 export function getStaticPaths() {
   return Object.keys(languages).map((lang) => ({ params: { lang } }));

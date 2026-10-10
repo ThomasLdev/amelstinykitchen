@@ -1,5 +1,5 @@
 ---
-import Kicker from "./Kicker.astro";
+import Kicker from "@components/Kicker.astro";
 
 interface Props {
   kicker?: string;
@@ -60,6 +60,7 @@ const { kicker, title, titleEm, sub, class: className, ...rest } = Astro.props;
     font-style: italic;
     font-weight: 300;
     color: var(--accent-ink);
+    margin-left: 0.5rem;
   }
 
   .section-head__sub {

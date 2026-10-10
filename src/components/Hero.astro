@@ -1,8 +1,8 @@
 ---
-import Button from "./Button.astro";
-import Chip from "./Chip.astro";
-import Icon from "./Icon.astro";
-import Kicker from "./Kicker.astro";
+import Button from "@components/Button.astro";
+import Chip from "@components/Chip.astro";
+import Icon from "@components/Icon.astro";
+import Kicker from "@components/Kicker.astro";
 
 interface Props {
   kicker?: string;
@@ -258,6 +258,9 @@ const metaItems = rawMeta.filter((item) => item.value) as {
 
   .hero__cta {
     width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
 
     @media (min-width: 720px) {
       width: auto;

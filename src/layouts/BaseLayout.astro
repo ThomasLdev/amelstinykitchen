@@ -1,9 +1,9 @@
 ---
-import Footer from "../components/Footer.astro";
-import Header from "../components/Header.astro";
-import SkipLink from "../components/SkipLink.astro";
-import { type Locale, useTranslations } from "../i18n";
-import "../styles/app.css";
+import Footer from "@components/Footer.astro";
+import Header from "@components/Header.astro";
+import SkipLink from "@components/SkipLink.astro";
+import { type Locale, useTranslations } from "@i18n";
+import "@styles/app.css";
 
 interface Props {
   title: string;
@@ -16,7 +16,7 @@ const t = useTranslations(locale);
 ---
 
 <!doctype html>
-<html lang={locale} data-palette="peach" data-density="aerated">
+<html lang={locale} data-palette="sage" data-density="aerated">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
