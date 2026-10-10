@@ -10,6 +10,7 @@ const fr = {
   },
   a11y: {
     skipToContent: "Aller au contenu",
+    breadcrumb: "Fil d'Ariane",
   },
   header: {
     navAriaLabel: "Navigation principale",
@@ -70,17 +71,52 @@ const fr = {
       medium: "Intermédiaire",
       advanced: "Avancé",
     },
-    ingredients: "Ingrédients",
-    servings: "Portions",
-    steps: {
-      title: "Étapes",
-      tip: "Astuce",
-      warning: "Attention",
-    },
-    chefNote: "Le mot de la cheffe",
     breadcrumb: {
       home: "Accueil",
       recipes: "Recettes",
+    },
+    meta: {
+      steps: (count: number) => `${count} ${count > 1 ? "étapes" : "étape"}`,
+      ingredients: (count: number) => `${count} ${count > 1 ? "ingrédients" : "ingrédient"}`,
+    },
+    actions: {
+      print: "Imprimer la recette",
+      share: "Partager la recette",
+      save: "Sauvegarder la recette",
+    },
+    servings: {
+      label: "Portions",
+      decrease: "Diminuer les portions",
+      increase: "Augmenter les portions",
+      forOne: "pour 1 personne",
+      forMany: "pour %count% personnes",
+    },
+    progress: {
+      label: "Progression",
+      reset: "Réinitialiser la progression",
+    },
+    ingredients: {
+      kicker: "Liste de courses",
+      title: "Les",
+      titleEm: "ingrédients",
+      reset: "Reset",
+    },
+    steps: {
+      kicker: "La méthode",
+      title: "Les",
+      titleEm: "étapes",
+      intro: "Cliquez sur le numéro pour marquer une étape comme faite.",
+      markDone: "Marquer cette étape comme faite",
+      tip: "Astuce.",
+      warning: "Attention.",
+    },
+    chef: {
+      label: "Le mot de la pâtissière",
+    },
+    author: {
+      name: "Amel",
+      role: "Pâtissière · Fondatrice",
+      initial: "A",
     },
   },
 };

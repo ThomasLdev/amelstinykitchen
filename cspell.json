@@ -14,9 +14,11 @@
     "Fraunces",
     "knip",
     "opencode",
+    "symfony",
     "tinie",
     "tinybakery"
   ],
+  "ignoreRegExpList": ["data:image/svg\\+xml,[^\"]+"],
   "ignorePaths": [
     "dist",
     "node_modules",

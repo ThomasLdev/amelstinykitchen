@@ -12,6 +12,7 @@ const en: Dictionary = {
   },
   a11y: {
     skipToContent: "Skip to content",
+    breadcrumb: "Breadcrumb",
   },
   header: {
     navAriaLabel: "Main navigation",
@@ -72,17 +73,52 @@ const en: Dictionary = {
       medium: "Medium",
       advanced: "Advanced",
     },
-    ingredients: "Ingredients",
-    servings: "Servings",
-    steps: {
-      title: "Steps",
-      tip: "Tip",
-      warning: "Careful",
-    },
-    chefNote: "A word from the chef",
     breadcrumb: {
       home: "Home",
       recipes: "Recipes",
+    },
+    meta: {
+      steps: (count: number) => `${count} ${count > 1 ? "steps" : "step"}`,
+      ingredients: (count: number) => `${count} ${count > 1 ? "ingredients" : "ingredient"}`,
+    },
+    actions: {
+      print: "Print recipe",
+      share: "Share recipe",
+      save: "Save recipe",
+    },
+    servings: {
+      label: "Servings",
+      decrease: "Decrease servings",
+      increase: "Increase servings",
+      forOne: "for 1 person",
+      forMany: "for %count% people",
+    },
+    progress: {
+      label: "Progress",
+      reset: "Reset progress",
+    },
+    ingredients: {
+      kicker: "Shopping list",
+      title: "The",
+      titleEm: "ingredients",
+      reset: "Reset",
+    },
+    steps: {
+      kicker: "The method",
+      title: "The",
+      titleEm: "steps",
+      intro: "Click the number to mark a step as done.",
+      markDone: "Mark this step as done",
+      tip: "Tip.",
+      warning: "Heads up.",
+    },
+    chef: {
+      label: "A word from the pastry chef",
+    },
+    author: {
+      name: "Amel",
+      role: "Pastry chef · Founder",
+      initial: "A",
     },
   },
 };

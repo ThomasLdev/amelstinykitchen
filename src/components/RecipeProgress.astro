@@ -1,0 +1,91 @@
+---
+import Container from "@components/Container.astro";
+import Icon from "@components/Icon.astro";
+import IconButton from "@components/IconButton.astro";
+import { type Locale, useTranslations } from "@i18n";
+
+interface Props {
+  total: number;
+  locale: Locale;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { total, locale, class: className, ...rest } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<div class:list={["recipe-progress", className]} {...rest}>
+  <Container class="recipe-progress__inner">
+    <span class="recipe-progress__label">
+      {t.recipe.progress.label}
+      <span class="recipe-progress__count" aria-live="polite">
+        <span data-recipe-checklist-count>0</span>
+        {" / "}
+        {total}
+      </span>
+    </span>
+    <div class="recipe-progress__track" data-recipe-checklist-progress>
+      <div class="recipe-progress__bar"></div>
+    </div>
+    <div class="recipe-progress__actions">
+      <IconButton aria-label={t.recipe.progress.reset} data-recipe-checklist-reset>
+        <Icon name="rotate-ccw" size={18} />
+      </IconButton>
+    </div>
+  </Container>
+</div>
+
+<style>
+@layer components {
+  .recipe-progress {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 30;
+    background: color-mix(in oklab, var(--bg) 96%, transparent);
+    backdrop-filter: blur(10px);
+    padding-block: 0.75rem;
+    border-bottom: 1px solid var(--line);
+    margin-block-start: var(--space-3);
+
+    .recipe-progress__inner {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .recipe-progress__label {
+      font-family: var(--font-mono);
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      color: var(--ink-2);
+      white-space: nowrap;
+    }
+
+    .recipe-progress__count {
+      color: var(--accent-ink);
+    }
+
+    .recipe-progress__track {
+      flex: 1;
+      block-size: 0.25rem;
+      background: var(--line);
+      border-radius: var(--radius-pill);
+      overflow: hidden;
+    }
+
+    .recipe-progress__bar {
+      block-size: 100%;
+      inline-size: calc(var(--progress, 0) * 1%);
+      background: linear-gradient(90deg, var(--accent-soft), var(--accent));
+      transition: inline-size var(--transition-base);
+      border-radius: var(--radius-pill);
+    }
+
+    .recipe-progress__actions {
+      display: flex;
+      gap: 0.25rem;
+    }
+  }
+}
+</style>

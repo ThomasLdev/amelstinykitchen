@@ -1,0 +1,220 @@
+---
+import Icon from "@components/Icon.astro";
+
+interface Props {
+  prepLabel: string;
+  cookLabel: string;
+  totalLabel: string;
+  difficultyLabel: string;
+  difficultyValue: string;
+  servingsLabel: string;
+  servings: number;
+  decreaseLabel: string;
+  increaseLabel: string;
+  preparationTime?: string | null;
+  cookingTime?: string | null;
+  totalTime?: string | null;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  prepLabel,
+  cookLabel,
+  totalLabel,
+  difficultyLabel,
+  difficultyValue,
+  servingsLabel,
+  servings,
+  decreaseLabel,
+  increaseLabel,
+  preparationTime,
+  cookingTime,
+  totalTime,
+  class: className,
+  ...rest
+} = Astro.props;
+---
+
+<dl class:list={["recipe-stats", className]} {...rest}>
+  {preparationTime && (
+    <div class="recipe-stats__item">
+      <Icon name="utensils-crossed" class="recipe-stats__icon" size={22} />
+      <dt class="recipe-stats__label">{prepLabel}</dt>
+      <dd class="recipe-stats__value">{preparationTime}</dd>
+    </div>
+  )}
+  {cookingTime && (
+    <div class="recipe-stats__item">
+      <Icon name="flame" class="recipe-stats__icon" size={22} />
+      <dt class="recipe-stats__label">{cookLabel}</dt>
+      <dd class="recipe-stats__value">{cookingTime}</dd>
+    </div>
+  )}
+  {totalTime && (
+    <div class="recipe-stats__item">
+      <Icon name="clock" class="recipe-stats__icon" size={22} />
+      <dt class="recipe-stats__label">{totalLabel}</dt>
+      <dd class="recipe-stats__value">{totalTime}</dd>
+    </div>
+  )}
+
+  <div class="recipe-stats__item">
+    <Icon name="chef-hat" class="recipe-stats__icon" size={22} />
+    <dt class="recipe-stats__label">{difficultyLabel}</dt>
+    <dd class="recipe-stats__value">{difficultyValue}</dd>
+  </div>
+
+  <div class="recipe-stats__item recipe-stats__item--portions">
+    <Icon name="users" class="recipe-stats__icon" size={22} />
+    <dt class="recipe-stats__label">{servingsLabel}</dt>
+    <dd class="recipe-stats__value">
+      <div class="portions">
+        <button
+          type="button"
+          class="portions__btn"
+          data-recipe-portions-decrease
+          aria-label={decreaseLabel}
+        >
+          <Icon name="minus" size={14} />
+        </button>
+        <output class="portions__value" data-recipe-portions-value>{servings}</output>
+        <button
+          type="button"
+          class="portions__btn"
+          data-recipe-portions-increase
+          aria-label={increaseLabel}
+        >
+          <Icon name="plus" size={14} />
+        </button>
+      </div>
+    </dd>
+  </div>
+</dl>
+
+<style>
+@layer components {
+  .recipe-stats {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 1.125rem 0.875rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.125rem 0;
+    margin: 0;
+    box-shadow: var(--shadow-soft);
+
+    .recipe-stats__item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      padding-inline: 0.75rem;
+      text-align: center;
+      border-inline-end: 1px solid var(--line);
+
+      &:nth-child(2n) {
+        border-inline-end: 0;
+      }
+    }
+
+    .recipe-stats__item--portions {
+      grid-column: 1 / -1;
+      padding-block-start: 0.875rem;
+      border-top: 1px solid var(--line);
+      border-inline-end: 0;
+    }
+
+    .recipe-stats__icon {
+      width: 1.375rem;
+      height: 1.375rem;
+      color: var(--accent-ink);
+    }
+
+    .recipe-stats__label {
+      font-family: var(--font-mono);
+      font-size: 0.5625rem;
+      text-transform: uppercase;
+      color: var(--ink-3);
+    }
+
+    .recipe-stats__value {
+      margin: 0;
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      color: var(--ink);
+    }
+
+    @media (min-width: 720px) {
+      grid-template-columns: repeat(5, 1fr);
+      padding: 1.5rem 1.75rem;
+
+      .recipe-stats__item {
+        padding-inline: 1rem;
+
+        &:nth-child(2n) {
+          border-inline-end: 1px solid var(--line);
+        }
+
+        &:last-child {
+          border-inline-end: 0;
+        }
+      }
+
+      .recipe-stats__item--portions {
+        grid-column: auto;
+        padding-block-start: 0;
+        border-top: 0;
+      }
+
+      .recipe-stats__value {
+        font-size: 1.375rem;
+      }
+    }
+  }
+
+  .portions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .portions__btn {
+      position: relative;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: var(--accent-bg);
+      color: var(--accent-ink);
+      display: grid;
+      place-items: center;
+      transition:
+        background-color var(--transition-fast),
+        color var(--transition-fast);
+
+      &::after {
+        content: "";
+        position: absolute;
+        inset: -0.375rem;
+      }
+
+      &:hover:not(:disabled) {
+        background: var(--accent);
+        color: var(--on-accent);
+      }
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+
+    .portions__value {
+      font-family: var(--font-serif);
+      font-size: 1.375rem;
+      color: var(--ink);
+      min-width: 1.875rem;
+      text-align: center;
+    }
+  }
+}
+</style>
