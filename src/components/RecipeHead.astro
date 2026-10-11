@@ -44,7 +44,17 @@ const t = useTranslations(locale);
 
     <div class="recipe-head__intro">
       {kicker && <Kicker class="recipe-head__kicker">{kicker}</Kicker>}
-      <h1 class="recipe-head__title">{title}</h1>
+      <div class="recipe-head__title-row">
+        <h1 class="recipe-head__title">{title}</h1>
+        <IconButton
+          variant="outline"
+          class="recipe-head__title-share"
+          aria-label={t.recipe.actions.share}
+          data-recipe-action-share
+        >
+          <Icon name="share-2" size={18} />
+        </IconButton>
+      </div>
       {excerpt && <p class="recipe-head__excerpt">{excerpt}</p>}
 
       {tags.length > 0 && (
@@ -62,17 +72,12 @@ const t = useTranslations(locale);
 
     <div class="recipe-head__actions">
       {recipeAnchor && (
-        <Button href={`#${recipeAnchor}`} class="recipe-head__jump">
+        <Button href={`#${recipeAnchor}`}>
           {t.recipe.actions.jump}
           <Icon name="arrow-down" size={16} />
         </Button>
       )}
-      <IconButton
-        variant="outline"
-        class="recipe-head__print"
-        aria-label={t.recipe.actions.print}
-        data-recipe-action-print
-      >
+      <IconButton variant="outline" aria-label={t.recipe.actions.print} data-recipe-action-print>
         <Icon name="printer" size={18} />
       </IconButton>
       <IconButton variant="outline" aria-label={t.recipe.actions.share} data-recipe-action-share>
@@ -123,25 +128,25 @@ const t = useTranslations(locale);
     }
 
     /* Mobile: the kicker (category · tags) stands in for the breadcrumb and
-       chips to keep the hero compact; category links remain in the nav. */
+       chips to keep the hero compact; category links remain in the nav.
+       Share moves next to the title, so the actions row is desktop only. */
     .recipe-head__breadcrumb,
     .recipe-head__tags,
-    .recipe-head__jump,
-    .recipe-head__print {
+    .recipe-head__actions {
       display: none;
+    }
+
+    .recipe-head__title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
     }
 
     .recipe-head__tags {
       flex-wrap: wrap;
       gap: 0.5rem;
       list-style: none;
-    }
-
-    .recipe-head__actions {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.5rem;
     }
 
     .recipe-head__media {
@@ -171,15 +176,14 @@ const t = useTranslations(locale);
         display: flex;
       }
 
-      .recipe-head__jump {
-        display: inline-flex;
-      }
-
-      .recipe-head__print {
-        display: grid;
+      .recipe-head__title-share {
+        display: none;
       }
 
       .recipe-head__actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
         gap: 0.75rem;
       }
 
@@ -224,7 +228,8 @@ const t = useTranslations(locale);
         font-size: 2.25rem;
       }
 
-      .recipe-head__actions {
+      .recipe-head__actions,
+      .recipe-head__title-share {
         display: none;
       }
     }
