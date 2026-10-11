@@ -1,0 +1,63 @@
+---
+import Icon from "@components/Icon.astro";
+
+interface Props {
+  href: string;
+  label: string;
+  /** Render a `head` and a `foot` link: only one is displayed per breakpoint. */
+  placement?: "head" | "foot";
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { href, label, placement = "head", class: className, ...rest } = Astro.props;
+---
+
+<a class:list={["view-all", `view-all--${placement}`, className]} href={href} {...rest}>
+  {label}
+  <Icon name="arrow-right" size={16} />
+</a>
+
+<style>
+@layer components {
+  .view-all {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-block-size: 2.75rem;
+    padding-inline: 1.125rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    font-size: 0.9375rem;
+    color: var(--ink);
+    text-decoration: none;
+    transition:
+      border-color var(--transition-base),
+      color var(--transition-base);
+
+    &:hover {
+      border-color: var(--accent-ink);
+      color: var(--accent-ink);
+    }
+  }
+
+  .view-all--head {
+    display: none;
+
+    @media (min-width: 720px) {
+      display: inline-flex;
+    }
+  }
+
+  .view-all--foot {
+    inline-size: 100%;
+    min-block-size: 3rem;
+    margin-block-start: 1rem;
+
+    @media (min-width: 720px) {
+      display: none;
+    }
+  }
+}
+</style>

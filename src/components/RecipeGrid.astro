@@ -1,0 +1,45 @@
+---
+import RecipeCard from "@components/RecipeCard.astro";
+
+type Item = Parameters<typeof RecipeCard>[0];
+
+interface Props {
+  items: Item[];
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { items, class: className, ...rest } = Astro.props;
+---
+
+<ul class:list={["recipe-grid", className]} {...rest}>
+  {items.map((item) => (
+    <li class="recipe-grid__item">
+      <RecipeCard {...item} />
+    </li>
+  ))}
+</ul>
+
+<style>
+@layer components {
+  .recipe-grid {
+    display: flex;
+    flex-direction: column;
+
+    @media (min-width: 720px) {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 2rem;
+      align-items: start;
+    }
+  }
+
+  .recipe-grid__item:not(:last-child) {
+    border-block-end: 1px solid var(--line);
+
+    @media (min-width: 720px) {
+      border-block-end: none;
+    }
+  }
+}
+</style>

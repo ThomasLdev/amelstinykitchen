@@ -1,12 +1,10 @@
 ---
 import TagCard from "@components/TagCard.astro";
-import type { ImageMetadata } from "astro";
 
 interface Item {
   name: string;
   meta?: string;
-  image?: ImageMetadata;
-  imageAlt?: string;
+  seasonLabel?: string;
 }
 
 interface Props {
@@ -20,7 +18,7 @@ const { items, class: className, ...rest } = Astro.props;
 
 <ul class:list={["tags", className]} {...rest}>
   {items.map((item) => (
-    <li>
+    <li class:list={["tags__item", item.seasonLabel && "tags__item--season"]}>
       <TagCard {...item} />
     </li>
   ))}
@@ -29,41 +27,25 @@ const { items, class: className, ...rest } = Astro.props;
 <style>
 @layer components {
   .tags {
-    display: flex;
-    gap: 0.875rem;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    padding: 0.25rem var(--gutter) 0.5rem;
-    margin-inline: calc(var(--gutter) * -1);
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-
-    & > li {
-      flex: 0 0 60%;
-      max-width: 13.75rem;
-      scroll-snap-align: start;
-    }
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.625rem;
 
     @media (min-width: 600px) {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 1rem;
-      overflow: visible;
-      padding: 0;
-      margin-inline: 0;
-
-      & > li {
-        flex: initial;
-        max-width: none;
-      }
     }
 
     @media (min-width: 900px) {
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+
+  .tags__item--season {
+    grid-column: span 2;
+
+    @media (min-width: 600px) {
+      grid-column: auto;
     }
   }
 }

@@ -36,38 +36,35 @@ const en: Dictionary = {
     instagram: "Instagram",
     pinterest: "Pinterest",
   },
-  hero: {
-    badge: "Signature",
-    kicker: "Featured",
-    cta: "View recipe",
-  },
   home: {
-    hero: {
-      title: "Rustic seasonal fruit tart",
-      description:
-        "A shortcrust base, sun-ripened fruit and a drizzle of honey: simplicity that does it all.",
-      prep: "15 min",
-      cook: "45 min",
-      total: "1 hr",
-      tags: ["Tart", "Fruit", "Vegetarian"],
+    intro: {
+      kicker: "Amel's kitchen",
+      title: "Simple, generous recipes to share",
+      titleEm: "no fuss.",
+    },
+    search: {
+      label: "What are we cooking today?",
+      placeholder: "A recipe, an ingredient…",
+      submit: "Search",
+      ideas: "Ideas:",
+    },
+    featured: {
+      badge: "Featured",
     },
     tags: {
-      kicker: "Categories",
-      title: "Browse by",
-      titleEm: "season",
-      sub: "Ideas for cooking whatever the market offers today.",
-      items: [
-        { name: "Spring", meta: "12 recipes" },
-        { name: "Summer", meta: "18 recipes" },
-        { name: "Autumn", meta: "9 recipes" },
-        { name: "Winter", meta: "7 recipes" },
-        { name: "Baking", meta: "24 recipes" },
-      ],
+      kicker: "By craving",
+      title: "Browse",
+      titleEm: "cravings",
+      sub: "Ideas to cook whatever you feel like today.",
+      inSeason: "In season",
+      recipesCount: (count: number) =>
+        count === 0 ? "No recipes" : count === 1 ? "1 recipe" : `${count} recipes`,
     },
-    philosophy: {
-      kicker: "Our philosophy",
-      quote: "Eating well starts with taking your time.",
-      author: "Amel",
+    popular: {
+      kicker: "Right now",
+      title: "Most",
+      titleEm: "loved",
+      viewAll: "All recipes",
     },
   },
   recipe: {

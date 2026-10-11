@@ -33,3 +33,7 @@ export function totalTime(preparationTime: number, cookingTime: number): number 
 export function ingredientCount(groups: Array<{ ingredients: unknown[] }>): number {
   return groups.reduce((total, group) => total + group.ingredients.length, 0);
 }
+
+export function isPublished(recipe: { data: { draft: boolean } }, production: boolean): boolean {
+  return production ? !recipe.data.draft : true;
+}

@@ -1,5 +1,6 @@
 ---
 # Recipe without steps: the narrative sections fallback is rendered instead.
+# Homepage: featured but older than recette-complete (second popular card).
 title:
   fr: "Recette narrative"
   en: "Narrative recipe"
@@ -8,7 +9,8 @@ paths:
   en: "narrative-recipe"
 category: "categorie-test"
 difficulty: "easy"
-publishDate: 2026-01-01
+isFeatured: true
+publishDate: 2026-01-02
 media:
   - src: "../assets/cover-1.png"
     alt:

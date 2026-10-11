@@ -4,13 +4,25 @@ import type { Page } from "@playwright/test";
  * Routes of the fixture content (e2e/fixtures/content), built by the
  * Playwright web server with CONTENT_DIR. Never the editorial content.
  */
+export const HOME_FR = "/fr/";
+export const HOME_EN = "/en/";
 export const RECIPE_FR = "/fr/recipes/recette-complete/";
 export const RECIPE_EN = "/en/recipes/complete-recipe/";
 export const NARRATIVE_FR = "/fr/recipes/recette-narrative/";
 export const DRAFT_FR = "/fr/recipes/recette-brouillon/";
 
 /** recette-complete.md: 4 servings, 4 ingredients (2 scalable), 2 steps, 2 cover photos. */
-export const COMPLETE = { ingredients: 4, steps: 2 } as const;
+export const COMPLETE = {
+  ingredients: 4,
+  steps: 2,
+  title: { fr: "Recette complète", en: "Complete recipe" },
+} as const;
+
+export const NARRATIVE_TITLE_FR = "Recette narrative";
+export const DRAFT_TITLE_FR = "Recette brouillon";
+export const FEATURED_TAG = { title: "Tag test", publishedRecipes: 1 } as const;
+/** One featured tag per season, so exactly one is in season whatever the build date. */
+export const SEASON_TAGS_FR = ["Printemps", "Été", "Automne", "Hiver"] as const;
 
 export const ingredientsPanel = (page: Page) => page.locator("[data-recipe-checklist]");
 export const stepsPanel = (page: Page) => page.locator(".recipe-steps");

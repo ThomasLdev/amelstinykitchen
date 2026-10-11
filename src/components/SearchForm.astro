@@ -1,0 +1,246 @@
+---
+import Icon from "@components/Icon.astro";
+
+interface Idea {
+  label: string;
+  href: string;
+}
+
+interface Props {
+  /** The query is sent as `?q=`. */
+  action: string;
+  label: string;
+  placeholder: string;
+  submitLabel: string;
+  ideas?: Idea[];
+  ideasLabel?: string;
+  id?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  action,
+  label,
+  placeholder,
+  submitLabel,
+  ideas = [],
+  ideasLabel,
+  id = "search-q",
+  class: className,
+  ...rest
+} = Astro.props;
+const ideasId = `${id}-ideas`;
+---
+
+<search class:list={["search", className]} {...rest}>
+  <form class="search__form" action={action} method="get">
+    <label class="search__label" for={id}>{label}</label>
+    <div class="search__field">
+      <Icon name="search" size={20} class="search__icon" />
+      <input class="search__input" id={id} name="q" type="search" placeholder={placeholder}>
+      <button class="search__submit" type="submit">
+        <Icon name="arrow-right" size={16} class="search__submit-icon" />
+        <span class="search__submit-label">{submitLabel}</span>
+      </button>
+    </div>
+  </form>
+
+  {ideas.length > 0 && (
+    <div class="search__ideas">
+      {ideasLabel && (
+        <span class="search__ideas-label" id={ideasId}>
+          {ideasLabel}
+        </span>
+      )}
+      <ul class="search__ideas-list" aria-labelledby={ideasLabel ? ideasId : undefined}>
+        {ideas.map((idea) => (
+          <li>
+            <a class="search__idea" href={idea.href}>
+              {idea.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+</search>
+
+<style>
+@layer components {
+  .search {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-inline-size: var(--max-width-sm);
+  }
+
+  .search__form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  .search__label {
+    font-size: 0.9375rem;
+    color: var(--ink-2);
+  }
+
+  .search__field {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    block-size: 3.25rem;
+    padding-inline: 1rem 0.375rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+
+    /* Stands in for the input's focus ring (the input fills the pill). */
+    &:has(.search__input:focus-visible) {
+      outline: 2px solid var(--accent-ink);
+      outline-offset: 2px;
+    }
+
+    @media (min-width: 720px) {
+      block-size: 3.75rem;
+      padding-inline-start: 1.25rem;
+    }
+  }
+
+  .search__icon {
+    flex: none;
+    color: var(--ink-3);
+  }
+
+  .search__input {
+    flex: 1;
+    min-inline-size: 0;
+    block-size: 100%;
+    border: none;
+    background: transparent;
+    font: inherit;
+    font-size: 1rem;
+    color: var(--ink);
+
+    &::placeholder {
+      color: var(--ink-3);
+    }
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+  .search__submit {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: var(--ink);
+    color: var(--on-ink);
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background var(--transition-base);
+
+    &:hover {
+      background: var(--accent-ink);
+    }
+
+    @media (min-width: 720px) {
+      block-size: 3rem;
+      padding-inline: 1.375rem;
+    }
+  }
+
+  /* Visually hidden on phones only (icon button), so it keeps naming the
+     button; a max-width query is simpler than undoing every property above. */
+  .search__submit-label {
+    @media (width < 720px) {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+
+  .search__submit-icon {
+    @media (min-width: 720px) {
+      display: none;
+    }
+  }
+
+  .search__ideas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .search__ideas-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    display: none;
+
+    @media (min-width: 720px) {
+      display: inline;
+    }
+  }
+
+  .search__ideas-list {
+    display: flex;
+    gap: 0.5rem;
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 0.25rem var(--gutter);
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    @media (min-width: 720px) {
+      flex-wrap: wrap;
+      margin-inline: 0;
+      padding: 0;
+      overflow: visible;
+    }
+  }
+
+  .search__idea {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    block-size: 2.25rem;
+    padding-inline: 0.875rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    font-size: 0.875rem;
+    color: var(--ink);
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      border-color var(--transition-base),
+      color var(--transition-base);
+
+    /* 44px hit area around the 36px chip. */
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -0.25rem 0;
+    }
+
+    &:hover {
+      border-color: var(--accent-ink);
+      color: var(--accent-ink);
+    }
+  }
+}
+</style>

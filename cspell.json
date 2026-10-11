@@ -11,11 +11,11 @@
     "biome",
     "biomejs",
     "chev",
-    "Fraunces",
     "knip",
     "opencode",
     "symfony",
     "tinie",
+    "tinos",
     "tinybakery"
   ],
   "ignoreRegExpList": ["data:image/svg\\+xml,[^\"]+"],
@@ -32,6 +32,7 @@
     ".opencode",
     "AGENTS.md",
     "CLAUDE.md",
-    "README.md"
+    "README.md",
+    "src/assets/fonts/**/LICENSE"
   ]
 }

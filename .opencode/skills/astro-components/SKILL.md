@@ -136,6 +136,24 @@ the `design-system` skill. The rules below are the Astro mechanics only.
 - Avoid layout shift: set image width/height, reserve space for async content.
 - Prefer `astro:assets` over raw `<img>` for local images.
 
+## Comments
+
+Comment the **why**, never the **what**. Code, names, types and CSS already say
+what happens; a comment is only worth keeping when a reader could not guess it.
+
+- Keep: a non-obvious constraint or contract (`?q=` read by the search page,
+  `getCollection()` order not being deterministic), a workaround or deliberate
+  rule exception (a `max-width` query, a `::before` hit area), an a11y choice
+  that looks odd (`aria-labelledby` on a card link), a build-time vs runtime
+  caveat.
+- Remove: paraphrases of the code or of a function/prop name ("Hero recipe: the
+  most recent one"), layout descriptions the CSS already shows ("Phone: list,
+  wider: grid"), examples of values, pointers that duplicate an import, and
+  comments in tests that repeat the test name.
+- One short line by default; a block only when the reasoning needs it.
+- Content fixtures are the exception: each one states the case it covers
+  (see `astro-testing`).
+
 ## Review checklist
 
 - [ ] `.astro` only where reusable; pages in `src/pages/`.
@@ -145,3 +163,4 @@ the `design-system` skill. The rules below are the Astro mechanics only.
 - [ ] No unnecessary JS; correct `client:*` directive and smallest scope.
 - [ ] Images optimized via `astro:assets` with `alt` and dimensions.
 - [ ] Semantic, accessible markup.
+- [ ] Comments explain a non-obvious why; none paraphrase the code.

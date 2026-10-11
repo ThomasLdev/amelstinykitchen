@@ -19,6 +19,8 @@ const emptyLocalized = { fr: "", en: "" };
 
 const difficulty = z.enum(["easy", "medium", "advanced"]);
 
+const season = z.enum(["spring", "summer", "autumn", "winter"]);
+
 /** Shared media + narrative-section schemas, bound to the collection image helper. */
 function sharedSchemas<T extends z.ZodType>(image: () => T) {
   const media = z.object({
@@ -44,6 +46,8 @@ const tags = defineCollection({
       title: localizedString,
       paths: localizedString,
       isFeatured: z.boolean().default(false),
+      /** "In season" on the homepage is evaluated at build time. */
+      season: season.optional(),
       image: image().optional(),
     }),
 });
