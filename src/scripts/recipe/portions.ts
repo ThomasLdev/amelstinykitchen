@@ -3,7 +3,7 @@
  * Ported from the Symfony `recipe_portions` Stimulus controller.
  */
 
-function formatQuantity(value: number, locale: string): string {
+export function formatQuantity(value: number, locale: string): string {
   if (value >= 10) return String(Math.round(value));
   if (Number.isInteger(value)) return String(value);
   const rounded = String(Math.round(value * 10) / 10);

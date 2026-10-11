@@ -21,6 +21,7 @@
   "ignoreRegExpList": ["data:image/svg\\+xml,[^\"]+"],
   "ignorePaths": [
     "dist",
+    "dist-e2e",
     "node_modules",
     ".astro",
     "coverage",

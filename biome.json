@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!dist", "!.astro", "!coverage", "!public", "!src/icons"]
+    "includes": ["**", "!dist", "!dist-e2e", "!.astro", "!coverage", "!public", "!src/icons"]
   },
   "formatter": {
     "enabled": true,

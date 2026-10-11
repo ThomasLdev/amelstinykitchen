@@ -11,6 +11,7 @@ jspm_packages/
 # Build output
 # =========================
 dist/
+dist-e2e/
 build/
 out/
 .output/

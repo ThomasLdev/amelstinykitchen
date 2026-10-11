@@ -4,7 +4,7 @@
  * Only sets `data-nav-state`; the CSS (mobile only) does the rest.
  */
 
-const THRESHOLD = 8;
+import { nextNavState } from "./nav-state";
 
 function initNav(nav: HTMLElement): void {
   const footer = document.querySelector<HTMLElement>("[data-site-footer]");
@@ -12,21 +12,12 @@ function initNav(nav: HTMLElement): void {
   let footerVisible = false;
   let ticking = false;
 
-  const setState = (visible: boolean): void => {
-    nav.dataset.navState = visible ? "visible" : "hidden";
-  };
-
   const update = (): void => {
     ticking = false;
     const y = Math.max(0, window.scrollY);
-    const delta = y - lastY;
-
-    if (footerVisible) setState(false);
-    else if (y < THRESHOLD) setState(true);
-    else if (delta < -THRESHOLD) setState(true);
-    else if (delta > THRESHOLD) setState(false);
-    else return;
-
+    const state = nextNavState(y, lastY, footerVisible);
+    if (!state) return;
+    nav.dataset.navState = state;
     lastY = y;
   };
 
@@ -43,12 +34,11 @@ function initNav(nav: HTMLElement): void {
   if (footer) {
     new IntersectionObserver(([entry]) => {
       footerVisible = entry?.isIntersecting ?? false;
-      if (footerVisible) setState(false);
-      else update();
+      update();
     }).observe(footer);
   }
 
-  setState(true);
+  nav.dataset.navState = "visible";
 }
 
 document.querySelectorAll<HTMLElement>("[data-nav]").forEach(initNav);

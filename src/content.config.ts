@@ -9,6 +9,12 @@ import { z } from "astro/zod";
  * fields are localized inline as `{ fr, en }`.
  */
 
+/**
+ * Content root. The e2e suite points it at `e2e/fixtures/content` so tests
+ * never depend on the editorial content (see playwright.config.ts).
+ */
+const contentDir = process.env.CONTENT_DIR ?? "./src/content";
+
 const emptyLocalized = { fr: "", en: "" };
 
 const difficulty = z.enum(["easy", "medium", "advanced"]);
@@ -32,7 +38,7 @@ function sharedSchemas<T extends z.ZodType>(image: () => T) {
 }
 
 const tags = defineCollection({
-  loader: glob({ base: "./src/content/tags", pattern: "**/*.json" }),
+  loader: glob({ base: `${contentDir}/tags`, pattern: "**/*.json" }),
   schema: ({ image }) =>
     z.object({
       title: localizedString,
@@ -43,7 +49,7 @@ const tags = defineCollection({
 });
 
 const categories = defineCollection({
-  loader: glob({ base: "./src/content/categories", pattern: "**/*.json" }),
+  loader: glob({ base: `${contentDir}/categories`, pattern: "**/*.json" }),
   schema: ({ image }) =>
     z.object({
       title: localizedString,
@@ -56,7 +62,7 @@ const categories = defineCollection({
 });
 
 const recipes = defineCollection({
-  loader: glob({ base: "./src/content/recipes", pattern: "**/*.{md,mdx}" }),
+  loader: glob({ base: `${contentDir}/recipes`, pattern: "**/*.{md,mdx}" }),
   schema: ({ image }) => {
     const { media, section } = sharedSchemas(image);
 
@@ -120,7 +126,7 @@ const recipes = defineCollection({
 });
 
 const posts = defineCollection({
-  loader: glob({ base: "./src/content/posts", pattern: "**/*.{md,mdx}" }),
+  loader: glob({ base: `${contentDir}/posts`, pattern: "**/*.{md,mdx}" }),
   schema: ({ image }) => {
     const { media, section } = sharedSchemas(image);
 
