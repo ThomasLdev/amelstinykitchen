@@ -56,10 +56,13 @@ test("cravings block counts published recipes and puts the current season first"
 }) => {
   await page.goto(HOME_FR);
   const cravings = block(page, fr.home.tags.titleEm);
-  await expect(cravings.getByRole("heading", { name: FEATURED_TAG.title })).toBeVisible();
+  const tagCard = cravings
+    .getByRole("listitem")
+    .filter({ has: page.getByRole("heading", { name: FEATURED_TAG.title }) });
+  await expect(tagCard).toBeVisible();
   // The draft also carries the tag but is not published.
   await expect(
-    cravings.getByText(fr.home.tags.recipesCount(FEATURED_TAG.publishedRecipes)),
+    tagCard.getByText(fr.home.tags.recipesCount(FEATURED_TAG.publishedRecipes)),
   ).toBeVisible();
 
   await expect(cravings.getByText(fr.home.tags.inSeason)).toHaveCount(1);

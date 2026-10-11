@@ -43,6 +43,7 @@
     0 24px 50px -28px color-mix(in oklab, var(--accent-ink) 18%, transparent),
     0 6px 18px -10px color-mix(in oklab, var(--accent-ink) 12%, transparent);
   --shadow-soft: 0 12px 28px -18px color-mix(in oklab, var(--accent-ink) 22%, transparent);
+  --shadow-sheet: 0 -8px 32px color-mix(in oklab, var(--ink) 18%, transparent);
 
   --max-width-xs: 30rem;
   --max-width-sm: 34rem;

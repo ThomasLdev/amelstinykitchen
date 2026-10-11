@@ -1,6 +1,7 @@
 ---
 import { getRelativeLocaleUrl } from "astro:i18n";
 import { type Locale, useTranslations } from "@i18n";
+import mark from "../assets/logo-mark.svg?raw";
 
 interface Props {
   locale: Locale;
@@ -21,7 +22,7 @@ const to = href ?? getRelativeLocaleUrl(locale, "");
   aria-label={`${t.brand.name} ${t.brand.nameAccent}`}
   {...rest}
 >
-  <span class="logo__mark" aria-hidden="true">{t.brand.mark}</span>
+  <span class="logo__mark" aria-hidden="true" set:html={mark} />
   <span class="logo__text">
     {t.brand.name} <span class="logo__brand">{t.brand.nameAccent}</span>
   </span>
@@ -40,21 +41,19 @@ const to = href ?? getRelativeLocaleUrl(locale, "");
   }
 
   .logo__mark {
-    display: grid;
-    place-items: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 50%;
-    background: var(--accent-soft);
-    color: var(--accent-ink);
-    font-style: italic;
-    font-size: 1.0625rem;
+    display: flex;
     flex-shrink: 0;
+    width: 3rem;
+    color: var(--accent-ink);
 
     @media (min-width: 600px) {
-      width: 2.25rem;
-      height: 2.25rem;
-      font-size: 1.125rem;
+      width: 3.5rem;
+    }
+
+    /* The emblem is injected with set:html, so it carries no scope attribute. */
+    :global(svg) {
+      width: 100%;
+      height: auto;
     }
   }
 
@@ -80,8 +79,7 @@ const to = href ?? getRelativeLocaleUrl(locale, "");
     color: var(--on-ink);
 
     .logo__mark {
-      background: var(--accent);
-      color: var(--on-accent);
+      color: var(--on-ink);
     }
 
     .logo__text,

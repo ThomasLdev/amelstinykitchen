@@ -6,7 +6,17 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!dist", "!dist-e2e", "!.astro", "!coverage", "!public", "!src/icons"]
+    "includes": [
+      "**",
+      "!dist",
+      "!dist-e2e",
+      "!.astro",
+      "!.opencode",
+      "!coverage",
+      "!public",
+      "!src/icons",
+      "!src/assets/logo-mark.svg"
+    ]
   },
   "formatter": {
     "enabled": true,

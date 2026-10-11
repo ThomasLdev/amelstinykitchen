@@ -20,7 +20,7 @@ export const COMPLETE = {
 
 export const NARRATIVE_TITLE_FR = "Recette narrative";
 export const DRAFT_TITLE_FR = "Recette brouillon";
-export const FEATURED_TAG = { title: "Tag test", publishedRecipes: 1 } as const;
+export const FEATURED_TAG = { id: "tag-test", title: "Tag test", publishedRecipes: 1 } as const;
 /** One featured tag per season, so exactly one is in season whatever the build date. */
 export const SEASON_TAGS_FR = ["Printemps", "Été", "Automne", "Hiver"] as const;
 
@@ -28,3 +28,17 @@ export const ingredientsPanel = (page: Page) => page.locator("[data-recipe-check
 export const stepsPanel = (page: Page) => page.locator(".recipe-steps");
 export const ingredientQuantity = (page: Page, name: string) =>
   ingredientsPanel(page).locator(".ing-item", { hasText: name }).locator(".ing-item__qty");
+
+export const RECIPES_FR = "/fr/recipes/";
+export const RECIPES_EN = "/en/recipes/";
+
+/** Published recipes on the list, in the default ("most loved") order. */
+export const LIST_FR = [COMPLETE.title.fr, NARRATIVE_TITLE_FR, "Recette filtre"] as const;
+/** recette-filtre.md: alone in its category and in winter, the quickest recipe. */
+export const FILTER_RECIPE = {
+  title: "Recette filtre",
+  category: "Catégorie filtre",
+  season: "Hiver",
+} as const;
+
+export const recipeList = (page: Page) => page.locator("[data-recipe-list] > li:not([hidden])");

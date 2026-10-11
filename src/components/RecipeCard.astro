@@ -7,18 +7,41 @@ interface Props {
   title: string;
   excerpt?: string;
   meta?: string;
+  kicker?: string;
   image?: ImageMetadata;
+  /** `list`: thumbnail row on phones; `tile`: always stacked (2-column grids). */
+  variant?: "list" | "tile";
   class?: string;
   [key: string]: unknown;
 }
 
-const { href, title, excerpt, meta, image, class: className, ...rest } = Astro.props;
+const {
+  href,
+  title,
+  excerpt,
+  meta,
+  kicker,
+  image,
+  variant = "list",
+  class: className,
+  ...rest
+} = Astro.props;
+
+const sizes = {
+  list: "(min-width: 1280px) 24rem, (min-width: 720px) 30vw, 6rem",
+  tile: "(min-width: 1280px) 19rem, (min-width: 900px) 24vw, (min-width: 720px) 30vw, 46vw",
+}[variant];
 
 // The card is one link: name it by its title, not by every fact inside it.
 const titleId = `recipe-card-${href.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "")}`;
 ---
 
-<a class:list={["recipe-card", className]} href={href} aria-labelledby={titleId} {...rest}>
+<a
+  class:list={["recipe-card", variant !== "list" && `recipe-card--${variant}`, className]}
+  href={href}
+  aria-labelledby={titleId}
+  {...rest}
+>
   <div class="recipe-card__media">
     {image && (
       <Picture
@@ -26,13 +49,14 @@ const titleId = `recipe-card-${href.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/
         alt=""
         formats={["avif", "webp"]}
         widths={[192, 360, 480, 720]}
-        sizes="(min-width: 1280px) 24rem, (min-width: 720px) 30vw, 6rem"
+        sizes={sizes}
         class="recipe-card__image"
       />
     )}
   </div>
 
   <div class="recipe-card__body">
+    {kicker && <p class="recipe-card__kicker">{kicker}</p>}
     {meta && <p class="recipe-card__meta">{meta}</p>}
     <h3 class="recipe-card__title" id={titleId}>{title}</h3>
     {excerpt && <p class="recipe-card__excerpt">{excerpt}</p>}
@@ -91,6 +115,18 @@ const titleId = `recipe-card-${href.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/
     }
   }
 
+  .recipe-card__kicker {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+
+    @media (min-width: 720px) {
+      font-size: 0.75rem;
+    }
+  }
+
   .recipe-card__meta {
     order: 1;
     margin: 0;
@@ -131,6 +167,33 @@ const titleId = `recipe-card-${href.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/
 
     @media (min-width: 720px) {
       display: block;
+    }
+  }
+
+  .recipe-card--tile {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding-block: 0;
+
+    @media (min-width: 720px) {
+      gap: 0.75rem;
+    }
+
+    .recipe-card__media {
+      inline-size: 100%;
+    }
+
+    .recipe-card__meta {
+      order: 1;
+    }
+
+    .recipe-card__title {
+      font-size: 1.125rem;
+
+      @media (min-width: 720px) {
+        font-size: 1.375rem;
+      }
     }
   }
 }
