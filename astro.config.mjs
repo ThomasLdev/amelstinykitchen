@@ -16,8 +16,6 @@ export default defineConfig({
       redirectToDefaultLocale: false,
     },
   },
-  // Self-hosted fonts (latin subset, licences next to the files), exposed as
-  // CSS variables and mapped to the --font-* tokens in src/styles/tokens.css.
   fonts: [
     {
       provider: fontProviders.local(),

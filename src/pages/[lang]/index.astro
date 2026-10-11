@@ -30,7 +30,6 @@ const tags = await getCollection("tags");
 const recipeHref = (recipe: CollectionEntry<"recipes">) =>
   getRelativeLocaleUrl(locale, `recipes/${recipe.data.paths[locale]}`);
 
-/** "1 h 05 · Intermédiaire": total time (when known) and difficulty. */
 const recipeFacts = ({ data }: CollectionEntry<"recipes">) => [
   formatDuration(totalTime(data.preparationTime, data.cookingTime), locale),
   t.recipe.difficulty[data.difficulty],

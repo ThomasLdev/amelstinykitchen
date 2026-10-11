@@ -4,11 +4,7 @@ import Icon from "@components/Icon.astro";
 interface Props {
   href: string;
   label: string;
-  /**
-   * `head`: pill next to a section title, from 720px.
-   * `foot`: full-width button under the list, below 720px.
-   * Render both to follow the layout; only one is displayed at a time.
-   */
+  /** Render a `head` and a `foot` link: only one is displayed per breakpoint. */
   placement?: "head" | "foot";
   class?: string;
   [key: string]: unknown;

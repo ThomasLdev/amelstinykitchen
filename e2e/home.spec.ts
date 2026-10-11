@@ -13,7 +13,6 @@ import {
   SEASON_TAGS_FR,
 } from "./fixtures";
 
-/** A homepage block, found by the emphasized part of its heading. */
 const block = (page: Page, titleEm: string) =>
   page.locator("section", { has: page.getByRole("heading", { level: 2, name: titleEm }) });
 
@@ -63,7 +62,6 @@ test("cravings block counts published recipes and puts the current season first"
     cravings.getByText(fr.home.tags.recipesCount(FEATURED_TAG.publishedRecipes)),
   ).toBeVisible();
 
-  // Whatever the build date, exactly one seasonal tag is in season, shown first.
   await expect(cravings.getByText(fr.home.tags.inSeason)).toHaveCount(1);
   const first = cravings.getByRole("listitem").first();
   await expect(first).toContainText(fr.home.tags.inSeason);

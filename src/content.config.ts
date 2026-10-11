@@ -46,7 +46,7 @@ const tags = defineCollection({
       title: localizedString,
       paths: localizedString,
       isFeatured: z.boolean().default(false),
-      /** Seasonal tag: flagged "in season" on the homepage while it lasts (at build time). */
+      /** "In season" on the homepage is evaluated at build time. */
       season: season.optional(),
       image: image().optional(),
     }),

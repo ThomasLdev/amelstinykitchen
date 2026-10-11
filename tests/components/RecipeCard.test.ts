@@ -18,7 +18,6 @@ describe("RecipeCard", () => {
     const html = await container.renderToString(RecipeCard, { props });
 
     expect(html).toContain('href="/fr/recipes/tarte/"');
-    // The link is named by its title, not by every fact inside it.
     const labelledBy = html.match(/aria-labelledby="([^"]+)"/)?.[1];
     expect(html).toMatch(new RegExp(`<h3[^>]*id="${labelledBy}"[^>]*>Tarte</h3>`));
     // Decorative image: the title already names the link.

@@ -7,12 +7,11 @@ interface Idea {
 }
 
 interface Props {
-  /** URL of the search page; the query is sent as `?q=`. */
+  /** The query is sent as `?q=`. */
   action: string;
   label: string;
   placeholder: string;
   submitLabel: string;
-  /** Shortcut queries, rendered as links under the field. */
   ideas?: Idea[];
   ideasLabel?: string;
   id?: string;
@@ -128,13 +127,11 @@ const ideasId = `${id}-ideas`;
       color: var(--ink-3);
     }
 
-    /* The ring is drawn around the whole field, see .search__field. */
     &:focus-visible {
       outline: none;
     }
   }
 
-  /* Phone: round icon button; wider screens: labelled pill. */
   .search__submit {
     display: inline-flex;
     flex: none;
@@ -201,7 +198,6 @@ const ideasId = `${id}-ideas`;
     }
   }
 
-  /* Phone: one scrollable row bleeding to the screen edges. */
   .search__ideas-list {
     display: flex;
     gap: 0.5rem;

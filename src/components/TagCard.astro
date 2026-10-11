@@ -2,7 +2,6 @@
 interface Props {
   name: string;
   meta?: string;
-  /** Label of the "in season" badge; the card is highlighted when set. */
   seasonLabel?: string;
   class?: string;
   [key: string]: unknown;
@@ -21,9 +20,7 @@ const initial = name.charAt(0).toLocaleUpperCase();
 
 <style>
 @layer components {
-  /* Phone: name + count; the seasonal card is a wide dark banner.
-     Wider: initial and badge on top, name and count below. The badge follows
-     the heading in the DOM so it is read with its own card. */
+  /* The badge follows the heading in the DOM so it is read with its own card. */
   .tag-card {
     display: grid;
     grid-template-areas:

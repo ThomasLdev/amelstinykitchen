@@ -34,7 +34,7 @@
   --radius-lg: 20px;
   --radius-pill: 999px;
 
-  /* Families (and their fallbacks) are declared in astro.config.mjs (Fonts API). */
+  /* --font-tinos & co. come from the Fonts API (astro.config.mjs). */
   --font-serif: var(--font-tinos);
   --font-sans: var(--font-ubuntu);
   --font-mono: var(--font-ubuntu-mono);

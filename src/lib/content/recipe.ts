@@ -34,7 +34,6 @@ export function ingredientCount(groups: Array<{ ingredients: unknown[] }>): numb
   return groups.reduce((total, group) => total + group.ingredients.length, 0);
 }
 
-/** Drafts are visible in dev only: they never reach a production build. */
 export function isPublished(recipe: { data: { draft: boolean } }, production: boolean): boolean {
   return production ? !recipe.data.draft : true;
 }

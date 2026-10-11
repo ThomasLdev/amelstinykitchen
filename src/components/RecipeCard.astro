@@ -5,9 +5,7 @@ import type { ImageMetadata } from "astro";
 interface Props {
   href: string;
   title: string;
-  /** Hidden on phones, where cards become compact rows. */
   excerpt?: string;
-  /** One line of facts, e.g. "1 h 05 · Intermédiaire". */
   meta?: string;
   image?: ImageMetadata;
   class?: string;
@@ -16,7 +14,7 @@ interface Props {
 
 const { href, title, excerpt, meta, image, class: className, ...rest } = Astro.props;
 
-// The whole card is a link: name it by its title only, not by every fact it contains.
+// The card is one link: name it by its title, not by every fact inside it.
 const titleId = `recipe-card-${href.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "")}`;
 ---
 
@@ -43,7 +41,6 @@ const titleId = `recipe-card-${href.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/
 
 <style>
 @layer components {
-  /* Phone: thumbnail row, title above the facts. Wider: photo card. */
   .recipe-card {
     display: flex;
     align-items: center;

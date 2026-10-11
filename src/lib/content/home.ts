@@ -21,24 +21,21 @@ interface TagLike {
   data: { isFeatured: boolean; season?: Season | undefined };
 }
 
-/** Number of featured recipes / tags shown on the homepage. */
 const HOME_LIMIT = 5;
 
 const lastTouched = (recipe: RecipeLike) =>
   (recipe.data.updatedDate ?? recipe.data.publishDate).valueOf();
 
-/** Newest first; the id breaks ties so the order is deterministic. */
+/** The id breaks ties: getCollection() order is not deterministic. */
 const byDateDesc =
   (date: (recipe: RecipeLike) => number) =>
   (a: RecipeLike, b: RecipeLike): number =>
     date(b) - date(a) || a.id.localeCompare(b.id);
 
-/** Hero recipe: the most recently published one. */
 export function selectHeroRecipe<T extends RecipeLike>(recipes: T[]): T | undefined {
   return [...recipes].sort(byDateDesc((recipe) => recipe.data.publishDate.valueOf()))[0];
 }
 
-/** "Most loved" block: featured recipes, most recently updated first. */
 export function selectPopularRecipes<T extends RecipeLike>(recipes: T[], limit = HOME_LIMIT): T[] {
   return recipes
     .filter((recipe) => recipe.data.isFeatured)
@@ -52,10 +49,6 @@ export function currentSeason(date: Date): Season {
   return seasons[Math.floor(((date.getUTCMonth() + 1) % 12) / 3)] as Season;
 }
 
-/**
- * "Cravings" block: featured tags with the number of recipes using each one.
- * The tag of the current season (at build time) comes first, flagged `inSeason`.
- */
 export function selectFeaturedTags<T extends TagLike>(
   tags: T[],
   recipes: RecipeLike[],

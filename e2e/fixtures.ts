@@ -18,12 +18,10 @@ export const COMPLETE = {
   title: { fr: "Recette complète", en: "Complete recipe" },
 } as const;
 
-/** Homepage facts: featured = COMPLETE (newest), popular = COMPLETE then NARRATIVE, draft never shown. */
 export const NARRATIVE_TITLE_FR = "Recette narrative";
 export const DRAFT_TITLE_FR = "Recette brouillon";
-/** tag-test.json: featured, used by COMPLETE (published) and the draft. */
 export const FEATURED_TAG = { title: "Tag test", publishedRecipes: 1 } as const;
-/** printemps/ete/automne/hiver.json: featured seasonal tags, so exactly one is always in season. */
+/** One featured tag per season, so exactly one is in season whatever the build date. */
 export const SEASON_TAGS_FR = ["Printemps", "Été", "Automne", "Hiver"] as const;
 
 export const ingredientsPanel = (page: Page) => page.locator("[data-recipe-checklist]");
