@@ -30,6 +30,16 @@
     accent-color: var(--accent);
   }
 
+  @media print {
+    @page {
+      margin: 1.5cm;
+    }
+
+    body {
+      background: none;
+    }
+  }
+
   img,
   picture,
   video,

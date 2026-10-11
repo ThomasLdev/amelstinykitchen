@@ -90,5 +90,31 @@ const t = useTranslations(locale);
       }
     }
   }
+
+  /* Print: dark card backgrounds are not printed, so switch to ink on paper. */
+  .chef-note {
+    @media print {
+      background: none;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      break-inside: avoid;
+
+      .chef-note__label {
+        color: var(--accent-ink);
+      }
+
+      .chef-note__title {
+        color: var(--ink);
+
+        :global(em) {
+          color: var(--accent-ink);
+        }
+      }
+
+      .chef-note__text {
+        color: var(--ink-2);
+      }
+    }
+  }
 }
 </style>

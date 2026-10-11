@@ -87,7 +87,6 @@ const en: Dictionary = {
     actions: {
       print: "Print recipe",
       share: "Share recipe",
-      save: "Save",
       jump: "Jump to recipe",
     },
     servings: {

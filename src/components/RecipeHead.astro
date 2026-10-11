@@ -67,10 +67,6 @@ const t = useTranslations(locale);
           <Icon name="arrow-down" size={16} />
         </Button>
       )}
-      <Button variant="ghost" class="recipe-head__save">
-        <Icon name="bookmark" size={16} />
-        {t.recipe.actions.save}
-      </Button>
       <IconButton
         variant="outline"
         class="recipe-head__print"
@@ -148,10 +144,6 @@ const t = useTranslations(locale);
       gap: 0.5rem;
     }
 
-    .recipe-head__save {
-      flex: 1;
-    }
-
     .recipe-head__media {
       min-width: 0;
     }
@@ -191,10 +183,6 @@ const t = useTranslations(locale);
         gap: 0.75rem;
       }
 
-      .recipe-head__save {
-        flex: none;
-      }
-
       .recipe-head__lede {
         grid-column: 1;
         grid-row: 1;
@@ -207,6 +195,37 @@ const t = useTranslations(locale);
 
       .recipe-head__excerpt {
         font-size: 1.1875rem;
+      }
+    }
+  }
+
+  /* Print: title block beside a small cover, no actions. */
+  .recipe-head {
+    @media print {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 15rem;
+      align-items: start;
+      gap: 1.5rem;
+      padding-block: 0 1.5rem;
+      break-inside: avoid;
+
+      .recipe-head__lede {
+        grid-column: 1;
+        grid-row: 1;
+        gap: 1rem;
+      }
+
+      .recipe-head__media {
+        grid-column: 2;
+        grid-row: 1;
+      }
+
+      .recipe-head__title {
+        font-size: 2.25rem;
+      }
+
+      .recipe-head__actions {
+        display: none;
       }
     }
   }

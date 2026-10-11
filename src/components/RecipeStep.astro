@@ -160,5 +160,35 @@ const tipWarning = tip?.type === "warning";
       }
     }
   }
+
+  .step {
+    /* Print: text on the left, photo in a narrow column on the right. */
+    @media print {
+      break-inside: avoid;
+      padding-block: 1rem;
+
+      .step__body {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 11rem;
+        align-content: start;
+        gap: 0.5rem 1.25rem;
+      }
+
+      .step__title,
+      .step__content,
+      .step__tip {
+        grid-column: 1;
+      }
+
+      .step__media {
+        grid-column: 2;
+        grid-row: 1 / span 3;
+      }
+
+      .step__tip {
+        border: 1px solid var(--accent-soft);
+      }
+    }
+  }
 }
 </style>

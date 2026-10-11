@@ -85,7 +85,6 @@ const fr = {
     actions: {
       print: "Imprimer la recette",
       share: "Partager la recette",
-      save: "Enregistrer",
       jump: "Voir la recette",
     },
     servings: {

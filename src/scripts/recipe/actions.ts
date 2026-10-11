@@ -1,9 +1,24 @@
 /** Recipe header actions: native print and share (with a clipboard fallback). */
 
+/** Lazy images below the fold may not be loaded yet: fetch them before printing. */
+async function loadLazyImages(): Promise<void> {
+  const images = Array.from(document.querySelectorAll<HTMLImageElement>('img[loading="lazy"]'));
+  for (const image of images) image.loading = "eager";
+  await Promise.all(images.map((image) => image.decode().catch(() => {})));
+}
+
 export function initActions(): void {
   for (const button of document.querySelectorAll<HTMLButtonElement>("[data-recipe-action-print]")) {
-    button.addEventListener("click", () => window.print());
+    button.addEventListener("click", async () => {
+      await loadLazyImages();
+      window.print();
+    });
   }
+
+  // Browser print shortcut (Ctrl/⌘+P): cannot be delayed, best effort.
+  window.addEventListener("beforeprint", () => {
+    loadLazyImages();
+  });
 
   for (const button of document.querySelectorAll<HTMLButtonElement>("[data-recipe-action-share]")) {
     button.addEventListener("click", () => {

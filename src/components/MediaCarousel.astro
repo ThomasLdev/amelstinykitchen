@@ -282,5 +282,37 @@ const multiple = media.length > 1;
       display: flex;
     }
   }
+
+  /* Print: no controls; every slide laid out (the hero keeps its cover only). */
+  .media-carousel {
+    @media print {
+      .media-carousel__nav,
+      .media-carousel__dots {
+        display: none;
+      }
+
+      .media-carousel__track {
+        flex-wrap: wrap;
+        overflow: visible;
+      }
+
+      .media-carousel__slide {
+        flex: 1 1 0;
+        min-width: 0;
+      }
+    }
+  }
+
+  .media-carousel--hero {
+    @media print {
+      .media-carousel__slide {
+        flex-basis: 100%;
+
+        &:not(:first-child) {
+          display: none;
+        }
+      }
+    }
+  }
 }
 </style>

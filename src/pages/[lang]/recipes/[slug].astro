@@ -252,7 +252,7 @@ const chefNote = data.chefNote
   /* Mobile only: ingredients and steps become two panels switched by the
      segmented control. Desktop shows both side by side, so these rules are
      scoped below the layout breakpoint rather than undone above it. */
-  @media (width < 900px) {
+  @media screen and (width < 900px) {
     .recipe-body:has(.recipe-body__view input[value="steps"]:checked) .recipe-body__ingredients,
     .recipe-body:has(.recipe-body__view input[value="ingredients"]:checked) .recipe-steps {
       display: none;
@@ -260,6 +260,13 @@ const chefNote = data.chefNote
   }
 
   .recipe-body {
+    @media print {
+      .recipe-body__view,
+      .recipe-body__done {
+        display: none;
+      }
+    }
+
     @media (min-width: 900px) {
       .recipe-body__view,
       .recipe-body__done {
@@ -271,6 +278,7 @@ const chefNote = data.chefNote
   .recipe-steps {
     .recipe-steps__title {
       margin-block-start: 0.5rem;
+      break-after: avoid;
     }
   }
 
