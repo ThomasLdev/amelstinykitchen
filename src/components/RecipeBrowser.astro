@@ -1,0 +1,543 @@
+---
+import Button from "@components/Button.astro";
+import FilterGroup from "@components/FilterGroup.astro";
+import FilterSheet from "@components/FilterSheet.astro";
+import Icon from "@components/Icon.astro";
+import RecipeGrid from "@components/RecipeGrid.astro";
+import SrOnly from "@components/SrOnly.astro";
+import { type Locale, useTranslations } from "@i18n";
+import { plural, type RecipeFacet, SORT_KEYS } from "@lib/content/recipe-filters";
+
+type Card = Parameters<typeof RecipeGrid>[0]["items"][number];
+
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  locale: Locale;
+  /** Already in the default ("popular") order. */
+  items: Array<{ card: Card; facet: RecipeFacet }>;
+  categories: Option[];
+  seasons: Option[];
+  tags: Option[];
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { locale, items, categories, seasons, tags, class: className, ...rest } = Astro.props;
+const t = useTranslations(locale).recipes;
+
+const total = items.length;
+const all = { value: "", label: t.filters.all };
+const categoryOptions = [all, ...categories].map((option) => ({
+  ...option,
+  count: option.value ? items.filter(({ facet }) => facet.category === option.value).length : total,
+}));
+const removeLabel = (label: string) => t.active.remove.replace("%label%", label);
+const activeChips = [
+  ...categories.map((option) => ({ ...option, name: "category" })),
+  ...seasons.map((option) => ({ ...option, name: "season" })),
+  ...tags.map((option) => ({ ...option, name: "tag" })),
+];
+
+// Read by src/scripts/recipes/browser.ts for the labels it rewrites.
+const strings = JSON.stringify({
+  count: t.count,
+  apply: t.apply,
+  remove: t.active.remove,
+  query: t.active.query,
+});
+---
+
+<form
+  class:list={["browser", className]}
+  method="get"
+  data-recipe-browser
+  data-strings={strings}
+  {...rest}
+>
+  <div class="browser__search" data-enhanced hidden>
+    <label class="browser__search-field" for="recipes-q">
+      <Icon name="search" size={18} class="browser__search-icon" />
+      <SrOnly>{t.search.label}</SrOnly>
+      <input
+        class="browser__search-input"
+        id="recipes-q"
+        name="q"
+        type="search"
+        placeholder={t.search.placeholder}
+        autocomplete="off"
+      >
+    </label>
+  </div>
+
+  <div class="browser__bar">
+    <div class="browser__actions">
+      <button
+        type="button"
+        class="browser__filters-btn"
+        aria-haspopup="dialog"
+        aria-controls="recipes-filters"
+        data-filters-open
+        data-enhanced
+        hidden
+      >
+        <Icon name="sliders-horizontal" size={18} />
+        {t.filters.open}
+        <span class="browser__badge" data-filters-badge hidden></span>
+      </button>
+
+      <label class="browser__sort" data-enhanced hidden>
+        <SrOnly>{t.sort.label}</SrOnly>
+        <span class="browser__sort-label" aria-hidden="true">{t.sort.label}</span>
+        <span class="browser__select">
+          <select class="browser__select-input" name="sort">
+            {SORT_KEYS.map((key) => <option value={key}>{t.sort[key]}</option>)}
+          </select>
+          <Icon name="chevron-down" size={16} class="browser__select-icon" />
+        </span>
+      </label>
+    </div>
+
+    <fieldset class="browser__quick" data-enhanced hidden>
+      <legend><SrOnly>{t.filters.quick}</SrOnly></legend>
+      {[all, ...categories].map((option) => (
+        <button
+          type="button"
+          class="browser__quick-chip"
+          aria-pressed={option.value === "" ? "true" : "false"}
+          data-quick-category={option.value}
+        >
+          {option.label}
+        </button>
+      ))}
+    </fieldset>
+  </div>
+
+  <FilterSheet
+    class="browser__filters"
+    id="recipes-filters"
+    title={t.filters.title}
+    closeLabel={t.filters.close}
+    resetLabel={t.filters.reset}
+    applyLabel={plural(t.apply, total)}
+  >
+    {categories.length > 1 && (
+      <FilterGroup
+        type="radio"
+        name="category"
+        legend={t.filters.category}
+        options={categoryOptions}
+        appearance="list"
+      />
+    )}
+    <FilterGroup
+      type="radio"
+      name="season"
+      legend={t.filters.season}
+      options={[all, ...seasons]}
+      appearance="segmented"
+    />
+    {tags.length > 0 && (
+      <FilterGroup
+        type="checkbox"
+        name="tag"
+        legend={t.filters.tags}
+        options={tags}
+        appearance="switch"
+      />
+    )}
+  </FilterSheet>
+
+  <section class="browser__results">
+    <div class="browser__status">
+      <h2 class="browser__count" data-results-count>{plural(t.count, total)}</h2>
+      <SrOnly role="status" data-results-status />
+      {activeChips.map((chip) => (
+        <button
+          type="button"
+          class="browser__chip"
+          aria-label={removeLabel(chip.label)}
+          data-filter-remove={chip.name}
+          data-filter-value={chip.value}
+          hidden
+        >
+          {chip.label}
+          <Icon name="x" size={12} />
+        </button>
+      ))}
+      <button type="button" class="browser__chip" data-filter-remove="q" hidden>
+        <span data-filter-query></span>
+        <Icon name="x" size={12} />
+      </button>
+      <button type="button" class="browser__clear" data-filters-clear="status" hidden>
+        {t.active.clear}
+      </button>
+    </div>
+
+    <RecipeGrid
+      variant="tile"
+      items={items.map(({ card, facet }) => ({
+        ...card,
+        "data-recipe-item": facet.id,
+        "data-facet": JSON.stringify(facet),
+      }))}
+      data-recipe-list
+    />
+
+    <div class="browser__empty" data-results-empty hidden>
+      <h3 class="browser__empty-title">{t.empty.title}</h3>
+      <p class="browser__empty-text">{t.empty.text}</p>
+      <Button data-filters-clear>{t.active.clear}</Button>
+    </div>
+  </section>
+</form>
+
+<script>
+import "@scripts/recipes";
+</script>
+
+<style>
+@layer components {
+  .browser {
+    display: grid;
+    grid-template-areas:
+      "search"
+      "bar"
+      "results";
+    grid-template-columns: minmax(0, 1fr);
+
+    @media (min-width: 900px) {
+      grid-template-areas:
+        "filters search actions"
+        "filters results results";
+      grid-template-columns: 15rem minmax(0, 1fr) auto;
+      gap: 1.25rem var(--space-5);
+      align-items: start;
+    }
+  }
+
+  .browser__search {
+    grid-area: search;
+
+    &[hidden] {
+      display: none;
+    }
+
+    padding-block-end: 0.75rem;
+
+    @media (min-width: 900px) {
+      padding: 0;
+    }
+  }
+
+  .browser__search-field {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    block-size: 3rem;
+    padding-inline: 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    cursor: text;
+
+    /* Stands in for the input's focus ring (the input fills the pill). */
+    &:has(.browser__search-input:focus-visible) {
+      outline: 2px solid var(--accent-ink);
+      outline-offset: 2px;
+    }
+  }
+
+  .browser__search-icon {
+    color: var(--ink-3);
+  }
+
+  .browser__search-input {
+    flex: 1;
+    min-inline-size: 0;
+    block-size: 100%;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+
+    &::placeholder {
+      color: var(--ink-3);
+    }
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+  .browser__bar {
+    grid-area: bar;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    margin-inline: calc(var(--gutter) * -1);
+    padding-block: 0.625rem;
+    border-block-end: 1px solid var(--line);
+    background: var(--bg);
+
+    @media (min-width: 900px) {
+      display: contents;
+    }
+  }
+
+  .browser__actions {
+    grid-area: actions;
+    display: flex;
+    gap: 0.5rem;
+    padding-inline: var(--gutter);
+
+    @media (min-width: 900px) {
+      padding: 0;
+    }
+  }
+
+  .browser__filters-btn,
+  .browser__select-input {
+    min-block-size: 2.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    color: var(--ink);
+  }
+
+  .browser__filters-btn {
+    display: inline-flex;
+    font-size: 0.9375rem;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+
+    &[hidden] {
+      display: none;
+    }
+
+    &[data-active] {
+      border-color: var(--ink);
+      background: var(--ink);
+      color: var(--on-ink);
+    }
+
+    @media (min-width: 900px) {
+      display: none;
+    }
+  }
+
+  .browser__badge {
+    display: inline-grid;
+    place-items: center;
+    min-inline-size: 1.25rem;
+    block-size: 1.25rem;
+    padding-inline: 0.375rem;
+    border-radius: var(--radius-pill);
+    background: var(--accent-soft);
+    color: var(--ink);
+    font-size: 0.75rem;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  .browser__sort {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 0.625rem;
+    font-size: 0.875rem;
+    color: var(--ink-2);
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  /* Phones rely on the select showing the current sort; the SrOnly copy names it. */
+  .browser__sort-label {
+    display: none;
+    white-space: nowrap;
+
+    @media (min-width: 900px) {
+      display: inline;
+    }
+  }
+
+  .browser__select {
+    position: relative;
+    display: flex;
+    flex: 1;
+  }
+
+  .browser__select-input {
+    flex: 1;
+    appearance: none;
+    padding-inline: 1rem 2.5rem;
+    text-align: center;
+    cursor: pointer;
+
+    @media (min-width: 900px) {
+      min-block-size: 3rem;
+      text-align: start;
+    }
+  }
+
+  .browser__select-icon {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 1rem;
+    margin-block: auto;
+    pointer-events: none;
+  }
+
+  .browser__quick {
+    display: flex;
+    gap: 0.5rem;
+    min-inline-size: 0;
+    margin: 0;
+    border: 0;
+    padding: 0.25rem var(--gutter);
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &[hidden] {
+      display: none;
+    }
+
+    @media (min-width: 900px) {
+      display: none;
+    }
+  }
+
+  .browser__quick-chip {
+    position: relative;
+    flex: none;
+    block-size: 2.25rem;
+    padding-inline: 0.875rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    font-size: 0.875rem;
+    white-space: nowrap;
+
+    /* 44px hit area around the 36px chip. */
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -0.25rem 0;
+    }
+
+    &[aria-pressed="true"] {
+      border-color: var(--ink);
+      background: var(--accent-bg);
+      font-weight: 500;
+    }
+  }
+
+  .browser__filters {
+    grid-area: filters;
+  }
+
+  .browser__results {
+    grid-area: results;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-block: 0.875rem var(--space-6);
+
+    @media (min-width: 900px) {
+      padding-block-start: 0;
+    }
+  }
+
+  .browser__status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 0.5rem;
+    min-block-size: 2.25rem;
+  }
+
+  .browser__count {
+    margin-inline-end: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .browser__chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    block-size: 2rem;
+    padding-inline: 0.75rem 0.625rem;
+    border-radius: var(--radius-pill);
+    background: var(--accent-bg);
+    color: var(--ink);
+    font-size: 0.8125rem;
+
+    /* 44px hit area around the 32px chip. */
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -0.375rem 0;
+    }
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  .browser__clear {
+    min-block-size: 2.75rem;
+    padding-inline: 0.25rem;
+    font-size: 0.8125rem;
+    color: var(--accent-ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  .browser__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: var(--space-5) var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    text-align: center;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  .browser__empty-title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.5rem, 3vw, 1.625rem);
+    font-weight: 400;
+  }
+
+  .browser__empty-text {
+    margin-block-end: 0.5rem;
+    font-size: 0.9375rem;
+    color: var(--ink-2);
+  }
+}
+</style>

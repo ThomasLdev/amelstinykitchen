@@ -4,7 +4,6 @@ const fr = {
     description: "Un carnet de recettes simples et généreuses, à cuisiner au fil des saisons.",
   },
   brand: {
-    mark: "a",
     name: "Amel's",
     nameAccent: "Tiny Kitchen",
   },
@@ -109,6 +108,62 @@ const fr = {
     },
     chef: {
       label: "L'astuce pour cette recette",
+    },
+  },
+  recipes: {
+    meta: {
+      title: "Toutes les recettes",
+      description: "Toutes les recettes d'Amel, à filtrer par catégorie, saison ou envie.",
+    },
+    title: "Toutes les",
+    titleEm: "recettes",
+    breadcrumb: "Toutes les recettes",
+    search: {
+      label: "Rechercher dans les recettes",
+      placeholder: "Une recette, un tag…",
+    },
+    sort: {
+      label: "Trier par",
+      popular: "Les plus aimées",
+      recent: "Les plus récentes",
+      quick: "Les plus rapides",
+    },
+    filters: {
+      title: "Filtres",
+      open: "Filtres",
+      close: "Fermer les filtres",
+      reset: "Réinitialiser",
+      category: "Catégorie",
+      season: "Saison",
+      tags: "Tags",
+      all: "Toutes",
+      quick: "Catégories",
+    },
+    seasons: {
+      spring: "Printemps",
+      summer: "Été",
+      autumn: "Automne",
+      winter: "Hiver",
+    },
+    active: {
+      remove: "Retirer le filtre %label%",
+      query: "« %query% »",
+      clear: "Tout effacer",
+    },
+    /** Client-side plurals, `%count%` is replaced by the number. */
+    count: {
+      zero: "0 recette",
+      one: "1 recette",
+      other: "%count% recettes",
+    },
+    apply: {
+      zero: "Aucune recette",
+      one: "Voir 1 recette",
+      other: "Voir %count% recettes",
+    },
+    empty: {
+      title: "Aucune recette ne correspond",
+      text: "Essayez de retirer un filtre ou d'élargir la saison.",
     },
   },
 };

@@ -16,11 +16,11 @@ difficulty: "easy"
 preparationTime: 10
 cookingTime: 10
 servings: 6
-isFeatured: false
+isFeatured: true
 draft: false
 publishDate: 2026-02-15
 media:
-  - src: "../../assets/recipes/fondant-au-chocolat.png"
+  - src: "../../assets/recipes/fondant-chocolat.jpg"
     alt:
       fr: "Fondant au chocolat au cœur coulant."
       en: "Chocolate fondant with a molten centre."
@@ -68,12 +68,22 @@ steps:
     content:
       fr: "Faites fondre le chocolat et le beurre au bain-marie, puis laissez tiédir."
       en: "Melt the chocolate and butter in a bain-marie, then let cool slightly."
+    media:
+      - src: "../../assets/recipes/39903996.webp"
+        alt:
+          fr: "Meringue dorée au chalumeau."
+          en: "Meringue torched until golden."
   - title:
       fr: "Mélanger"
       en: "Mix"
     content:
       fr: "Fouettez les œufs et le sucre, ajoutez la farine puis le chocolat fondu."
       en: "Whisk the eggs and sugar, add the flour then the melted chocolate."
+    media:
+      - src: "../../assets/recipes/images.jpeg"
+        alt:
+          fr: "Meringue dorée au chalumeau."
+          en: "Meringue torched until golden."
   - title:
       fr: "Cuire"
       en: "Bake"

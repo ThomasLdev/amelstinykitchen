@@ -1,0 +1,118 @@
+---
+import { getCollection } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import Breadcrumb from "@components/Breadcrumb.astro";
+import Container from "@components/Container.astro";
+import PageHeader from "@components/PageHeader.astro";
+import RecipeBrowser from "@components/RecipeBrowser.astro";
+import { defaultLocale, isLocale, languages, useTranslations } from "@i18n";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import type { Season } from "@lib/content/home";
+import { translate } from "@lib/content/i18n";
+import { formatDuration, isPublished, totalTime } from "@lib/content/recipe";
+import { type RecipeFacet, sortRecipes } from "@lib/content/recipe-filters";
+
+export function getStaticPaths() {
+  return Object.keys(languages).map((lang) => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+const locale = isLocale(lang) ? lang : defaultLocale;
+const t = useTranslations(locale);
+
+const recipes = await getCollection("recipes", (entry) => isPublished(entry, import.meta.env.PROD));
+const categories = new Map((await getCollection("categories")).map((entry) => [entry.id, entry]));
+const tags = new Map((await getCollection("tags")).map((entry) => [entry.id, entry]));
+
+const SEASONS: Season[] = ["spring", "summer", "autumn", "winter"];
+
+// A recipe's seasons come from its season tags; the other tags are filters.
+const items = recipes.map((recipe) => {
+  const { data } = recipe;
+  const category = categories.get(data.category.id);
+  const recipeTags = data.tags.flatMap((ref) => tags.get(ref.id) ?? []);
+  const seasons = SEASONS.filter((season) => recipeTags.some((tag) => tag.data.season === season));
+  const plainTags = recipeTags.filter((tag) => !tag.data.season);
+  const time = totalTime(data.preparationTime, data.cookingTime);
+  const title = translate(data.title, locale);
+  const categoryLabel = category ? translate(category.data.title, locale) : "";
+  const tagLabels = recipeTags.map((tag) => translate(tag.data.title, locale));
+
+  const facet: RecipeFacet = {
+    id: recipe.id,
+    category: data.category.id,
+    seasons,
+    tags: plainTags.map((tag) => tag.id),
+    time,
+    date: data.publishDate.valueOf(),
+    featured: data.isFeatured,
+    search: [title, categoryLabel, ...tagLabels].join(" "),
+  };
+
+  return {
+    facet,
+    card: {
+      href: getRelativeLocaleUrl(locale, `recipes/${data.paths[locale]}`),
+      title,
+      kicker: [categoryLabel, ...seasons.map((season) => t.recipes.seasons[season])]
+        .filter(Boolean)
+        .join(" · "),
+      meta: [formatDuration(time, locale), t.recipe.difficulty[data.difficulty]]
+        .filter(Boolean)
+        .join(" · "),
+      image: data.media[0]?.src,
+    },
+  };
+});
+
+const sorted = sortRecipes(
+  items.map((item) => ({ ...item.facet, item })),
+  "popular",
+).map(({ item }) => item);
+
+// Categories and tags without a recipe are left out; the four seasons always show.
+const usedCategories = new Set(items.map(({ facet }) => facet.category));
+const usedTags = new Set(items.flatMap(({ facet }) => facet.tags));
+const byLabel = (a: { label: string }, b: { label: string }) =>
+  a.label.localeCompare(b.label, locale);
+
+const categoryOptions = [...categories.values()]
+  .filter((entry) => usedCategories.has(entry.id))
+  .sort((a, b) => a.data.position - b.data.position || a.id.localeCompare(b.id))
+  .map((entry) => ({ value: entry.id, label: translate(entry.data.title, locale) }));
+
+const seasonOptions = SEASONS.map((season) => ({
+  value: season,
+  label: t.recipes.seasons[season],
+}));
+
+const tagOptions = [...tags.values()]
+  .filter((entry) => usedTags.has(entry.id))
+  .map((entry) => ({ value: entry.id, label: translate(entry.data.title, locale) }))
+  .sort(byLabel);
+---
+
+<BaseLayout
+  title={`${t.recipes.meta.title} · ${t.meta.title}`}
+  description={t.recipes.meta.description}
+  locale={locale}
+>
+  <Container>
+    <PageHeader title={t.recipes.title} titleEm={t.recipes.titleEm}>
+      <Breadcrumb
+        slot="breadcrumb"
+        items={[{ label: t.recipe.breadcrumb.home, href: getRelativeLocaleUrl(locale, "") }]}
+        current={t.recipes.breadcrumb}
+        label={t.a11y.breadcrumb}
+      />
+    </PageHeader>
+
+    <RecipeBrowser
+      locale={locale}
+      items={sorted}
+      categories={categoryOptions}
+      seasons={seasonOptions}
+      tags={tagOptions}
+    />
+  </Container>
+</BaseLayout>

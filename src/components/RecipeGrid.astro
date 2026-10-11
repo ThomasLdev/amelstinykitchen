@@ -5,17 +5,21 @@ type Item = Parameters<typeof RecipeCard>[0];
 
 interface Props {
   items: Item[];
+  variant?: Item["variant"];
   class?: string;
   [key: string]: unknown;
 }
 
-const { items, class: className, ...rest } = Astro.props;
+const { items, variant = "list", class: className, ...rest } = Astro.props;
 ---
 
-<ul class:list={["recipe-grid", className]} {...rest}>
+<ul
+  class:list={["recipe-grid", variant !== "list" && `recipe-grid--${variant}`, className]}
+  {...rest}
+>
   {items.map((item) => (
     <li class="recipe-grid__item">
-      <RecipeCard {...item} />
+      <RecipeCard {...item} variant={variant} />
     </li>
   ))}
 </ul>
@@ -32,9 +36,21 @@ const { items, class: className, ...rest } = Astro.props;
       gap: 2rem;
       align-items: start;
     }
+
+    &.recipe-grid--tile {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem 0.75rem;
+      align-items: start;
+
+      @media (min-width: 720px) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 2rem 1.5rem;
+      }
+    }
   }
 
-  .recipe-grid__item:not(:last-child) {
+  .recipe-grid:not(.recipe-grid--tile) .recipe-grid__item:not(:last-child) {
     border-block-end: 1px solid var(--line);
 
     @media (min-width: 720px) {

@@ -6,7 +6,6 @@ const en: Dictionary = {
     description: "A notebook of simple, generous recipes to cook with the seasons.",
   },
   brand: {
-    mark: "a",
     name: "Amel's",
     nameAccent: "Tiny Kitchen",
   },
@@ -111,6 +110,61 @@ const en: Dictionary = {
     },
     chef: {
       label: "A word from the pastry chef",
+    },
+  },
+  recipes: {
+    meta: {
+      title: "All recipes",
+      description: "All of Amel's recipes, to filter by category, season or craving.",
+    },
+    title: "All",
+    titleEm: "recipes",
+    breadcrumb: "All recipes",
+    search: {
+      label: "Search recipes",
+      placeholder: "A recipe, a tag…",
+    },
+    sort: {
+      label: "Sort by",
+      popular: "Most loved",
+      recent: "Most recent",
+      quick: "Quickest",
+    },
+    filters: {
+      title: "Filters",
+      open: "Filters",
+      close: "Close filters",
+      reset: "Reset",
+      category: "Category",
+      season: "Season",
+      tags: "Tags",
+      all: "All",
+      quick: "Categories",
+    },
+    seasons: {
+      spring: "Spring",
+      summer: "Summer",
+      autumn: "Autumn",
+      winter: "Winter",
+    },
+    active: {
+      remove: "Remove the %label% filter",
+      query: "“%query%”",
+      clear: "Clear all",
+    },
+    count: {
+      zero: "0 recipes",
+      one: "1 recipe",
+      other: "%count% recipes",
+    },
+    apply: {
+      zero: "No recipes",
+      one: "Show 1 recipe",
+      other: "Show %count% recipes",
+    },
+    empty: {
+      title: "No recipe matches",
+      text: "Try removing a filter or widening the season.",
     },
   },
 };
