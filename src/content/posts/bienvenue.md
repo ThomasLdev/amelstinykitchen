@@ -26,15 +26,13 @@ hero:
     fr: "Herbes fraîches et ustensiles sur un plan de travail."
     en: "Fresh herbs and utensils on a worktop."
 sections:
-  - type: "default"
-    title:
+  - title:
       fr: "Une cuisine simple"
       en: "Simple cooking"
     content:
       fr: "Ici, on privilégie les produits de saison et les gestes qui se transmettent."
       en: "Here, we favour seasonal produce and gestures passed down over time."
-  - type: "two_columns"
-    title:
+  - title:
       fr: "Prenons le temps"
       en: "Let us take our time"
     content:

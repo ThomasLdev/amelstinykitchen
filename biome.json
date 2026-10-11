@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!dist", "!.astro", "!coverage", "!public", "!src/icons"]
+    "includes": ["**", "!dist", "!dist-e2e", "!.astro", "!coverage", "!public", "!src/icons"]
   },
   "formatter": {
     "enabled": true,
@@ -61,6 +61,16 @@
         "rules": {
           "a11y": {
             "useAnchorContent": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/components/MediaCarousel.astro"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useSemanticElements": "off"
           }
         }
       }

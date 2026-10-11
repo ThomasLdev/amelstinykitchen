@@ -1,4 +1,5 @@
 ---
+name: astro-reviewer
 description: Audits Astro code against the official best practices (components, content collections, routing, styling, performance). Use after writing or changing .astro files, layouts, pages, content.config.ts, or dynamic routes.
 mode: subagent
 permission:

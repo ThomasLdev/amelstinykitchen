@@ -1,10 +1,11 @@
 ---
 import TagCard from "@components/TagCard.astro";
+import type { ImageMetadata } from "astro";
 
 interface Item {
   name: string;
   meta?: string;
-  imageSrc?: string;
+  image?: ImageMetadata;
   imageAlt?: string;
 }
 

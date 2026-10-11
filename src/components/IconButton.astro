@@ -1,13 +1,18 @@
 ---
 interface Props {
+  variant?: "default" | "outline";
   class?: string;
   [key: string]: unknown;
 }
 
-const { class: className, ...rest } = Astro.props;
+const { variant = "default", class: className, ...rest } = Astro.props;
 ---
 
-<button type="button" class:list={["icon-btn", className]} {...rest}>
+<button
+  type="button"
+  class:list={["icon-btn", variant !== "default" && `icon-btn--${variant}`, className]}
+  {...rest}
+>
   <slot />
 </button>
 
@@ -23,11 +28,23 @@ const { class: className, ...rest } = Astro.props;
     flex-shrink: 0;
     transition:
       background var(--transition-base),
+      border-color var(--transition-base),
       color var(--transition-base);
 
     &:hover {
       background: var(--accent-bg);
       color: var(--accent-ink);
+    }
+
+    &.icon-btn--outline {
+      width: 3rem;
+      height: 3rem;
+      border: 1px solid var(--line);
+      color: var(--ink);
+
+      &:hover {
+        border-color: var(--accent);
+      }
     }
   }
 }

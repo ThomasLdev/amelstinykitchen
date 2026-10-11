@@ -12,11 +12,19 @@ const en: Dictionary = {
   },
   a11y: {
     skipToContent: "Skip to content",
+    breadcrumb: "Breadcrumb",
+    carousel: "Image gallery",
+    carouselRole: "carousel",
+    carouselPrevious: "Previous image",
+    carouselNext: "Next image",
+    slide: "slide",
+    slidePosition: (current: number, total: number) => `Image ${current} of ${total}`,
   },
   header: {
     navAriaLabel: "Main navigation",
     home: "Home",
     recipes: "Recipes",
+    search: "Search",
   },
   footer: {
     tagline: "Simple, generous recipes meant to be shared.",
@@ -72,17 +80,40 @@ const en: Dictionary = {
       medium: "Medium",
       advanced: "Advanced",
     },
-    ingredients: "Ingredients",
-    servings: "Servings",
-    steps: {
-      title: "Steps",
-      tip: "Tip",
-      warning: "Careful",
-    },
-    chefNote: "A word from the chef",
     breadcrumb: {
       home: "Home",
       recipes: "Recipes",
+    },
+    actions: {
+      print: "Print recipe",
+      share: "Share recipe",
+      jump: "Jump to recipe",
+    },
+    servings: {
+      label: "Servings",
+      decrease: "Decrease servings",
+      increase: "Increase servings",
+    },
+    ingredients: {
+      title: "The",
+      titleEm: "ingredients",
+      progress: "%count% / %total% ready",
+      reset: "Uncheck all",
+      done: "Got everything, show the steps",
+    },
+    view: {
+      legend: "Show",
+      ingredients: "Ingredients",
+      steps: "Steps",
+    },
+    steps: {
+      title: "The",
+      titleEm: "steps",
+      tip: "Tip.",
+      warning: "Heads up.",
+    },
+    chef: {
+      label: "A word from the pastry chef",
     },
   },
 };

@@ -9,9 +9,14 @@ import { z } from "astro/zod";
  * fields are localized inline as `{ fr, en }`.
  */
 
+/**
+ * Content root. The e2e suite points it at `e2e/fixtures/content` so tests
+ * never depend on the editorial content (see playwright.config.ts).
+ */
+const contentDir = process.env.CONTENT_DIR ?? "./src/content";
+
 const emptyLocalized = { fr: "", en: "" };
 
-const sectionType = z.enum(["default", "two_columns", "two_columns_media_left"]);
 const difficulty = z.enum(["easy", "medium", "advanced"]);
 
 /** Shared media + narrative-section schemas, bound to the collection image helper. */
@@ -23,17 +28,17 @@ function sharedSchemas<T extends z.ZodType>(image: () => T) {
   });
 
   const section = z.object({
-    type: sectionType.default("default"),
     title: localizedString,
     content: localizedString,
-    image: media.optional(),
+    /** One or more illustrations; rendered as a carousel when there are several. */
+    media: z.array(media).default([]),
   });
 
   return { media, section };
 }
 
 const tags = defineCollection({
-  loader: glob({ base: "./src/content/tags", pattern: "**/*.json" }),
+  loader: glob({ base: `${contentDir}/tags`, pattern: "**/*.json" }),
   schema: ({ image }) =>
     z.object({
       title: localizedString,
@@ -44,7 +49,7 @@ const tags = defineCollection({
 });
 
 const categories = defineCollection({
-  loader: glob({ base: "./src/content/categories", pattern: "**/*.json" }),
+  loader: glob({ base: `${contentDir}/categories`, pattern: "**/*.json" }),
   schema: ({ image }) =>
     z.object({
       title: localizedString,
@@ -57,7 +62,7 @@ const categories = defineCollection({
 });
 
 const recipes = defineCollection({
-  loader: glob({ base: "./src/content/recipes", pattern: "**/*.{md,mdx}" }),
+  loader: glob({ base: `${contentDir}/recipes`, pattern: "**/*.{md,mdx}" }),
   schema: ({ image }) => {
     const { media, section } = sharedSchemas(image);
 
@@ -84,7 +89,8 @@ const recipes = defineCollection({
           text: localizedString,
         })
         .optional(),
-      image: media.optional(),
+      /** One or more illustrations; rendered as a carousel when there are several. */
+      media: z.array(media).default([]),
     });
 
     return z.object({
@@ -95,7 +101,8 @@ const recipes = defineCollection({
       metaDescription: localizedString.optional(),
       category: reference("categories"),
       tags: z.array(reference("tags")).default([]),
-      hero: media.optional(),
+      /** One or more recipe visuals; the first is the hero, rendered as a carousel when there are several. */
+      media: z.array(media).default([]),
       difficulty,
       preparationTime: z.number().int().nonnegative().default(0),
       cookingTime: z.number().int().nonnegative().default(0),
@@ -119,7 +126,7 @@ const recipes = defineCollection({
 });
 
 const posts = defineCollection({
-  loader: glob({ base: "./src/content/posts", pattern: "**/*.{md,mdx}" }),
+  loader: glob({ base: `${contentDir}/posts`, pattern: "**/*.{md,mdx}" }),
   schema: ({ image }) => {
     const { media, section } = sharedSchemas(image);
 

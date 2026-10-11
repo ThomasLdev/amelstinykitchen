@@ -1,11 +1,18 @@
 ---
-import { Image } from "astro:assets";
 import { type CollectionEntry, getCollection, getEntries, getEntry } from "astro:content";
 import { getRelativeLocaleUrl } from "astro:i18n";
-import Chip from "@components/Chip.astro";
+import Breadcrumb from "@components/Breadcrumb.astro";
+import Button from "@components/Button.astro";
+import ChefNote from "@components/ChefNote.astro";
 import Container from "@components/Container.astro";
-import Kicker from "@components/Kicker.astro";
-import Section from "@components/Section.astro";
+import Ingredients from "@components/Ingredients.astro";
+import MediaCarousel from "@components/MediaCarousel.astro";
+import Prose from "@components/Prose.astro";
+import RecipeHead from "@components/RecipeHead.astro";
+import RecipeStats from "@components/RecipeStats.astro";
+import RecipeStep from "@components/RecipeStep.astro";
+import SectionTitle from "@components/SectionTitle.astro";
+import SegmentedControl from "@components/SegmentedControl.astro";
 import { type Locale, languages, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { translate } from "@lib/content/i18n";
@@ -36,184 +43,264 @@ const data = recipe.data;
 
 const category = await getEntry(data.category);
 const tags = await getEntries(data.tags);
+const tagLabels = tags.map((tag) => translate(tag.data.title, locale));
+const kicker = [category && translate(category.data.title, locale), ...tagLabels]
+  .filter(Boolean)
+  .join(" · ");
 
-const cookingTime = formatDuration(data.cookingTime, locale);
 const preparationTime = formatDuration(data.preparationTime, locale);
+const cookingTime = formatDuration(data.cookingTime, locale);
 const totalRecipeTime = formatDuration(totalTime(data.preparationTime, data.cookingTime), locale);
-const ingredients = ingredientCount(data.ingredientGroups);
+const ingredientsCount = ingredientCount(data.ingredientGroups);
+const recipeAnchor = "recipe";
+
+const breadcrumbItems = [
+  { label: t.recipe.breadcrumb.home, href: getRelativeLocaleUrl(locale, "") },
+  { label: t.recipe.breadcrumb.recipes, href: getRelativeLocaleUrl(locale, "recipes") },
+];
+if (category) {
+  breadcrumbItems.push({
+    label: translate(category.data.title, locale),
+    href: getRelativeLocaleUrl(locale, `recipes/${category.data.paths[locale]}`),
+  });
+}
+
+const groups = data.ingredientGroups.map((group, groupIndex) => ({
+  label: translate(group.label, locale) || undefined,
+  ingredients: group.ingredients.map((ingredient, index) => ({
+    id: `${recipe.id}-${groupIndex}-${index}`,
+    name: translate(ingredient.name, locale),
+    quantity: ingredient.quantity,
+    unit: translate(ingredient.unit, locale),
+    display: ingredient.display ? translate(ingredient.display, locale) : undefined,
+  })),
+}));
+
+const steps = data.steps.map((step, index) => ({
+  index: index + 1,
+  title: translate(step.title, locale),
+  content: translate(step.content, locale),
+  tip: step.tip ? { type: step.tip.type, text: translate(step.tip.text, locale) } : undefined,
+  media: step.media.map((item) => ({
+    src: item.src,
+    alt: translate(item.alt, locale),
+  })),
+}));
+
+const recipeMedia = data.media.map((item) => ({
+  src: item.src,
+  alt: translate(item.alt, locale),
+}));
+
+// Below 720px a multi-image carousel shows 85% wide slides; the page gutter
+// is 4vw on phones, hence 92vw for a full-bleed image.
+const mobileSlide = (count: number) => (count > 1 ? "78vw" : "92vw");
+
+const chefNote = data.chefNote
+  ? {
+      title: translate(data.chefNote.title, locale),
+      body: translate(data.chefNote.body, locale),
+    }
+  : undefined;
 ---
 
 <BaseLayout
-  title={translate(data.title, locale)}
-  description={translate(data.excerpt, locale)}
+  title={translate(data.metaTitle ?? data.title, locale)}
+  description={translate(data.metaDescription ?? data.excerpt, locale)}
   locale={locale}
 >
-  <Container>
-    <nav aria-label="Breadcrumb">
-      <ol>
-        <li>
-          <a href={getRelativeLocaleUrl(locale, "")}>{t.recipe.breadcrumb.home}</a>
-        </li>
-        <li>
-          <a href={getRelativeLocaleUrl(locale, "recipes")}>{t.recipe.breadcrumb.recipes}</a>
-        </li>
-        {category && (
-          <li>
-            <a href={getRelativeLocaleUrl(locale, `recipes/${category.data.paths[locale]}`)}>
-              {translate(category.data.title, locale)}
-            </a>
-          </li>
-        )}
-        <li aria-current="page">{translate(data.title, locale)}</li>
-      </ol>
-    </nav>
+  <div
+    data-recipe-portions
+    data-recipe-portions-base={data.servings}
+    data-recipe-portions-min="1"
+    data-recipe-portions-max="24"
+    data-locale={locale}
+  >
+    <Container>
+      <RecipeHead
+        locale={locale}
+        title={translate(data.title, locale)}
+        tags={tagLabels}
+        excerpt={translate(data.excerpt, locale)}
+        kicker={kicker}
+        recipeAnchor={steps.length > 0 ? recipeAnchor : undefined}
+      >
+        <Breadcrumb
+          slot="breadcrumb"
+          items={breadcrumbItems}
+          current={translate(data.title, locale)}
+          label={t.a11y.breadcrumb}
+        />
 
-    <header>
-      {data.isFeatured && <Kicker>{t.hero.badge}</Kicker>}
-      <h1>{translate(data.title, locale)}</h1>
+        <RecipeStats
+          slot="stats"
+          prepLabel={t.recipe.prep}
+          cookLabel={t.recipe.cook}
+          totalLabel={t.recipe.total}
+          difficultyLabel={t.recipe.difficultyLabel}
+          difficultyValue={t.recipe.difficulty[data.difficulty]}
+          preparationTime={preparationTime}
+          cookingTime={cookingTime}
+          totalTime={totalRecipeTime}
+        />
 
-      <p>
-        {category && <span>{translate(category.data.title, locale)}</span>}
-        <span>{t.recipe.difficulty[data.difficulty]}</span>
-        {data.steps.length > 0 && (
-          <span>
-            {data.steps.length} {t.recipe.steps.title}
-          </span>
-        )}
-        {ingredients > 0 && (
-          <span>
-            {ingredients} {t.recipe.ingredients}
-          </span>
-        )}
-      </p>
+        <MediaCarousel
+          slot="media"
+          media={recipeMedia}
+          locale={locale}
+          variant="hero"
+          widths={[480, 720, 960, 1280]}
+          sizes="(min-width: 1280px) 34rem, (min-width: 900px) 45vw, 92vw"
+          eager
+        />
+      </RecipeHead>
+    </Container>
 
-      {tags.length > 0 && (
-        <ul>
-          {tags.map((tag) => (
-            <li>
-              <Chip>{translate(tag.data.title, locale)}</Chip>
-            </li>
-          ))}
-        </ul>
-      )}
+    {steps.length > 0 ? (
+      <Container>
+        <div class="recipe-body" id={recipeAnchor}>
+          <SegmentedControl
+            class="recipe-body__view"
+            name="recipe-view"
+            legend={t.recipe.view.legend}
+            options={[
+              { value: "ingredients", label: `${t.recipe.view.ingredients} · ${ingredientsCount}` },
+              { value: "steps", label: `${t.recipe.view.steps} · ${steps.length}` },
+            ]}
+            data-recipe-view
+          />
 
-      {translate(data.excerpt, locale) && <p>{translate(data.excerpt, locale)}</p>}
-    </header>
+          <Ingredients
+            class="recipe-body__ingredients"
+            groups={groups}
+            total={ingredientsCount}
+            servings={data.servings}
+            recipeId={recipe.id}
+            locale={locale}
+          >
+            <Button slot="footer" class="recipe-body__done" data-recipe-view-show="steps" hidden>
+              {t.recipe.ingredients.done}
+            </Button>
+          </Ingredients>
 
-    {data.hero && (
-      <figure>
-        <Image src={data.hero.src} alt={translate(data.hero.alt, locale)} />
-        {data.hero.title && <figcaption>{translate(data.hero.title, locale)}</figcaption>}
-      </figure>
+          <section class="recipe-steps">
+            <SectionTitle
+              class="recipe-steps__title"
+              title={t.recipe.steps.title}
+              titleEm={t.recipe.steps.titleEm}
+            />
+
+            {steps.map((step) => (
+              <RecipeStep {...step} locale={locale} />
+            ))}
+
+            {chefNote && <ChefNote title={chefNote.title} body={chefNote.body} locale={locale} />}
+          </section>
+        </div>
+      </Container>
+    ) : (
+      data.sections.length > 0 && (
+        <Container>
+          <div class="recipe-sections">
+            {data.sections.map((section) => (
+              <section class="post-section">
+                {translate(section.title, locale) && (
+                  <h2 class="post-section__title">{translate(section.title, locale)}</h2>
+                )}
+                <Prose html={translate(section.content, locale)} />
+                {section.media.length > 0 && (
+                  <MediaCarousel
+                    media={section.media.map((item) => ({
+                      src: item.src,
+                      alt: translate(item.alt, locale),
+                    }))}
+                    locale={locale}
+                    sizes={`(min-width: 900px) 42rem, (min-width: 720px) 92vw, ${mobileSlide(section.media.length)}`}
+                  />
+                )}
+              </section>
+            ))}
+          </div>
+        </Container>
+      )
     )}
 
-    <dl>
-      {preparationTime && (
-        <div>
-          <dt>{t.recipe.prep}</dt>
-          <dd>{preparationTime}</dd>
-        </div>
-      )}
-      {cookingTime && (
-        <div>
-          <dt>{t.recipe.cook}</dt>
-          <dd>{cookingTime}</dd>
-        </div>
-      )}
-      {totalRecipeTime && (
-        <div>
-          <dt>{t.recipe.total}</dt>
-          <dd>{totalRecipeTime}</dd>
-        </div>
-      )}
-      <div>
-        <dt>{t.recipe.difficultyLabel}</dt>
-        <dd>{t.recipe.difficulty[data.difficulty]}</dd>
-      </div>
-      <div>
-        <dt>{t.recipe.servings}</dt>
-        <dd>{data.servings}</dd>
-      </div>
-    </dl>
-  </Container>
-
-  {data.steps.length > 0 ? (
-    <Section>
-      <Container>
-        <aside>
-          <h2>{t.recipe.ingredients}</h2>
-          {data.ingredientGroups.map((group) => (
-            <div>
-              {translate(group.label, locale) && <h3>{translate(group.label, locale)}</h3>}
-              <ul>
-                {group.ingredients.map((ingredient) => (
-                  <li>
-                    <span>
-                      {ingredient.display ? (
-                        translate(ingredient.display, locale)
-                      ) : (
-                        <>
-                          {ingredient.quantity !== null && `${ingredient.quantity} `}
-                          {translate(ingredient.unit, locale)}
-                        </>
-                      )}
-                    </span>{" "}
-                    <span>{translate(ingredient.name, locale)}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </aside>
-
-        <ol>
-          {data.steps.map((step, index) => (
-            <li>
-              <article>
-                <h3>
-                  {index + 1}. {translate(step.title, locale)}
-                </h3>
-                <Fragment set:html={translate(step.content, locale)} />
-                {step.image && (
-                  <Image src={step.image.src} alt={translate(step.image.alt, locale)} />
-                )}
-                {step.tip && (
-                  <aside>
-                    <strong>
-                      {step.tip.type === "warning" ? t.recipe.steps.warning : t.recipe.steps.tip}
-                    </strong>
-                    <p>{translate(step.tip.text, locale)}</p>
-                  </aside>
-                )}
-              </article>
-            </li>
-          ))}
-        </ol>
-
-        {data.chefNote && (
-          <aside>
-            <h2>{t.recipe.chefNote}</h2>
-            <h3>{translate(data.chefNote.title, locale)}</h3>
-            <p>{translate(data.chefNote.body, locale)}</p>
-          </aside>
-        )}
-      </Container>
-    </Section>
-  ) : (
-    data.sections.length > 0 && (
-      <Section>
-        <Container>
-          {data.sections.map((section) => (
-            <section>
-              {translate(section.title, locale) && <h2>{translate(section.title, locale)}</h2>}
-              <Fragment set:html={translate(section.content, locale)} />
-              {section.image && (
-                <Image src={section.image.src} alt={translate(section.image.alt, locale)} />
-              )}
-            </section>
-          ))}
-        </Container>
-      </Section>
-    )
-  )}
+    <script>
+    import "@scripts/recipe";
+    </script>
+  </div>
 </BaseLayout>
+
+<style>
+@layer components {
+  .recipe-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding-block: var(--space-4);
+
+    @media (min-width: 900px) {
+      display: grid;
+      grid-template-columns: 23.75rem minmax(0, 1fr);
+      gap: var(--space-6);
+      align-items: start;
+      padding-block: var(--space-5) var(--space-6);
+      border-top: 1px solid var(--line);
+    }
+  }
+
+  /* Mobile only: ingredients and steps become two panels switched by the
+     segmented control. Desktop shows both side by side, so these rules are
+     scoped below the layout breakpoint rather than undone above it. */
+  @media screen and (width < 900px) {
+    .recipe-body:has(.recipe-body__view input[value="steps"]:checked) .recipe-body__ingredients,
+    .recipe-body:has(.recipe-body__view input[value="ingredients"]:checked) .recipe-steps {
+      display: none;
+    }
+  }
+
+  .recipe-body {
+    @media print {
+      .recipe-body__view,
+      .recipe-body__done {
+        display: none;
+      }
+    }
+
+    @media (min-width: 900px) {
+      .recipe-body__view,
+      .recipe-body__done {
+        display: none;
+      }
+    }
+  }
+
+  .recipe-steps {
+    .recipe-steps__title {
+      margin-block-start: 0.5rem;
+      break-after: avoid;
+    }
+  }
+
+  .recipe-sections {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding-block: var(--space-4);
+
+    .post-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .post-section__title {
+      font-family: var(--font-serif);
+      font-size: clamp(1.375rem, 4vw, 1.75rem);
+      font-weight: 400;
+      line-height: 1.15;
+      color: var(--ink);
+    }
+  }
+}
+</style>

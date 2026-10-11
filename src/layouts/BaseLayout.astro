@@ -1,9 +1,9 @@
 ---
+import "@styles/app.css";
 import Footer from "@components/Footer.astro";
 import Header from "@components/Header.astro";
 import SkipLink from "@components/SkipLink.astro";
 import { type Locale, useTranslations } from "@i18n";
-import "@styles/app.css";
 
 interface Props {
   title: string;
@@ -25,6 +25,10 @@ const t = useTranslations(locale);
     <meta name="generator" content={Astro.generator}>
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+    <!-- Ordre des cascade layers déclaré avant tout style de composant (voir design-system) -->
+    <style is:global is:inline>
+    @layer tokens, base, components;
+    </style>
   </head>
   <body>
     <SkipLink>{t.a11y.skipToContent}</SkipLink>

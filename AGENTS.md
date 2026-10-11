@@ -87,6 +87,8 @@ code Astro, charger le skill correspondant :
   `getCollection`/`render`, routes dynamiques, i18n** → skill `astro-content`.
 - **CSS, tokens, palettes, thème, composants du front public, accessibilité** →
   skill `design-system`.
+- **Tests unitaires/e2e, fixtures, choix du niveau de test** →
+  skill `astro-testing`.
 
 Pour toute question version-spécifique, la doc fait foi :
 https://docs.astro.build — consulter en priorité

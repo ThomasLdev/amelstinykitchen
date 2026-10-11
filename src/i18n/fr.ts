@@ -10,11 +10,19 @@ const fr = {
   },
   a11y: {
     skipToContent: "Aller au contenu",
+    breadcrumb: "Fil d'Ariane",
+    carousel: "Galerie d'images",
+    carouselRole: "carrousel",
+    carouselPrevious: "Image précédente",
+    carouselNext: "Image suivante",
+    slide: "diapositive",
+    slidePosition: (current: number, total: number) => `Image ${current} sur ${total}`,
   },
   header: {
     navAriaLabel: "Navigation principale",
     home: "Accueil",
     recipes: "Recettes",
+    search: "Recherche",
   },
   footer: {
     tagline: "Des recettes simples et généreuses, à partager sans façon.",
@@ -70,17 +78,40 @@ const fr = {
       medium: "Intermédiaire",
       advanced: "Avancé",
     },
-    ingredients: "Ingrédients",
-    servings: "Portions",
-    steps: {
-      title: "Étapes",
-      tip: "Astuce",
-      warning: "Attention",
-    },
-    chefNote: "Le mot de la cheffe",
     breadcrumb: {
       home: "Accueil",
       recipes: "Recettes",
+    },
+    actions: {
+      print: "Imprimer la recette",
+      share: "Partager la recette",
+      jump: "Voir la recette",
+    },
+    servings: {
+      label: "Portions",
+      decrease: "Diminuer les portions",
+      increase: "Augmenter les portions",
+    },
+    ingredients: {
+      title: "Les",
+      titleEm: "ingrédients",
+      progress: "%count% / %total% prêts",
+      reset: "Tout décocher",
+      done: "J'ai tout, voir les étapes",
+    },
+    view: {
+      legend: "Afficher",
+      ingredients: "Ingrédients",
+      steps: "Étapes",
+    },
+    steps: {
+      title: "Les",
+      titleEm: "étapes",
+      tip: "Astuce.",
+      warning: "Attention.",
+    },
+    chef: {
+      label: "L'astuce pour cette recette",
     },
   },
 };

@@ -1,0 +1,362 @@
+---
+import Icon from "@components/Icon.astro";
+import SectionTitle from "@components/SectionTitle.astro";
+import { type Locale, useTranslations } from "@i18n";
+
+interface Ingredient {
+  id: string;
+  name: string;
+  quantity: number | null;
+  unit: string;
+  display?: string;
+}
+
+interface Group {
+  label?: string;
+  ingredients: Ingredient[];
+}
+
+interface Props {
+  groups: Group[];
+  total: number;
+  servings: number;
+  recipeId: string;
+  locale: Locale;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { groups, total, servings, recipeId, locale, class: className, ...rest } = Astro.props;
+const t = useTranslations(locale);
+const titleId = `ingredients-title-${recipeId}`;
+const portionsLabelId = `ingredients-portions-${recipeId}`;
+const [progressBefore = "", progressAfter = ""] = t.recipe.ingredients.progress
+  .replace("%total%", String(total))
+  .split("%count%");
+---
+
+<aside
+  class:list={["ingredients", className]}
+  aria-labelledby={titleId}
+  data-recipe-checklist
+  data-recipe-checklist-storage={`recipe-${recipeId}-ingredients`}
+  {...rest}
+>
+  <div class="ingredients__head">
+    <SectionTitle
+      id={titleId}
+      title={t.recipe.ingredients.title}
+      titleEm={t.recipe.ingredients.titleEm}
+    />
+    <span class="ingredients__count" aria-live="polite">
+      {progressBefore}
+      <span data-recipe-checklist-count>0</span>
+      {progressAfter}
+    </span>
+  </div>
+
+  <div class="ingredients__portions">
+    <span class="ingredients__portions-label" id={portionsLabelId}>
+      <Icon name="users" size={18} class="ingredients__portions-icon" />
+      {t.recipe.servings.label}
+    </span>
+    <div class="portions">
+      <button
+        type="button"
+        class="portions__btn"
+        data-recipe-portions-decrease
+        aria-label={t.recipe.servings.decrease}
+      >
+        <Icon name="minus" size={16} />
+      </button>
+      <output class="portions__value" aria-labelledby={portionsLabelId} data-recipe-portions-value
+        >{servings}</output
+      >
+      <button
+        type="button"
+        class="portions__btn"
+        data-recipe-portions-increase
+        aria-label={t.recipe.servings.increase}
+      >
+        <Icon name="plus" size={16} />
+      </button>
+    </div>
+  </div>
+
+  {groups.map((group) => (
+    <div class="ing-group">
+      {group.label && <h3 class="ing-group__title">{group.label}</h3>}
+      <ul class="ing-group__list">
+        {group.ingredients.map((ingredient) => (
+          <li class="ing-item">
+            <input
+              type="checkbox"
+              id={`ingredient-${ingredient.id}`}
+              class="ing-item__check"
+              data-recipe-checklist-item
+            />
+            <label for={`ingredient-${ingredient.id}`} class="ing-item__label">
+              <span class="ing-item__name">{ingredient.name}</span>
+              <span class="ing-item__qty">
+                {ingredient.display ? (
+                  ingredient.display
+                ) : ingredient.quantity !== null ? (
+                  <>
+                    <span data-recipe-portions-quantity data-base-quantity={ingredient.quantity}>
+                      {ingredient.quantity}
+                    </span>
+                    {ingredient.unit && ` ${ingredient.unit}`}
+                  </>
+                ) : (
+                  ingredient.unit
+                )}
+              </span>
+            </label>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ))}
+
+  <button type="button" class="ingredients__reset" data-recipe-checklist-reset>
+    {t.recipe.ingredients.reset}
+  </button>
+
+  <slot name="footer" />
+</aside>
+
+<style>
+@layer components {
+  .ingredients {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 1.375rem 1.25rem;
+    box-shadow: var(--shadow-soft);
+
+    .ingredients__head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .ingredients__count {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--ink-3);
+    }
+
+    .ingredients__portions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding-block: 0.5rem;
+      padding-inline: 1rem 0.5rem;
+      border-radius: var(--radius-md);
+      background: var(--accent-bg);
+    }
+
+    .ingredients__portions-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.625rem;
+      font-size: 0.9375rem;
+      color: var(--ink);
+    }
+
+    .ingredients__portions-icon {
+      color: var(--accent-ink);
+    }
+
+    .ingredients__reset {
+      align-self: flex-start;
+      min-height: 2.75rem;
+      padding-inline: 0;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent-ink);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: color var(--transition-fast);
+
+      &:hover {
+        color: var(--ink);
+      }
+    }
+
+    @media (min-width: 900px) {
+      position: sticky;
+      inset-block-start: var(--space-4);
+      padding: 1.75rem;
+    }
+  }
+
+  .portions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    .portions__btn {
+      display: grid;
+      place-items: center;
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 50%;
+      background: var(--surface);
+      color: var(--accent-ink);
+      transition:
+        background-color var(--transition-fast),
+        color var(--transition-fast);
+
+      &:hover:not(:disabled) {
+        background: var(--accent);
+        color: var(--on-accent);
+      }
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+
+    .portions__value {
+      min-width: 2.25rem;
+      font-family: var(--font-serif);
+      font-size: 1.375rem;
+      text-align: center;
+      color: var(--ink);
+    }
+  }
+
+  .ing-group {
+    .ing-group__title {
+      margin: 0 0 0.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-ink);
+    }
+
+    .ing-group__list {
+      list-style: none;
+    }
+  }
+
+  .ing-item {
+    border-bottom: 1px solid var(--line);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    .ing-item__check {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .ing-item__label {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      min-height: 3rem;
+      padding-block: 0.625rem;
+      cursor: pointer;
+      user-select: none;
+
+      &::before {
+        content: "";
+        width: 1.375rem;
+        height: 1.375rem;
+        border-radius: 50%;
+        border: 1.5px solid var(--accent);
+        flex-shrink: 0;
+        background: transparent center no-repeat;
+        transition:
+          background-color var(--transition-fast),
+          border-color var(--transition-fast);
+      }
+    }
+
+    .ing-item__name {
+      flex: 1;
+      font-size: 1rem;
+      color: var(--ink);
+      transition: color var(--transition-fast);
+    }
+
+    .ing-item__qty {
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: var(--accent-ink);
+      white-space: nowrap;
+      transition: color var(--transition-fast);
+    }
+
+    .ing-item__check:focus-visible + .ing-item__label::before {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    &:has(.ing-item__check:checked) {
+      .ing-item__label::before {
+        background-color: var(--accent);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 12 10 17 20 7'/%3E%3C/svg%3E");
+        background-size: 0.75rem 0.75rem;
+        background-position: center;
+      }
+
+      .ing-item__name,
+      .ing-item__qty {
+        color: var(--ink-3);
+        text-decoration: line-through;
+      }
+    }
+  }
+
+  /* Print: plain bordered box, groups side by side, no interactive bits. */
+  .ingredients {
+    @media print {
+      position: static;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem 1.5rem;
+      padding: 1rem 1.25rem;
+      border: 1px solid var(--line);
+      box-shadow: none;
+
+      .ingredients__head,
+      .ingredients__portions {
+        grid-column: 1 / -1;
+      }
+
+      .ingredients__portions {
+        justify-content: flex-start;
+        padding: 0;
+      }
+
+      .ingredients__count,
+      .ingredients__reset,
+      .portions__btn {
+        display: none;
+      }
+    }
+  }
+}
+</style>
