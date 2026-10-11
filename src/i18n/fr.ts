@@ -85,20 +85,20 @@ const fr = {
     actions: {
       print: "Imprimer la recette",
       share: "Partager la recette",
-      save: "Sauvegarder la recette",
+      save: "Enregistrer",
+      jump: "Voir la recette",
     },
     servings: {
       label: "Portions",
       decrease: "Diminuer les portions",
       increase: "Augmenter les portions",
-      forOne: "pour 1 personne",
-      forMany: "pour %count% personnes",
     },
     ingredients: {
       kicker: "Liste de courses",
       title: "Les",
       titleEm: "ingrédients",
-      reset: "Reset",
+      progress: "%count% / %total% prêts",
+      reset: "Tout décocher",
     },
     steps: {
       kicker: "La méthode",

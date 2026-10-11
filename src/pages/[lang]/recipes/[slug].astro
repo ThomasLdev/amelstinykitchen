@@ -47,6 +47,7 @@ const preparationTime = formatDuration(data.preparationTime, locale);
 const cookingTime = formatDuration(data.cookingTime, locale);
 const totalRecipeTime = formatDuration(totalTime(data.preparationTime, data.cookingTime), locale);
 const ingredientsCount = ingredientCount(data.ingredientGroups);
+const recipeAnchor = "recipe";
 
 const breadcrumbItems = [
   { label: t.recipe.breadcrumb.home, href: getRelativeLocaleUrl(locale, "") },
@@ -107,50 +108,47 @@ const chefNote = data.chefNote
     data-locale={locale}
   >
     <Container>
-      <Breadcrumb
-        items={breadcrumbItems}
-        current={translate(data.title, locale)}
-        label={t.a11y.breadcrumb}
-      />
-
       <RecipeHead
         locale={locale}
         title={translate(data.title, locale)}
-        isFeatured={data.isFeatured}
         tags={tagLabels}
         excerpt={translate(data.excerpt, locale)}
-      />
+        recipeAnchor={steps.length > 0 ? recipeAnchor : undefined}
+      >
+        <Breadcrumb
+          slot="breadcrumb"
+          items={breadcrumbItems}
+          current={translate(data.title, locale)}
+          label={t.a11y.breadcrumb}
+        />
 
-      <div class="recipe-hero">
+        <RecipeStats
+          slot="stats"
+          prepLabel={t.recipe.prep}
+          cookLabel={t.recipe.cook}
+          totalLabel={t.recipe.total}
+          difficultyLabel={t.recipe.difficultyLabel}
+          difficultyValue={t.recipe.difficulty[data.difficulty]}
+          preparationTime={preparationTime}
+          cookingTime={cookingTime}
+          totalTime={totalRecipeTime}
+        />
+
         <MediaCarousel
+          slot="media"
           media={recipeMedia}
           locale={locale}
           variant="hero"
-          widths={[480, 720, 960, 1280, 1600]}
-          sizes="(min-width: 900px) 80rem, 100vw"
+          widths={[480, 720, 960, 1280]}
+          sizes="(min-width: 1280px) 34rem, (min-width: 900px) 45vw, 100vw"
           eager
         />
-      </div>
-
-      <RecipeStats
-        prepLabel={t.recipe.prep}
-        cookLabel={t.recipe.cook}
-        totalLabel={t.recipe.total}
-        difficultyLabel={t.recipe.difficultyLabel}
-        difficultyValue={t.recipe.difficulty[data.difficulty]}
-        servingsLabel={t.recipe.servings.label}
-        servings={data.servings}
-        decreaseLabel={t.recipe.servings.decrease}
-        increaseLabel={t.recipe.servings.increase}
-        preparationTime={preparationTime}
-        cookingTime={cookingTime}
-        totalTime={totalRecipeTime}
-      />
+      </RecipeHead>
     </Container>
 
     {steps.length > 0 ? (
       <Container>
-        <div class="recipe-body">
+        <div class="recipe-body" id={recipeAnchor}>
           <Ingredients
             groups={groups}
             total={ingredientsCount}
@@ -207,14 +205,6 @@ const chefNote = data.chefNote
 
 <style>
 @layer components {
-  .recipe-hero {
-    margin-block: 0 var(--space-6);
-
-    @media (min-width: 900px) {
-      margin-block: 0 var(--space-3);
-    }
-  }
-
   .recipe-body {
     display: flex;
     flex-direction: column;
@@ -223,10 +213,11 @@ const chefNote = data.chefNote
 
     @media (min-width: 900px) {
       display: grid;
-      grid-template-columns: 20rem 1fr;
-      gap: var(--space-5);
+      grid-template-columns: 23.75rem minmax(0, 1fr);
+      gap: var(--space-6);
       align-items: start;
-      padding-block: var(--space-5);
+      padding-block: var(--space-5) var(--space-6);
+      border-top: 1px solid var(--line);
     }
   }
 

@@ -87,20 +87,20 @@ const en: Dictionary = {
     actions: {
       print: "Print recipe",
       share: "Share recipe",
-      save: "Save recipe",
+      save: "Save",
+      jump: "Jump to recipe",
     },
     servings: {
       label: "Servings",
       decrease: "Decrease servings",
       increase: "Increase servings",
-      forOne: "for 1 person",
-      forMany: "for %count% people",
     },
     ingredients: {
       kicker: "Shopping list",
       title: "The",
       titleEm: "ingredients",
-      reset: "Reset",
+      progress: "%count% / %total% ready",
+      reset: "Uncheck all",
     },
     steps: {
       kicker: "The method",

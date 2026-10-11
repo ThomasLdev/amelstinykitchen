@@ -1,5 +1,5 @@
 /**
- * Servings scaler: rescales ingredient quantities and the servings label.
+ * Servings scaler: rescales ingredient quantities.
  * Ported from the Symfony `recipe_portions` Stimulus controller.
  */
 
@@ -19,7 +19,6 @@ export function initPortions(root: HTMLElement): void {
   const valueEl = root.querySelector<HTMLElement>("[data-recipe-portions-value]");
   const decreaseBtn = root.querySelector<HTMLButtonElement>("[data-recipe-portions-decrease]");
   const increaseBtn = root.querySelector<HTMLButtonElement>("[data-recipe-portions-increase]");
-  const servingsEl = root.querySelector<HTMLElement>("[data-recipe-portions-servings]");
   const quantities = Array.from(
     root.querySelectorAll<HTMLElement>("[data-recipe-portions-quantity]"),
   );
@@ -28,11 +27,6 @@ export function initPortions(root: HTMLElement): void {
 
   const render = (): void => {
     if (valueEl) valueEl.textContent = String(current);
-
-    if (servingsEl) {
-      const template = current === 1 ? servingsEl.dataset.singular : servingsEl.dataset.plural;
-      if (template) servingsEl.textContent = template.replace("%count%", String(current));
-    }
 
     const ratio = base > 0 ? current / base : 1;
     for (const el of quantities) {
