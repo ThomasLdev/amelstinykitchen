@@ -116,8 +116,9 @@ describe("Ingredients", () => {
   `tests/fixtures/` donne un `ImageMetadata` ; les URLs `/_image?…&w=960&h=720
   &f=avif&fit=cover` permettent de vérifier formats et recadrage.
 - Pages : caster le composant de page pour `renderToString` et passer
-  `params` (voir `tests/pages/home.test.ts`). Les pages qui dépendent de
-  `getCollection`/props de `getStaticPaths` → plutôt e2e.
+  `params`. Les pages qui dépendent de `getCollection`/props de
+  `getStaticPaths` (dont la home) → e2e, avec la logique de sélection sortie
+  dans un module pur testé en unitaire (ex. `src/lib/content/home.ts`).
 - Libellés UI : importer les dictionnaires (`@i18n/fr`, `@i18n/en`) plutôt que
   recopier les chaînes.
 

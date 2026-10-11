@@ -16,11 +16,11 @@ import SegmentedControl from "@components/SegmentedControl.astro";
 import { type Locale, languages, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { translate } from "@lib/content/i18n";
-import { formatDuration, ingredientCount, totalTime } from "@lib/content/recipe";
+import { formatDuration, ingredientCount, isPublished, totalTime } from "@lib/content/recipe";
 
 export async function getStaticPaths() {
-  const recipes = await getCollection("recipes", ({ data }) =>
-    import.meta.env.PROD ? !data.draft : true,
+  const recipes = await getCollection("recipes", (entry) =>
+    isPublished(entry, import.meta.env.PROD),
   );
   const locales = Object.keys(languages) as Locale[];
 

@@ -1,5 +1,6 @@
 ---
 # Reference fixture for the e2e suite: every recipe-page feature is exercised.
+# Homepage: newest published recipe (hero) and featured (signature card).
 title:
   fr: "Recette complète"
   en: "Complete recipe"
@@ -16,7 +17,8 @@ difficulty: "medium"
 preparationTime: 30
 cookingTime: 15
 servings: 4
-publishDate: 2026-01-01
+isFeatured: true
+publishDate: 2026-01-03
 media:
   - src: "../assets/cover-1.png"
     alt:

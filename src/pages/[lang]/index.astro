@@ -1,13 +1,20 @@
 ---
+import { type CollectionEntry, getCollection, getEntries } from "astro:content";
 import { getRelativeLocaleUrl } from "astro:i18n";
 import Container from "@components/Container.astro";
-import Hero from "@components/Hero.astro";
-import QuoteStrip from "@components/QuoteStrip.astro";
+import FeaturedRecipe from "@components/FeaturedRecipe.astro";
+import HomeHero from "@components/HomeHero.astro";
+import RecipeGrid from "@components/RecipeGrid.astro";
+import SearchForm from "@components/SearchForm.astro";
 import Section from "@components/Section.astro";
 import SectionHead from "@components/SectionHead.astro";
 import TagGrid from "@components/TagGrid.astro";
+import ViewAllLink from "@components/ViewAllLink.astro";
 import { defaultLocale, isLocale, languages, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
+import { selectFeaturedTags, selectHeroRecipe, selectPopularRecipes } from "@lib/content/home";
+import { translate } from "@lib/content/i18n";
+import { formatDuration, isPublished, totalTime } from "@lib/content/recipe";
 
 export function getStaticPaths() {
   return Object.keys(languages).map((lang) => ({ params: { lang } }));
@@ -16,52 +23,103 @@ export function getStaticPaths() {
 const { lang } = Astro.params;
 const locale = isLocale(lang) ? lang : defaultLocale;
 const t = useTranslations(locale);
-const hero = t.home.hero;
-const ctaHref = getRelativeLocaleUrl(locale, "");
+
+const recipes = await getCollection("recipes", (entry) => isPublished(entry, import.meta.env.PROD));
+const tags = await getCollection("tags");
+
+const recipeHref = (recipe: CollectionEntry<"recipes">) =>
+  getRelativeLocaleUrl(locale, `recipes/${recipe.data.paths[locale]}`);
+
+/** "1 h 05 · Intermédiaire": total time (when known) and difficulty. */
+const recipeFacts = ({ data }: CollectionEntry<"recipes">) => [
+  formatDuration(totalTime(data.preparationTime, data.cookingTime), locale),
+  t.recipe.difficulty[data.difficulty],
+];
+
+const factsLine = (facts: Array<string | null | undefined>) => facts.filter(Boolean).join(" · ");
+
+const recipesUrl = getRelativeLocaleUrl(locale, "recipes");
+const searchUrl = getRelativeLocaleUrl(locale, "search");
+const searchHref = (query: string) => `${searchUrl}?q=${encodeURIComponent(query)}`;
+
+const heroRecipe = selectHeroRecipe(recipes);
+const hero = heroRecipe && {
+  href: recipeHref(heroRecipe),
+  title: translate(heroRecipe.data.title, locale),
+  meta: factsLine([
+    ...recipeFacts(heroRecipe),
+    ...(await getEntries(heroRecipe.data.tags)).map((tag) => translate(tag.data.title, locale)),
+  ]),
+  image: heroRecipe.data.media[0]?.src,
+  imageAlt: heroRecipe.data.media[0] ? translate(heroRecipe.data.media[0].alt, locale) : "",
+};
+
+const popular = selectPopularRecipes(recipes).map((recipe) => ({
+  href: recipeHref(recipe),
+  title: translate(recipe.data.title, locale),
+  excerpt: translate(recipe.data.excerpt, locale) || undefined,
+  meta: factsLine(recipeFacts(recipe)),
+  image: recipe.data.media[0]?.src,
+}));
+
+// Built statically: "in season" is evaluated at build time.
+const featuredTags = selectFeaturedTags(tags, recipes, new Date()).map(
+  ({ tag, recipeCount, inSeason }) => ({
+    name: translate(tag.data.title, locale),
+    meta: t.home.tags.recipesCount(recipeCount),
+    seasonLabel: inSeason ? t.home.tags.inSeason : undefined,
+  }),
+);
+
+const ideas = featuredTags.slice(0, 4).map(({ name }) => ({ label: name, href: searchHref(name) }));
 ---
 
 <BaseLayout title={t.meta.title} description={t.meta.description} locale={locale}>
-  <Section>
-    <Container>
-      <Hero
-        badge={t.hero.badge}
-        kicker={t.hero.kicker}
-        title={hero.title}
-        description={hero.description}
-        prep={hero.prep}
-        cook={hero.cook}
-        total={hero.total}
-        prepLabel={t.recipe.prep}
-        cookLabel={t.recipe.cook}
-        totalLabel={t.recipe.total}
-        tags={hero.tags}
-        ctaHref={ctaHref}
-        ctaLabel={t.hero.cta}
+  <Container>
+    <HomeHero
+      kicker={t.home.intro.kicker}
+      title={t.home.intro.title}
+      titleEm={t.home.intro.titleEm}
+    >
+      <SearchForm
+        action={searchUrl}
+        label={t.home.search.label}
+        placeholder={t.home.search.placeholder}
+        submitLabel={t.home.search.submit}
+        ideas={ideas}
+        ideasLabel={t.home.search.ideas}
       />
-    </Container>
-  </Section>
+      {hero && <FeaturedRecipe slot="aside" {...hero} badge={t.home.featured.badge} />}
+    </HomeHero>
+  </Container>
 
-  <Section>
-    <Container>
-      <SectionHead
-        kicker={t.home.tags.kicker}
-        title={t.home.tags.title}
-        titleEm={t.home.tags.titleEm}
-        sub={t.home.tags.sub}
-      />
-    </Container>
-    <Container>
-      <TagGrid items={t.home.tags.items} />
-    </Container>
-  </Section>
+  {featuredTags.length > 0 && (
+    <Section>
+      <Container>
+        <SectionHead
+          kicker={t.home.tags.kicker}
+          title={t.home.tags.title}
+          titleEm={t.home.tags.titleEm}
+          sub={t.home.tags.sub}
+        />
+        <TagGrid items={featuredTags} />
+      </Container>
+    </Section>
+  )}
 
-  <Section>
-    <Container>
-      <QuoteStrip
-        kicker={t.home.philosophy.kicker}
-        quote={t.home.philosophy.quote}
-        author={t.home.philosophy.author}
-      />
-    </Container>
-  </Section>
+  {popular.length > 0 && (
+    <Section>
+      <Container>
+        <SectionHead
+          kicker={t.home.popular.kicker}
+          title={t.home.popular.title}
+          titleEm={t.home.popular.titleEm}
+        >
+          <ViewAllLink slot="action" href={recipesUrl} label={t.home.popular.viewAll} />
+        </SectionHead>
+        <RecipeGrid items={popular} />
+        <ViewAllLink placement="foot" href={recipesUrl} label={t.home.popular.viewAll} />
+      </Container>
+    </Section>
+  )}
 </BaseLayout>

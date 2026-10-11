@@ -1,0 +1,82 @@
+---
+import Kicker from "@components/Kicker.astro";
+
+interface Props {
+  kicker?: string;
+  title: string;
+  titleEm?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { kicker, title, titleEm, class: className, ...rest } = Astro.props;
+---
+
+<section class:list={["home-hero", className]} {...rest}>
+  <div class="home-hero__intro">
+    <div class="home-hero__titles">
+      {kicker && <Kicker>{kicker}</Kicker>}
+      <h1 class="home-hero__title">
+        {title} {titleEm && <em class="home-hero__title-em">{titleEm}</em>}
+      </h1>
+    </div>
+    <slot />
+  </div>
+
+  {Astro.slots.has("aside") && (
+    <div class="home-hero__aside">
+      <slot name="aside" />
+    </div>
+  )}
+</section>
+
+<style>
+@layer components {
+  .home-hero {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.75rem 4rem;
+    padding-block: 2rem 1rem;
+
+    @media (min-width: 720px) {
+      padding-block: 4rem 3rem;
+    }
+  }
+
+  .home-hero__intro {
+    display: flex;
+    flex: 1 1 32.5rem;
+    flex-direction: column;
+    gap: 1.75rem;
+    min-inline-size: 0;
+  }
+
+  .home-hero__titles {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .home-hero__title {
+    font-family: var(--font-serif);
+    font-size: clamp(2.375rem, 5vw, 3.75rem);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+
+  .home-hero__title-em {
+    font-style: italic;
+    color: var(--accent-ink);
+  }
+
+  .home-hero__aside {
+    flex: 1 1 25rem;
+    max-inline-size: var(--max-width-xs);
+    min-inline-size: 0;
+  }
+}
+</style>

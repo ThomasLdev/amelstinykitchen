@@ -34,38 +34,35 @@ const fr = {
     instagram: "Instagram",
     pinterest: "Pinterest",
   },
-  hero: {
-    badge: "Signature",
-    kicker: "À la une",
-    cta: "Voir la recette",
-  },
   home: {
-    hero: {
-      title: "Tarte rustique aux fruits de saison",
-      description:
-        "Une pâte sablée, des fruits gorgés de soleil et un filet de miel : la simplicité qui fait tout.",
-      prep: "15 min",
-      cook: "45 min",
-      total: "1 h",
-      tags: ["Tarte", "Fruits", "Végétarien"],
+    intro: {
+      kicker: "La cuisine d'Amel",
+      title: "Des recettes simples et généreuses, à partager",
+      titleEm: "sans façon.",
+    },
+    search: {
+      label: "Que cuisine-t-on aujourd'hui ?",
+      placeholder: "Une recette, un ingrédient…",
+      submit: "Chercher",
+      ideas: "Idées :",
+    },
+    featured: {
+      badge: "À la une",
     },
     tags: {
-      kicker: "Catégories",
-      title: "Explorez par",
-      titleEm: "saison",
-      sub: "Des idées pour cuisiner ce que le marché offre aujourd'hui.",
-      items: [
-        { name: "Printemps", meta: "12 recettes" },
-        { name: "Été", meta: "18 recettes" },
-        { name: "Automne", meta: "9 recettes" },
-        { name: "Hiver", meta: "7 recettes" },
-        { name: "Pâtisserie", meta: "24 recettes" },
-      ],
+      kicker: "Par envie",
+      title: "Parcourir les",
+      titleEm: "envies",
+      sub: "Des idées pour cuisiner selon l'humeur du jour.",
+      inSeason: "De saison",
+      recipesCount: (count: number) =>
+        count === 0 ? "Aucune recette" : count === 1 ? "1 recette" : `${count} recettes`,
     },
-    philosophy: {
-      kicker: "Notre philosophie",
-      quote: "Bien manger, c'est d'abord prendre le temps.",
-      author: "Amel",
+    popular: {
+      kicker: "En ce moment",
+      title: "Les plus",
+      titleEm: "aimées",
+      viewAll: "Toutes les recettes",
     },
   },
   recipe: {

@@ -1,4 +1,4 @@
-import { formatDuration, ingredientCount, totalTime } from "@lib/content/recipe";
+import { formatDuration, ingredientCount, isPublished, totalTime } from "@lib/content/recipe";
 import { describe, expect, it } from "vitest";
 
 describe("recipe helpers", () => {
@@ -13,5 +13,14 @@ describe("recipe helpers", () => {
   it("derives total time and ingredient count", () => {
     expect(totalTime(40, 25)).toBe(65);
     expect(ingredientCount([{ ingredients: [1, 2] }, { ingredients: [3] }])).toBe(3);
+  });
+});
+
+describe("isPublished", () => {
+  it("hides drafts in production only", () => {
+    const draft = { data: { draft: true } };
+    expect(isPublished(draft, true)).toBe(false);
+    expect(isPublished(draft, false)).toBe(true);
+    expect(isPublished({ data: { draft: false } }, true)).toBe(true);
   });
 });
