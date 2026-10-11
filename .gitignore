@@ -91,11 +91,6 @@ Thumbs.db
 ehthumbs.db
 desktop.ini
 
-# =========================
-# Legacy Symfony source (migration reference only)
-# =========================
-# Uncomment if you vendor the old tinybakery project inside this repo
-# legacy/
-# vendor/
-# var/
-# public/bundles/
+# Cloudflare / wrangler
+.wrangler/
+.dev.vars*
