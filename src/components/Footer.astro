@@ -22,7 +22,7 @@ const socials = [
 ];
 ---
 
-<footer class:list={["footer", className]} {...rest}>
+<footer class:list={["footer", className]} data-site-footer {...rest}>
   <Container>
     <div class="footer__top">
       <div class="footer__grid">
@@ -80,7 +80,6 @@ const socials = [
   .footer {
     margin-block-start: var(--space-6);
     padding-block: var(--space-5) var(--space-3);
-    padding-block-end: 4.5rem;
     background: var(--ink);
     color: var(--on-ink-soft);
   }

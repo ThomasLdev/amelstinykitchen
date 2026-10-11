@@ -23,7 +23,7 @@ const normalize = (path: string) => (path.endsWith("/") ? path : `${path}/`);
 const isCurrent = (href: string) => normalize(currentPath) === normalize(href);
 ---
 
-<header class:list={["nav-wrapper", className]} {...rest}>
+<header class:list={["nav-wrapper", className]} data-nav {...rest}>
   <nav class="nav" aria-label={t.header.navAriaLabel}>
     <div class="nav__inner">
       <div class="nav__brand">
@@ -54,6 +54,10 @@ const isCurrent = (href: string) => normalize(currentPath) === normalize(href);
   </nav>
 </header>
 
+<script>
+import "@scripts/nav";
+</script>
+
 <style>
 @layer components {
   .nav-wrapper {
@@ -65,6 +69,16 @@ const isCurrent = (href: string) => normalize(currentPath) === normalize(href);
     justify-content: center;
     padding-inline: var(--gutter);
     padding-block-end: var(--space-2);
+    transition: translate var(--transition-drawer);
+
+    /* Mobile only (the desktop nav is static at the top): slid out of view
+       while scrolling down or over the footer (state set by
+       src/scripts/nav.ts), but brought back on keyboard focus. */
+    @media (width < 1200px) {
+      &[data-nav-state="hidden"]:not(:focus-within) {
+        translate: 0 100%;
+      }
+    }
 
     @media (min-width: 1200px) {
       position: static;
