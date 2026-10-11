@@ -24,6 +24,8 @@ const en: Dictionary = {
     home: "Home",
     recipes: "Recipes",
     search: "Search",
+    /** Name of this language, in itself (language switch). */
+    languageName: "English",
   },
   footer: {
     tagline: "Simple, generous recipes meant to be shared.",
@@ -108,9 +110,27 @@ const en: Dictionary = {
       tip: "Tip.",
       warning: "Heads up.",
     },
+    related: {
+      kicker: "Cook next",
+      title: "In the same",
+      titleEm: "spirit",
+    },
     chef: {
       label: "A word from the pastry chef",
     },
+  },
+  markdown: {
+    separator: ": ",
+    source: "Source",
+    category: "Category",
+    cuisine: "Cuisine",
+    recipes: "Recipes",
+  },
+  notFound: {
+    title: "Page not found",
+    text: "This page does not exist or has moved.",
+    home: "Back to the homepage",
+    recipes: "Browse all recipes",
   },
   recipes: {
     meta: {

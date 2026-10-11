@@ -97,35 +97,57 @@ const recipes = defineCollection({
       media: z.array(media).default([]),
     });
 
-    return z.object({
-      title: localizedString,
-      paths: localizedString,
-      excerpt: localizedString.default(emptyLocalized),
-      metaTitle: localizedString.optional(),
-      metaDescription: localizedString.optional(),
-      category: reference("categories"),
-      tags: z.array(reference("tags")).default([]),
-      /** One or more recipe visuals; the first is the hero, rendered as a carousel when there are several. */
-      media: z.array(media).default([]),
-      difficulty,
-      preparationTime: z.number().int().nonnegative().default(0),
-      cookingTime: z.number().int().nonnegative().default(0),
-      servings: z.number().int().positive().default(4),
-      isFeatured: z.boolean().default(false),
-      draft: z.boolean().default(false),
-      publishDate: z.coerce.date(),
-      updatedDate: z.coerce.date().optional(),
-      ingredientGroups: z.array(ingredientGroup).default([]),
-      steps: z.array(step).default([]),
-      /** Narrative fallback shown when a recipe has no steps. */
-      sections: z.array(section).default([]),
-      chefNote: z
+    return (
+      z
         .object({
           title: localizedString,
-          body: localizedString,
+          paths: localizedString,
+          excerpt: localizedString.default(emptyLocalized),
+          metaTitle: localizedString.optional(),
+          metaDescription: localizedString.optional(),
+          category: reference("categories"),
+          tags: z.array(reference("tags")).default([]),
+          /** schema.org `recipeCuisine` (e.g. "Française"). */
+          cuisine: localizedString.optional(),
+          /** schema.org `keywords`; the tag titles are used when empty. */
+          keywords: z.array(localizedString).default([]),
+          /** One or more recipe visuals; the first is the hero, rendered as a carousel when there are several. */
+          media: z.array(media).default([]),
+          difficulty,
+          preparationTime: z.number().int().nonnegative().default(0),
+          cookingTime: z.number().int().nonnegative().default(0),
+          servings: z.number().int().positive().default(4),
+          isFeatured: z.boolean().default(false),
+          draft: z.boolean().default(false),
+          publishDate: z.coerce.date(),
+          updatedDate: z.coerce.date().optional(),
+          ingredientGroups: z.array(ingredientGroup).default([]),
+          steps: z.array(step).default([]),
+          /** Narrative fallback shown when a recipe has no steps. */
+          sections: z.array(section).default([]),
+          chefNote: z
+            .object({
+              title: localizedString,
+              body: localizedString,
+            })
+            .optional(),
         })
-        .optional(),
-    });
+        // Google requires an image for Recipe rich results.
+        .refine((recipe) => recipe.draft || recipe.media.length > 0, {
+          message: "A published recipe needs at least one `media` (Recipe rich results).",
+        })
+        .refine(
+          (recipe) =>
+            recipe.draft ||
+            (["fr", "en"] as const).every(
+              (locale) => (recipe.metaDescription ?? recipe.excerpt)[locale].trim() !== "",
+            ),
+          {
+            message:
+              "A published recipe needs an `excerpt` or a `metaDescription` in both locales (meta description).",
+          },
+        )
+    );
   },
 });
 

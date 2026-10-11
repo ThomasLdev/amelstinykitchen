@@ -1,6 +1,6 @@
 ---
 import { type CollectionEntry, getCollection, getEntries, getEntry } from "astro:content";
-import { getRelativeLocaleUrl } from "astro:i18n";
+import { getAbsoluteLocaleUrl, getRelativeLocaleUrl } from "astro:i18n";
 import Breadcrumb from "@components/Breadcrumb.astro";
 import Button from "@components/Button.astro";
 import ChefNote from "@components/ChefNote.astro";
@@ -8,15 +8,29 @@ import Container from "@components/Container.astro";
 import Ingredients from "@components/Ingredients.astro";
 import MediaCarousel from "@components/MediaCarousel.astro";
 import Prose from "@components/Prose.astro";
+import RecipeGrid from "@components/RecipeGrid.astro";
 import RecipeHead from "@components/RecipeHead.astro";
 import RecipeStats from "@components/RecipeStats.astro";
 import RecipeStep from "@components/RecipeStep.astro";
+import Section from "@components/Section.astro";
+import SectionHead from "@components/SectionHead.astro";
 import SectionTitle from "@components/SectionTitle.astro";
 import SegmentedControl from "@components/SegmentedControl.astro";
 import { type Locale, languages, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { translate } from "@lib/content/i18n";
-import { formatDuration, ingredientCount, isPublished, totalTime } from "@lib/content/recipe";
+import {
+  formatDuration,
+  ingredientCount,
+  isPublished,
+  selectRelatedRecipes,
+  totalTime,
+} from "@lib/content/recipe";
+import { ogImage } from "@lib/seo/images";
+import { breadcrumbLd, recipeLd } from "@lib/seo/jsonld";
+import { isoDuration } from "@lib/seo/recipe";
+import { recipePath, resolveRecipe } from "@lib/seo/resolve";
+import { siteConfig, socialProfiles } from "@site";
 
 export async function getStaticPaths() {
   const recipes = await getCollection("recipes", (entry) =>
@@ -27,17 +41,19 @@ export async function getStaticPaths() {
   return recipes.flatMap((recipe) =>
     locales.map((locale) => ({
       params: { lang: locale, slug: recipe.data.paths[locale] },
-      props: { recipe, locale },
+      props: { recipe, recipes, locale },
     })),
   );
 }
 
 interface Props {
   recipe: CollectionEntry<"recipes">;
+  /** Every published recipe, for the related recipes block. */
+  recipes: CollectionEntry<"recipes">[];
   locale: Locale;
 }
 
-const { recipe, locale } = Astro.props;
+const { recipe, recipes, locale } = Astro.props;
 const t = useTranslations(locale);
 const data = recipe.data;
 
@@ -54,15 +70,14 @@ const totalRecipeTime = formatDuration(totalTime(data.preparationTime, data.cook
 const ingredientsCount = ingredientCount(data.ingredientGroups);
 const recipeAnchor = "recipe";
 
-const breadcrumbItems = [
+// Category pages do not exist yet: the category crumb stays plain text so
+// crawlers never follow a link to a 404.
+const breadcrumbItems: { label: string; href?: string }[] = [
   { label: t.recipe.breadcrumb.home, href: getRelativeLocaleUrl(locale, "") },
   { label: t.recipe.breadcrumb.recipes, href: getRelativeLocaleUrl(locale, "recipes") },
 ];
 if (category) {
-  breadcrumbItems.push({
-    label: translate(category.data.title, locale),
-    href: getRelativeLocaleUrl(locale, `recipes/${category.data.paths[locale]}`),
-  });
+  breadcrumbItems.push({ label: translate(category.data.title, locale) });
 }
 
 const groups = data.ingredientGroups.map((group, groupIndex) => ({
@@ -96,6 +111,40 @@ const recipeMedia = data.media.map((item) => ({
 // is 4vw on phones, hence 92vw for a full-bleed image.
 const mobileSlide = (count: number) => (count > 1 ? "78vw" : "92vw");
 
+const site = Astro.site ?? new URL(Astro.url.origin);
+const resolved = await resolveRecipe(recipe, locale, site);
+const title = data.metaTitle
+  ? translate(data.metaTitle, locale)
+  : `${resolved.title} · ${siteConfig.name}`;
+const hero = data.media[0];
+const shareImage = hero && (await ogImage(hero.src, translate(hero.alt, locale), site));
+const homeUrl = getAbsoluteLocaleUrl(locale, "");
+const jsonLd = [
+  recipeLd(resolved, { name: siteConfig.author.name, url: homeUrl, sameAs: socialProfiles() }),
+  // Without the visible category crumb: a middle item needs a URL and category
+  // pages do not exist yet.
+  breadcrumbLd([
+    { name: t.recipe.breadcrumb.home, url: homeUrl },
+    { name: t.recipe.breadcrumb.recipes, url: getAbsoluteLocaleUrl(locale, "recipes") },
+    { name: resolved.title, url: resolved.url },
+  ]),
+];
+const alternates = Object.fromEntries(
+  (Object.keys(languages) as Locale[]).map((lang) => [lang, recipePath(recipe, lang)]),
+);
+
+const related = selectRelatedRecipes(recipe, recipes).map((entry) => ({
+  href: getRelativeLocaleUrl(locale, recipePath(entry, locale)),
+  title: translate(entry.data.title, locale),
+  meta: [
+    formatDuration(totalTime(entry.data.preparationTime, entry.data.cookingTime), locale),
+    t.recipe.difficulty[entry.data.difficulty],
+  ]
+    .filter(Boolean)
+    .join(" · "),
+  image: entry.data.media[0]?.src,
+}));
+
 const chefNote = data.chefNote
   ? {
       title: translate(data.chefNote.title, locale),
@@ -105,9 +154,16 @@ const chefNote = data.chefNote
 ---
 
 <BaseLayout
-  title={translate(data.metaTitle ?? data.title, locale)}
-  description={translate(data.metaDescription ?? data.excerpt, locale)}
+  title={title}
+  description={resolved.description}
   locale={locale}
+  alternates={alternates}
+  image={shareImage}
+  type="article"
+  publishedTime={data.publishDate}
+  modifiedTime={data.updatedDate}
+  jsonLd={jsonLd}
+  markdownUrl={resolved.markdownUrl}
 >
   <div
     data-recipe-portions
@@ -142,6 +198,11 @@ const chefNote = data.chefNote
           preparationTime={preparationTime}
           cookingTime={cookingTime}
           totalTime={totalRecipeTime}
+          datetimes={{
+            preparation: isoDuration(data.preparationTime),
+            cooking: isoDuration(data.cookingTime),
+            total: isoDuration(totalTime(data.preparationTime, data.cookingTime)),
+          }}
         />
 
         <MediaCarousel
@@ -190,9 +251,11 @@ const chefNote = data.chefNote
               titleEm={t.recipe.steps.titleEm}
             />
 
-            {steps.map((step) => (
-              <RecipeStep {...step} locale={locale} />
-            ))}
+            <ol class="recipe-steps__list" role="list">
+              {steps.map((step) => (
+                <RecipeStep {...step} locale={locale} />
+              ))}
+            </ol>
 
             {chefNote && <ChefNote title={chefNote.title} body={chefNote.body} locale={locale} />}
           </section>
@@ -223,6 +286,19 @@ const chefNote = data.chefNote
           </div>
         </Container>
       )
+    )}
+
+    {related.length > 0 && (
+      <Section>
+        <Container>
+          <SectionHead
+            kicker={t.recipe.related.kicker}
+            title={t.recipe.related.title}
+            titleEm={t.recipe.related.titleEm}
+          />
+          <RecipeGrid items={related} />
+        </Container>
+      </Section>
     )}
 
     <script>

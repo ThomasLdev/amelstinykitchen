@@ -4,6 +4,7 @@ import Container from "@components/Container.astro";
 import Icon from "@components/Icon.astro";
 import Logo from "@components/Logo.astro";
 import { type Locale, useTranslations } from "@i18n";
+import { siteConfig } from "@site";
 
 interface Props {
   locale: Locale;
@@ -17,9 +18,9 @@ const year = new Date().getFullYear();
 const homeHref = getRelativeLocaleUrl(locale, "");
 const recipesHref = getRelativeLocaleUrl(locale, "recipes");
 const socials = [
-  { label: t.footer.instagram, href: "#" },
-  { label: t.footer.pinterest, href: "#" },
-];
+  { label: t.footer.instagram, href: siteConfig.social.instagram },
+  { label: t.footer.pinterest, href: siteConfig.social.pinterest },
+].filter((social) => social.href !== "");
 ---
 
 <footer class:list={["footer", className]} data-site-footer {...rest}>
@@ -62,15 +63,17 @@ const socials = [
         {" · "}
         {t.footer.copyright}
       </span>
-      <ul class="footer__socials" aria-label={t.footer.socialsAriaLabel}>
-        {socials.map((social) => (
-          <li class="footer__socials-item">
-            <a href={social.href} class="footer__social">
-              {social.label}
-            </a>
-          </li>
-        ))}
-      </ul>
+      {socials.length > 0 && (
+        <ul class="footer__socials" aria-label={t.footer.socialsAriaLabel}>
+          {socials.map((social) => (
+            <li class="footer__socials-item">
+              <a href={social.href} class="footer__social" rel="me">
+                {social.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   </Container>
 </footer>

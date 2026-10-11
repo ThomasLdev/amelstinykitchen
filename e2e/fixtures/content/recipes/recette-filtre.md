@@ -8,9 +8,18 @@ title:
 paths:
   fr: "recette-filtre"
   en: "filter-recipe"
+# No excerpt (cards stay without summary): the meta description comes from metaDescription.
+metaDescription:
+  fr: "Description SEO de la recette filtre."
+  en: "SEO description of the filter recipe."
 category: "categorie-filtre"
 tags:
   - "hiver"
+media:
+  - src: "../assets/cover-2.png"
+    alt:
+      fr: "Photo de la recette filtre."
+      en: "Filter recipe photo."
 difficulty: "easy"
 preparationTime: 10
 isFeatured: false

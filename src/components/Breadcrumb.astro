@@ -1,7 +1,8 @@
 ---
 interface Item {
   label: string;
-  href: string;
+  /** Omitted while the target page does not exist yet: the crumb is plain text. */
+  href?: string;
 }
 
 interface Props {
@@ -19,9 +20,13 @@ const { items, current, label, class: className, ...rest } = Astro.props;
   <ol class="breadcrumb__list">
     {items.map((item) => (
       <li class="breadcrumb__item">
-        <a href={item.href} class="breadcrumb__link">
-          {item.label}
-        </a>
+        {item.href ? (
+          <a href={item.href} class="breadcrumb__link">
+            {item.label}
+          </a>
+        ) : (
+          item.label
+        )}
         <span class="breadcrumb__sep" aria-hidden="true">
           /
         </span>

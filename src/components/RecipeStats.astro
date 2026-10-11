@@ -8,6 +8,8 @@ interface Props {
   preparationTime?: string | null;
   cookingTime?: string | null;
   totalTime?: string | null;
+  /** ISO 8601 durations (`PT40M`) for the `<time datetime>` of each value. */
+  datetimes?: { preparation?: string; cooking?: string; total?: string };
   class?: string;
   [key: string]: unknown;
 }
@@ -21,15 +23,16 @@ const {
   preparationTime,
   cookingTime,
   totalTime,
+  datetimes = {},
   class: className,
   ...rest
 } = Astro.props;
 
 const items = [
-  { label: prepLabel, value: preparationTime },
-  { label: cookLabel, value: cookingTime },
-  { label: totalLabel, value: totalTime },
-  { label: difficultyLabel, value: difficultyValue },
+  { label: prepLabel, value: preparationTime, datetime: datetimes.preparation },
+  { label: cookLabel, value: cookingTime, datetime: datetimes.cooking },
+  { label: totalLabel, value: totalTime, datetime: datetimes.total },
+  { label: difficultyLabel, value: difficultyValue, datetime: undefined },
 ].filter((item) => item.value);
 ---
 
@@ -38,7 +41,9 @@ const items = [
     {items.map((item) => (
       <div class="recipe-stats__item">
         <dt class="recipe-stats__label">{item.label}</dt>
-        <dd class="recipe-stats__value">{item.value}</dd>
+        <dd class="recipe-stats__value">
+          {item.datetime ? <time datetime={item.datetime}>{item.value}</time> : item.value}
+        </dd>
       </div>
     ))}
   </dl>

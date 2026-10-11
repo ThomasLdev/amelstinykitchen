@@ -2,16 +2,29 @@
 import { getRelativeLocaleUrl } from "astro:i18n";
 import Icon from "@components/Icon.astro";
 import Logo from "@components/Logo.astro";
-import { type Locale, useTranslations } from "@i18n";
+import { type Locale, languages, useTranslations } from "@i18n";
 
 interface Props {
   locale: Locale;
+  /** Locale-relative path of the current page per locale, for the language switch. */
+  alternates?: Partial<Record<Locale, string>>;
   class?: string;
   [key: string]: unknown;
 }
 
-const { locale, class: className, ...rest } = Astro.props;
+const { locale, alternates = {}, class: className, ...rest } = Astro.props;
 const t = useTranslations(locale);
+
+const switchLocale = (Object.keys(languages) as Locale[]).find((lang) => lang !== locale);
+const switchPath = switchLocale && alternates[switchLocale];
+const languageSwitch =
+  switchLocale && switchPath !== undefined
+    ? {
+        lang: switchLocale,
+        href: getRelativeLocaleUrl(switchLocale, switchPath),
+        label: useTranslations(switchLocale).header.languageName,
+      }
+    : undefined;
 
 const items = [
   { label: t.header.home, icon: "house", href: getRelativeLocaleUrl(locale, "") },
@@ -49,6 +62,19 @@ const isCurrent = (href: string) => normalize(currentPath) === normalize(href);
             <span class="nav__item-label">{t.header.search}</span>
           </button>
         </li>
+        {languageSwitch && (
+          <li>
+            <a
+              href={languageSwitch.href}
+              class="nav__item"
+              hreflang={languageSwitch.lang}
+              lang={languageSwitch.lang}
+            >
+              <Icon name="languages" size={18} />
+              <span class="nav__item-label">{languageSwitch.label}</span>
+            </a>
+          </li>
+        )}
       </ul>
     </div>
   </nav>

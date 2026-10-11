@@ -3,16 +3,13 @@ import { Font } from "astro:assets";
 import "@styles/app.css";
 import Footer from "@components/Footer.astro";
 import Header from "@components/Header.astro";
+import Seo from "@components/Seo.astro";
 import SkipLink from "@components/SkipLink.astro";
-import { type Locale, useTranslations } from "@i18n";
+import { useTranslations } from "@i18n";
 
-interface Props {
-  title: string;
-  locale: Locale;
-  description?: string;
-}
+type Props = Parameters<typeof Seo>[0];
 
-const { title, locale, description } = Astro.props;
+const { locale, alternates } = Astro.props;
 const t = useTranslations(locale);
 ---
 
@@ -23,9 +20,9 @@ const t = useTranslations(locale);
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <meta name="generator" content={Astro.generator}>
-    <title>{title}</title>
-    {description && <meta name="description" content={description} />}
+    <Seo {...Astro.props} />
     <!-- Ordre des cascade layers déclaré avant tout style de composant (voir design-system) -->
     <style is:global is:inline>
     @layer tokens, base, components;
@@ -36,7 +33,7 @@ const t = useTranslations(locale);
   </head>
   <body>
     <SkipLink>{t.a11y.skipToContent}</SkipLink>
-    <Header locale={locale} />
+    <Header locale={locale} alternates={alternates} />
     <main id="main">
       <slot />
     </main>

@@ -5,6 +5,7 @@ import Prose from "@components/Prose.astro";
 import { type Locale, useTranslations } from "@i18n";
 import type { ImageMetadata } from "astro";
 
+/** Renders an `<li>`: place it in an `<ol>`. Its `id` (`step-N`) is the HowToStep URL in JSON-LD. */
 interface Props {
   index: number;
   title: string;
@@ -22,40 +23,54 @@ const number = String(index).padStart(2, "0");
 const tipWarning = tip?.type === "warning";
 ---
 
-<article class:list={["step", className]} {...rest}>
-  <span class="step__num">{number}</span>
+<li class="step-item" id={`step-${index}`}>
+  <article class:list={["step", className]} {...rest}>
+    <span class="step__num" aria-hidden="true">{number}</span>
 
-  <div class="step__body">
-    {title && <h3 class="step__title">{title}</h3>}
-    {content && <Prose html={content} class="step__content" />}
+    <div class="step__body">
+      {title && <h3 class="step__title">{title}</h3>}
+      {content && <Prose html={content} class="step__content" />}
 
-    {media && media.length > 0 && (
-      <div class="step__media">
-        <MediaCarousel
-          media={media}
-          locale={locale}
-          sizes={`(min-width: 600px) 34rem, ${media.length > 1 ? "78vw" : "92vw"}`}
-          widths={[480, 720, 960]}
-        />
-      </div>
-    )}
+      {media && media.length > 0 && (
+        <div class="step__media">
+          <MediaCarousel
+            media={media}
+            locale={locale}
+            sizes={`(min-width: 600px) 34rem, ${media.length > 1 ? "78vw" : "92vw"}`}
+            widths={[480, 720, 960]}
+          />
+        </div>
+      )}
 
-    {tip && (
-      <aside class:list={["step__tip", tipWarning && "step__tip--warning"]}>
-        <Icon name={tipWarning ? "triangle-alert" : "lightbulb"} class="step__tip-icon" size={20} />
-        <p class="step__tip-text">
-          <strong class="step__tip-label">
-            {tipWarning ? t.recipe.steps.warning : t.recipe.steps.tip}
-          </strong>
-          {tip.text}
-        </p>
-      </aside>
-    )}
-  </div>
-</article>
+      {tip && (
+        <aside class:list={["step__tip", tipWarning && "step__tip--warning"]}>
+          <Icon
+            name={tipWarning ? "triangle-alert" : "lightbulb"}
+            class="step__tip-icon"
+            size={20}
+          />
+          <p class="step__tip-text">
+            <strong class="step__tip-label">
+              {tipWarning ? t.recipe.steps.warning : t.recipe.steps.tip}
+            </strong>
+            {tip.text}
+          </p>
+        </aside>
+      )}
+    </div>
+  </article>
+</li>
 
 <style>
 @layer components {
+  .step-item {
+    border-bottom: 1px solid var(--line);
+
+    &:last-of-type {
+      border-bottom: 0;
+    }
+  }
+
   .step {
     /* Mobile: number and title share the first row; the body's other
        children (text, media, tip) span the full width underneath. */
@@ -64,11 +79,6 @@ const tipWarning = tip?.type === "warning";
     align-items: baseline;
     gap: 0.75rem;
     padding-block: 1.25rem;
-    border-bottom: 1px solid var(--line);
-
-    &:last-of-type {
-      border-bottom: 0;
-    }
 
     .step__num {
       font-family: var(--font-serif);

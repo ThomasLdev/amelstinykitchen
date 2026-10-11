@@ -18,6 +18,16 @@ category: "patisserie"
 tags:
   - "citron"
   - "vegetarien"
+cuisine:
+  fr: "Française"
+  en: "French"
+keywords:
+  - fr: "tarte au citron"
+    en: "lemon pie"
+  - fr: "meringue"
+    en: "meringue"
+  - fr: "pâte sablée"
+    en: "shortcrust pastry"
 difficulty: "medium"
 preparationTime: 40
 cookingTime: 25

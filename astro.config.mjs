@@ -1,10 +1,14 @@
 // @ts-check
+import sitemap from "@astrojs/sitemap";
 import { defineConfig, fontProviders } from "astro/config";
 
 const fontDir = "./src/assets/fonts";
 
 // https://astro.build/config
 export default defineConfig({
+  site: "https://amelstinykitchen.fr",
+  // Matches wrangler's `auto-trailing-slash` so canonical URLs have one form.
+  trailingSlash: "always",
   // Fixture builds (e2e) keep their own content-layer cache so they never mix
   // with the editorial content of regular builds.
   ...(process.env.CONTENT_DIR && { cacheDir: "./node_modules/.astro-fixtures" }),
@@ -65,6 +69,13 @@ export default defineConfig({
         ],
       },
     },
+  ],
+  integrations: [
+    sitemap({
+      // `/` is only a redirect to the default locale; hreflang lives in each page's <head>
+      // because FR and EN slugs differ, which the sitemap `i18n` option cannot pair.
+      filter: (page) => new URL(page).pathname !== "/",
+    }),
   ],
   redirects: {
     "/": "/fr/",
