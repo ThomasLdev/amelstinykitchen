@@ -187,6 +187,22 @@ Fixtures de contenu (`e2e/fixtures/content/`, même arborescence que
 - `localStorage` est vierge à chaque test Playwright (contexte neuf) : un
   test de persistance fait `page.reload()` dans le même test.
 
+## 6 bis. CI (GitHub Actions)
+
+- **Parallélisme** : `fullyParallel: true` et `workers: "100%"` en CI. C'est
+  sûr ici : site statique en lecture seule, un contexte navigateur neuf par
+  test. Toute fixture qui écrirait un état serveur casserait cette hypothèse.
+- **Logs en direct** : reporter `[["list"], ["github"], ["html"]]` en CI
+  (`github` seul n'affiche rien avant la fin) et `webServer.stdout: "pipe"`
+  pour voir le build de fixtures. Rapport HTML publié en artefact.
+- **Navigateurs** : job `e2e` dans le conteneur
+  `mcr.microsoft.com/playwright:v<version>-noble` (Chromium + dépendances
+  système préinstallés) au lieu de `playwright install --with-deps` à chaque
+  run. **Le tag doit suivre la version de `@playwright/test`.**
+- `timeout-minutes` sur le job pour qu'un blocage ne tourne pas des heures.
+- Le `globalTeardown` (`astro sync`) est sauté en CI. En local, lancer avec
+  `CI=1` le saute aussi : refaire `npx astro sync` si un dev server tourne.
+
 ## 7. Commandes & Definition of Done
 
 ```bash

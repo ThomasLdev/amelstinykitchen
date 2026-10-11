@@ -10,7 +10,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  reporter: process.env.CI ? "github" : "list",
+  reporter: process.env.CI ? [["list"], ["github"], ["html", { open: "never" }]] : "list",
+  workers: process.env.CI ? "100%" : undefined,
   use: {
     baseURL,
     trace: "on-first-retry",
@@ -34,5 +35,7 @@ export default defineConfig({
     url: baseURL,
     timeout: 120 * 1000,
     reuseExistingServer: false,
+    // Show the fixture build and preview output in the logs (hidden by default).
+    stdout: "pipe",
   },
 });
