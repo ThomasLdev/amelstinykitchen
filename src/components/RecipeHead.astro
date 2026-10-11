@@ -3,6 +3,7 @@ import Button from "@components/Button.astro";
 import Chip from "@components/Chip.astro";
 import Icon from "@components/Icon.astro";
 import IconButton from "@components/IconButton.astro";
+import Kicker from "@components/Kicker.astro";
 import { type Locale, useTranslations } from "@i18n";
 
 interface Props {
@@ -10,21 +11,39 @@ interface Props {
   title: string;
   tags?: string[];
   excerpt?: string;
+  /** Short context line (category, tags) shown instead of the breadcrumb on mobile. */
+  kicker?: string;
   /** Fragment of the recipe body targeted by the "jump to recipe" link. */
   recipeAnchor?: string;
   class?: string;
   [key: string]: unknown;
 }
 
-const { locale, title, tags = [], excerpt, recipeAnchor, class: className, ...rest } = Astro.props;
+const {
+  locale,
+  title,
+  tags = [],
+  excerpt,
+  kicker,
+  recipeAnchor,
+  class: className,
+  ...rest
+} = Astro.props;
 const t = useTranslations(locale);
 ---
 
 <header class:list={["recipe-head", className]} {...rest}>
+  <div class="recipe-head__media">
+    <slot name="media" />
+  </div>
+
   <div class="recipe-head__lede">
-    <slot name="breadcrumb" />
+    <div class="recipe-head__breadcrumb">
+      <slot name="breadcrumb" />
+    </div>
 
     <div class="recipe-head__intro">
+      {kicker && <Kicker class="recipe-head__kicker">{kicker}</Kicker>}
       <h1 class="recipe-head__title">{title}</h1>
       {excerpt && <p class="recipe-head__excerpt">{excerpt}</p>}
 
@@ -43,26 +62,27 @@ const t = useTranslations(locale);
 
     <div class="recipe-head__actions">
       {recipeAnchor && (
-        <Button href={`#${recipeAnchor}`}>
+        <Button href={`#${recipeAnchor}`} class="recipe-head__jump">
           {t.recipe.actions.jump}
           <Icon name="arrow-down" size={16} />
         </Button>
       )}
-      <Button variant="ghost">
+      <Button variant="ghost" class="recipe-head__save">
         <Icon name="bookmark" size={16} />
         {t.recipe.actions.save}
       </Button>
-      <IconButton variant="outline" aria-label={t.recipe.actions.print} data-recipe-action-print>
+      <IconButton
+        variant="outline"
+        class="recipe-head__print"
+        aria-label={t.recipe.actions.print}
+        data-recipe-action-print
+      >
         <Icon name="printer" size={18} />
       </IconButton>
       <IconButton variant="outline" aria-label={t.recipe.actions.share} data-recipe-action-share>
         <Icon name="share-2" size={18} />
       </IconButton>
     </div>
-  </div>
-
-  <div class="recipe-head__media">
-    <slot name="media" />
   </div>
 </header>
 
@@ -72,7 +92,7 @@ const t = useTranslations(locale);
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
-    padding-block: var(--space-2) var(--space-5);
+    padding-block: var(--gutter) var(--space-5);
 
     .recipe-head__lede {
       display: flex;
@@ -106,8 +126,16 @@ const t = useTranslations(locale);
       color: var(--ink-2);
     }
 
+    /* Mobile: the kicker (category · tags) stands in for the breadcrumb and
+       chips to keep the hero compact; category links remain in the nav. */
+    .recipe-head__breadcrumb,
+    .recipe-head__tags,
+    .recipe-head__jump,
+    .recipe-head__print {
+      display: none;
+    }
+
     .recipe-head__tags {
-      display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
       list-style: none;
@@ -117,7 +145,11 @@ const t = useTranslations(locale);
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.5rem;
+    }
+
+    .recipe-head__save {
+      flex: 1;
     }
 
     .recipe-head__media {
@@ -133,6 +165,44 @@ const t = useTranslations(locale);
 
       .recipe-head__lede {
         gap: var(--space-4);
+      }
+
+      .recipe-head__breadcrumb {
+        display: block;
+      }
+
+      .recipe-head__kicker {
+        display: none;
+      }
+
+      .recipe-head__tags {
+        display: flex;
+      }
+
+      .recipe-head__jump {
+        display: inline-flex;
+      }
+
+      .recipe-head__print {
+        display: grid;
+      }
+
+      .recipe-head__actions {
+        gap: 0.75rem;
+      }
+
+      .recipe-head__save {
+        flex: none;
+      }
+
+      .recipe-head__lede {
+        grid-column: 1;
+        grid-row: 1;
+      }
+
+      .recipe-head__media {
+        grid-column: 2;
+        grid-row: 1;
       }
 
       .recipe-head__excerpt {

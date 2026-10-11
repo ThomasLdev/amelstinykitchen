@@ -34,7 +34,7 @@ const tipWarning = tip?.type === "warning";
         <MediaCarousel
           media={media}
           locale={locale}
-          sizes="(min-width: 900px) 34rem, 100vw"
+          sizes={`(min-width: 600px) 34rem, ${media.length > 1 ? "78vw" : "92vw"}`}
           widths={[480, 720, 960]}
         />
       </div>

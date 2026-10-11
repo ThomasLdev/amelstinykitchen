@@ -101,6 +101,12 @@ const en: Dictionary = {
       titleEm: "ingredients",
       progress: "%count% / %total% ready",
       reset: "Uncheck all",
+      done: "Got everything, show the steps",
+    },
+    view: {
+      legend: "Show",
+      ingredients: "Ingredients",
+      steps: "Steps",
     },
     steps: {
       kicker: "The method",

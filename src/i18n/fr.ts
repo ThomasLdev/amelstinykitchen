@@ -99,6 +99,12 @@ const fr = {
       titleEm: "ingrédients",
       progress: "%count% / %total% prêts",
       reset: "Tout décocher",
+      done: "J'ai tout, voir les étapes",
+    },
+    view: {
+      legend: "Afficher",
+      ingredients: "Ingrédients",
+      steps: "Étapes",
     },
     steps: {
       kicker: "La méthode",

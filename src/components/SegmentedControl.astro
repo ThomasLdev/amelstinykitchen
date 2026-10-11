@@ -1,0 +1,102 @@
+---
+import SrOnly from "@components/SrOnly.astro";
+
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  name: string;
+  legend: string;
+  options: Option[];
+  /** Value checked by default; the first option when omitted. */
+  value?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { name, legend, options, value, class: className, ...rest } = Astro.props;
+const checked = value ?? options[0]?.value;
+---
+
+<fieldset class:list={["segmented", className]} {...rest}>
+  <legend><SrOnly>{legend}</SrOnly></legend>
+  <div class="segmented__track">
+    {options.map((option) => (
+      <label class="segmented__option">
+        <input
+          type="radio"
+          class="segmented__input"
+          name={name}
+          value={option.value}
+          checked={option.value === checked}
+        />
+        <span class="segmented__label">{option.label}</span>
+      </label>
+    ))}
+  </div>
+</fieldset>
+
+<style>
+@layer components {
+  .segmented {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+
+    .segmented__track {
+      display: grid;
+      grid-auto-columns: minmax(0, 1fr);
+      grid-auto-flow: column;
+      padding: 0.25rem;
+      border-radius: var(--radius-pill);
+      background: var(--bg-deep);
+    }
+
+    .segmented__option {
+      position: relative;
+    }
+
+    .segmented__input {
+      position: absolute;
+      inset: 0;
+      margin: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .segmented__label {
+      display: grid;
+      place-items: center;
+      min-height: 2.75rem;
+      padding-inline: 0.75rem;
+      border-radius: var(--radius-pill);
+      font-size: 0.9375rem;
+      color: var(--ink-2);
+      transition:
+        background var(--transition-base),
+        color var(--transition-base);
+    }
+
+    .segmented__input:checked + .segmented__label {
+      background: var(--surface);
+      color: var(--ink);
+      font-weight: 500;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .segmented__input:focus-visible + .segmented__label {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    @media (forced-colors: active) {
+      .segmented__input:checked + .segmented__label {
+        outline: 2px solid CanvasText;
+      }
+    }
+  }
+}
+</style>

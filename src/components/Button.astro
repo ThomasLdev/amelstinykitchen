@@ -45,6 +45,10 @@ const classes = ["btn", `btn--${variant}`, size !== "md" && `btn--${size}`, clas
       border-color var(--transition-base),
       color var(--transition-base);
 
+    &[hidden] {
+      display: none;
+    }
+
     &.btn--sm {
       min-height: 2.5rem;
       padding-block: 0.625rem;

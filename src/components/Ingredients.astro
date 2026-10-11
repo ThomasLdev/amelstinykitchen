@@ -119,6 +119,8 @@ const [progressBefore = "", progressAfter = ""] = t.recipe.ingredients.progress
   <button type="button" class="ingredients__reset" data-recipe-checklist-reset>
     {t.recipe.ingredients.reset}
   </button>
+
+  <slot name="footer" />
 </aside>
 
 <style>

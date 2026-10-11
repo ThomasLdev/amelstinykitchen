@@ -2,6 +2,7 @@
 import { type CollectionEntry, getCollection, getEntries, getEntry } from "astro:content";
 import { getRelativeLocaleUrl } from "astro:i18n";
 import Breadcrumb from "@components/Breadcrumb.astro";
+import Button from "@components/Button.astro";
 import ChefNote from "@components/ChefNote.astro";
 import Container from "@components/Container.astro";
 import Ingredients from "@components/Ingredients.astro";
@@ -11,6 +12,7 @@ import Prose from "@components/Prose.astro";
 import RecipeHead from "@components/RecipeHead.astro";
 import RecipeStats from "@components/RecipeStats.astro";
 import RecipeStep from "@components/RecipeStep.astro";
+import SegmentedControl from "@components/SegmentedControl.astro";
 import { type Locale, languages, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { translate } from "@lib/content/i18n";
@@ -42,6 +44,9 @@ const data = recipe.data;
 const category = await getEntry(data.category);
 const tags = await getEntries(data.tags);
 const tagLabels = tags.map((tag) => translate(tag.data.title, locale));
+const kicker = [category && translate(category.data.title, locale), ...tagLabels]
+  .filter(Boolean)
+  .join(" · ");
 
 const preparationTime = formatDuration(data.preparationTime, locale);
 const cookingTime = formatDuration(data.cookingTime, locale);
@@ -87,6 +92,10 @@ const recipeMedia = data.media.map((item) => ({
   alt: translate(item.alt, locale),
 }));
 
+// Below 720px a multi-image carousel shows 85% wide slides; the page gutter
+// is 4vw on phones, hence 92vw for a full-bleed image.
+const mobileSlide = (count: number) => (count > 1 ? "78vw" : "92vw");
+
 const chefNote = data.chefNote
   ? {
       title: translate(data.chefNote.title, locale),
@@ -113,6 +122,7 @@ const chefNote = data.chefNote
         title={translate(data.title, locale)}
         tags={tagLabels}
         excerpt={translate(data.excerpt, locale)}
+        kicker={kicker}
         recipeAnchor={steps.length > 0 ? recipeAnchor : undefined}
       >
         <Breadcrumb
@@ -140,7 +150,7 @@ const chefNote = data.chefNote
           locale={locale}
           variant="hero"
           widths={[480, 720, 960, 1280]}
-          sizes="(min-width: 1280px) 34rem, (min-width: 900px) 45vw, 100vw"
+          sizes="(min-width: 1280px) 34rem, (min-width: 900px) 45vw, 92vw"
           eager
         />
       </RecipeHead>
@@ -149,13 +159,29 @@ const chefNote = data.chefNote
     {steps.length > 0 ? (
       <Container>
         <div class="recipe-body" id={recipeAnchor}>
+          <SegmentedControl
+            class="recipe-body__view"
+            name="recipe-view"
+            legend={t.recipe.view.legend}
+            options={[
+              { value: "ingredients", label: `${t.recipe.view.ingredients} · ${ingredientsCount}` },
+              { value: "steps", label: `${t.recipe.view.steps} · ${steps.length}` },
+            ]}
+            data-recipe-view
+          />
+
           <Ingredients
+            class="recipe-body__ingredients"
             groups={groups}
             total={ingredientsCount}
             servings={data.servings}
             recipeId={recipe.id}
             locale={locale}
-          />
+          >
+            <Button slot="footer" class="recipe-body__done" data-recipe-view-show="steps" hidden>
+              {t.recipe.ingredients.done}
+            </Button>
+          </Ingredients>
 
           <section class="recipe-steps">
             <h2 class="recipe-steps__title">
@@ -187,7 +213,7 @@ const chefNote = data.chefNote
                       alt: translate(item.alt, locale),
                     }))}
                     locale={locale}
-                    sizes="(min-width: 900px) 42rem, 100vw"
+                    sizes={`(min-width: 900px) 42rem, (min-width: 720px) 92vw, ${mobileSlide(section.media.length)}`}
                   />
                 )}
               </section>
@@ -218,6 +244,25 @@ const chefNote = data.chefNote
       align-items: start;
       padding-block: var(--space-5) var(--space-6);
       border-top: 1px solid var(--line);
+    }
+  }
+
+  /* Mobile only: ingredients and steps become two panels switched by the
+     segmented control. Desktop shows both side by side, so these rules are
+     scoped below the layout breakpoint rather than undone above it. */
+  @media (width < 900px) {
+    .recipe-body:has(.recipe-body__view input[value="steps"]:checked) .recipe-body__ingredients,
+    .recipe-body:has(.recipe-body__view input[value="ingredients"]:checked) .recipe-steps {
+      display: none;
+    }
+  }
+
+  .recipe-body {
+    @media (min-width: 900px) {
+      .recipe-body__view,
+      .recipe-body__done {
+        display: none;
+      }
     }
   }
 
