@@ -11,7 +11,6 @@ import { z } from "astro/zod";
 
 const emptyLocalized = { fr: "", en: "" };
 
-const sectionType = z.enum(["default", "two_columns", "two_columns_media_left"]);
 const difficulty = z.enum(["easy", "medium", "advanced"]);
 
 /** Shared media + narrative-section schemas, bound to the collection image helper. */
@@ -23,10 +22,10 @@ function sharedSchemas<T extends z.ZodType>(image: () => T) {
   });
 
   const section = z.object({
-    type: sectionType.default("default"),
     title: localizedString,
     content: localizedString,
-    image: media.optional(),
+    /** One or more illustrations; rendered as a carousel when there are several. */
+    media: z.array(media).default([]),
   });
 
   return { media, section };
@@ -84,7 +83,8 @@ const recipes = defineCollection({
           text: localizedString,
         })
         .optional(),
-      image: media.optional(),
+      /** One or more illustrations; rendered as a carousel when there are several. */
+      media: z.array(media).default([]),
     });
 
     return z.object({
@@ -95,7 +95,8 @@ const recipes = defineCollection({
       metaDescription: localizedString.optional(),
       category: reference("categories"),
       tags: z.array(reference("tags")).default([]),
-      hero: media.optional(),
+      /** One or more recipe visuals; the first is the hero, rendered as a carousel when there are several. */
+      media: z.array(media).default([]),
       difficulty,
       preparationTime: z.number().int().nonnegative().default(0),
       cookingTime: z.number().int().nonnegative().default(0),

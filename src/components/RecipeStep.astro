@@ -1,49 +1,43 @@
 ---
-import { Image } from "astro:assets";
 import Icon from "@components/Icon.astro";
+import MediaCarousel from "@components/MediaCarousel.astro";
 import Prose from "@components/Prose.astro";
 import { type Locale, useTranslations } from "@i18n";
 import type { ImageMetadata } from "astro";
 
 interface Props {
-  id: string;
   index: number;
   title: string;
   content: string;
   tip?: { type: "tip" | "warning"; text: string };
-  image?: { src: ImageMetadata; alt: string };
+  media?: { src: ImageMetadata; alt: string }[];
   locale: Locale;
   class?: string;
   [key: string]: unknown;
 }
 
-const { id, index, title, content, tip, image, locale, class: className, ...rest } = Astro.props;
+const { index, title, content, tip, media, locale, class: className, ...rest } = Astro.props;
 const t = useTranslations(locale);
 const number = String(index).padStart(2, "0");
 const tipWarning = tip?.type === "warning";
 ---
 
 <article class:list={["step", className]} {...rest}>
-  <input type="checkbox" id={id} class="step__check" data-recipe-checklist-item>
-  <label for={id} class="step__num" aria-label={t.recipe.steps.markDone}>
-    <span class="step__num-bullet" aria-hidden="true"></span>
-    <span class="step__num-text">{number}</span>
-  </label>
+  <span class="step__num">{number}</span>
 
   <div class="step__body">
     {title && <h3 class="step__title">{title}</h3>}
     {content && <Prose html={content} class="step__content" />}
 
-    {image && (
-      <figure class="step__media">
-        <Image
-          src={image.src}
-          alt={image.alt}
-          widths={[480, 720, 960]}
+    {media && media.length > 0 && (
+      <div class="step__media">
+        <MediaCarousel
+          media={media}
+          locale={locale}
           sizes="(min-width: 900px) 34rem, 100vw"
-          class="step__cover"
+          widths={[480, 720, 960]}
         />
-      </figure>
+      </div>
     )}
 
     {tip && (
@@ -73,24 +67,8 @@ const tipWarning = tip?.type === "warning";
       border-bottom: 0;
     }
 
-    .step__check {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip-path: inset(50%);
-      white-space: nowrap;
-      border: 0;
-    }
-
     .step__num {
-      display: flex;
-      align-items: center;
-      gap: 0.625rem;
-      cursor: pointer;
-      user-select: none;
+      display: block;
       min-height: 2.75rem;
       font-family: var(--font-serif);
       font-style: italic;
@@ -98,24 +76,6 @@ const tipWarning = tip?.type === "warning";
       font-size: clamp(2rem, 5vw, 2.25rem);
       color: var(--accent);
       line-height: 1;
-      transition: color var(--transition-base);
-    }
-
-    .step__num-bullet {
-      width: 1.125rem;
-      height: 1.125rem;
-      border-radius: 50%;
-      border: 2px solid var(--accent);
-      background: transparent;
-      flex-shrink: 0;
-      transition:
-        background-color var(--transition-fast),
-        box-shadow var(--transition-fast);
-    }
-
-    .step__check:focus-visible + .step__num .step__num-bullet {
-      outline: 2px solid var(--accent);
-      outline-offset: 3px;
     }
 
     .step__body {
@@ -126,7 +86,6 @@ const tipWarning = tip?.type === "warning";
 
     .step__title {
       margin: 0;
-      transition: color var(--transition-base);
     }
 
     .step__content {
@@ -135,18 +94,7 @@ const tipWarning = tip?.type === "warning";
     }
 
     .step__media {
-      margin: 0;
-      aspect-ratio: 16 / 9;
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      background: var(--accent-soft);
       max-inline-size: var(--max-width-sm);
-    }
-
-    .step__cover {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
     }
 
     .step__tip {
@@ -182,21 +130,6 @@ const tipWarning = tip?.type === "warning";
       font-style: italic;
       font-weight: 400;
       margin-inline-end: 0.25rem;
-    }
-
-    &:has(.step__check:checked) {
-      .step__num {
-        color: var(--ink-3);
-      }
-
-      .step__num-bullet {
-        background: var(--accent);
-        box-shadow: inset 0 0 0 3px var(--surface);
-      }
-
-      .step__title {
-        color: var(--ink-3);
-      }
     }
 
     @media (min-width: 720px) {

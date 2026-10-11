@@ -19,11 +19,11 @@ servings: 6
 isFeatured: false
 draft: false
 publishDate: 2026-02-15
-hero:
-  src: "../../assets/recipes/fondant-au-chocolat.png"
-  alt:
-    fr: "Fondant au chocolat au cœur coulant."
-    en: "Chocolate fondant with a molten centre."
+media:
+  - src: "../../assets/recipes/fondant-au-chocolat.png"
+    alt:
+      fr: "Fondant au chocolat au cœur coulant."
+      en: "Chocolate fondant with a molten centre."
 ingredientGroups:
   - label:
       fr: ""

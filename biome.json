@@ -66,6 +66,16 @@
       }
     },
     {
+      "includes": ["src/components/MediaCarousel.astro"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useSemanticElements": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["src/styles/theme.css"],
       "linter": {
         "rules": {

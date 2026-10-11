@@ -25,14 +25,21 @@ servings: 8
 isFeatured: true
 draft: false
 publishDate: 2026-03-01
-hero:
-  src: "../../assets/recipes/tarte-au-citron.png"
-  alt:
-    fr: "Tarte au citron meringuée posée sur une assiette."
-    en: "Lemon meringue pie resting on a plate."
-  title:
-    fr: "Tarte au citron meringuée"
-    en: "Lemon meringue pie"
+media:
+  - src: "../../assets/recipes/tarte-au-citron.png"
+    alt:
+      fr: "Tarte au citron meringuée posée sur une assiette."
+      en: "Lemon meringue pie resting on a plate."
+    title:
+      fr: "Tarte au citron meringuée"
+      en: "Lemon meringue pie"
+  - src: "../../assets/recipes/tarte-etape-dorage.png"
+    alt:
+      fr: "Meringue dorée au chalumeau."
+      en: "Meringue torched until golden."
+    title:
+      fr: "La meringue dorée au chalumeau"
+      en: "Meringue torched until golden"
 ingredientGroups:
   - label:
       fr: "Pâte sablée"
@@ -108,11 +115,11 @@ steps:
       text:
         fr: "Surveillez les bords : ils ne doivent pas trop dorer."
         en: "Watch the edges: they should not brown too much."
-    image:
-      src: "../../assets/recipes/tarte-etape-dorage.png"
-      alt:
-        fr: "Meringue dorée au chalumeau."
-        en: "Meringue torched until golden."
+    media:
+      - src: "../../assets/recipes/tarte-etape-dorage.png"
+        alt:
+          fr: "Meringue dorée au chalumeau."
+          en: "Meringue torched until golden."
 chefNote:
   title:
     fr: "Le secret de la meringue"
