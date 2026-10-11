@@ -22,6 +22,7 @@ const fr = {
     navAriaLabel: "Navigation principale",
     home: "Accueil",
     recipes: "Recettes",
+    search: "Recherche",
   },
   footer: {
     tagline: "Des recettes simples et généreuses, à partager sans façon.",
@@ -107,7 +108,7 @@ const fr = {
       warning: "Attention.",
     },
     chef: {
-      label: "Le mot de la pâtissière",
+      label: "L'astuce pour cette recette",
       initial: "A",
     },
   },

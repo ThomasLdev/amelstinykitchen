@@ -160,7 +160,6 @@ const chefNote = data.chefNote
           />
 
           <section class="recipe-steps">
-            <Kicker>{t.recipe.steps.kicker}</Kicker>
             <h2 class="recipe-steps__title">
               {t.recipe.steps.title} <em>{t.recipe.steps.titleEm}</em>
             </h2>
@@ -210,6 +209,10 @@ const chefNote = data.chefNote
 @layer components {
   .recipe-hero {
     margin-block: 0 var(--space-6);
+
+    @media (min-width: 900px) {
+      margin-block: 0 var(--space-3);
+    }
   }
 
   .recipe-body {

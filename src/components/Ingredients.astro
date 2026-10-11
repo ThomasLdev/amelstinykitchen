@@ -39,7 +39,6 @@ const servingsLabel =
   data-recipe-checklist-storage={`recipe-${recipeId}-ingredients`}
   {...rest}
 >
-  <span class="kicker">{t.recipe.ingredients.kicker}</span>
   <h2 class="ingredients__title">
     {t.recipe.ingredients.title} <em>{t.recipe.ingredients.titleEm}</em>
   </h2>
@@ -120,6 +119,7 @@ const servingsLabel =
       font-size: 0.625rem;
       text-transform: uppercase;
       color: var(--ink-3);
+      padding-bottom: 1rem;
     }
 
     .ingredients__sub-strong {

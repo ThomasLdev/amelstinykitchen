@@ -24,6 +24,7 @@ const en: Dictionary = {
     navAriaLabel: "Main navigation",
     home: "Home",
     recipes: "Recipes",
+    search: "Search",
   },
   footer: {
     tagline: "Simple, generous recipes meant to be shared.",
