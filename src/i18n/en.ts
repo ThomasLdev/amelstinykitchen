@@ -96,7 +96,6 @@ const en: Dictionary = {
       increase: "Increase servings",
     },
     ingredients: {
-      kicker: "Shopping list",
       title: "The",
       titleEm: "ingredients",
       progress: "%count% / %total% ready",
@@ -109,7 +108,6 @@ const en: Dictionary = {
       steps: "Steps",
     },
     steps: {
-      kicker: "The method",
       title: "The",
       titleEm: "steps",
       tip: "Tip.",
@@ -117,7 +115,6 @@ const en: Dictionary = {
     },
     chef: {
       label: "A word from the pastry chef",
-      initial: "A",
     },
   },
 };

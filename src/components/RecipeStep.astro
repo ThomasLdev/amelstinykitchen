@@ -57,8 +57,11 @@ const tipWarning = tip?.type === "warning";
 <style>
 @layer components {
   .step {
-    display: flex;
-    flex-direction: column;
+    /* Mobile: number and title share the first row; the body's other
+       children (text, media, tip) span the full width underneath. */
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
     gap: 0.75rem;
     padding-block: 1.25rem;
     border-bottom: 1px solid var(--line);
@@ -68,8 +71,6 @@ const tipWarning = tip?.type === "warning";
     }
 
     .step__num {
-      display: block;
-      min-height: 2.75rem;
       font-family: var(--font-serif);
       font-style: italic;
       font-weight: 300;
@@ -79,13 +80,17 @@ const tipWarning = tip?.type === "warning";
     }
 
     .step__body {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
+      display: contents;
     }
 
     .step__title {
       margin: 0;
+    }
+
+    .step__content,
+    .step__media,
+    .step__tip {
+      grid-column: 1 / -1;
     }
 
     .step__content {
@@ -133,14 +138,25 @@ const tipWarning = tip?.type === "warning";
     }
 
     @media (min-width: 720px) {
-      display: grid;
-      grid-template-columns: 5rem 1fr;
+      grid-template-columns: 5rem minmax(0, 1fr);
       gap: 1.25rem;
       padding-block: 1.75rem;
       align-items: start;
 
       .step__num {
         font-size: 2.75rem;
+      }
+
+      .step__body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .step__content,
+      .step__media,
+      .step__tip {
+        grid-column: auto;
       }
     }
   }

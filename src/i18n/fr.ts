@@ -94,7 +94,6 @@ const fr = {
       increase: "Augmenter les portions",
     },
     ingredients: {
-      kicker: "Liste de courses",
       title: "Les",
       titleEm: "ingrédients",
       progress: "%count% / %total% prêts",
@@ -107,7 +106,6 @@ const fr = {
       steps: "Étapes",
     },
     steps: {
-      kicker: "La méthode",
       title: "Les",
       titleEm: "étapes",
       tip: "Astuce.",
@@ -115,7 +113,6 @@ const fr = {
     },
     chef: {
       label: "L'astuce pour cette recette",
-      initial: "A",
     },
   },
 };

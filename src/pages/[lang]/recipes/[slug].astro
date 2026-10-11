@@ -6,12 +6,12 @@ import Button from "@components/Button.astro";
 import ChefNote from "@components/ChefNote.astro";
 import Container from "@components/Container.astro";
 import Ingredients from "@components/Ingredients.astro";
-import Kicker from "@components/Kicker.astro";
 import MediaCarousel from "@components/MediaCarousel.astro";
 import Prose from "@components/Prose.astro";
 import RecipeHead from "@components/RecipeHead.astro";
 import RecipeStats from "@components/RecipeStats.astro";
 import RecipeStep from "@components/RecipeStep.astro";
+import SectionTitle from "@components/SectionTitle.astro";
 import SegmentedControl from "@components/SegmentedControl.astro";
 import { type Locale, languages, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
@@ -184,9 +184,11 @@ const chefNote = data.chefNote
           </Ingredients>
 
           <section class="recipe-steps">
-            <h2 class="recipe-steps__title">
-              {t.recipe.steps.title} <em>{t.recipe.steps.titleEm}</em>
-            </h2>
+            <SectionTitle
+              class="recipe-steps__title"
+              title={t.recipe.steps.title}
+              titleEm={t.recipe.steps.titleEm}
+            />
 
             {steps.map((step) => (
               <RecipeStep {...step} locale={locale} />
@@ -269,18 +271,6 @@ const chefNote = data.chefNote
   .recipe-steps {
     .recipe-steps__title {
       margin-block-start: 0.5rem;
-      margin-block-end: 0;
-      font-family: var(--font-serif);
-      font-size: clamp(1.625rem, 5.5vw, 3.25rem);
-      font-weight: 400;
-      line-height: 1.05;
-      color: var(--ink);
-    }
-
-    .recipe-steps__title em {
-      font-style: italic;
-      font-weight: 300;
-      color: var(--accent-ink);
     }
   }
 
