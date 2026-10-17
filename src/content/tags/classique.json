@@ -1,0 +1,14 @@
+{
+  "fr": {
+    "title": "Classique",
+    "paths": "classique",
+    "isFeatured": true,
+    "image": "/src/assets/tags/macaron-recipe-feature.jpg"
+  },
+  "en": {
+    "title": "Classic",
+    "paths": "classic",
+    "isFeatured": true,
+    "image": "/src/assets/tags/macaron-recipe-feature.jpg"
+  }
+}
