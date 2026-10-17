@@ -32,40 +32,30 @@ servings: 8
 isFeatured: true
 draft: false
 publishDate: 2026-03-01
-updatedDate: ''
 ingredientGroups:
   - label: Pâte sablée
     ingredients:
       - name: Farine
         quantity: 250
         unit: g
-        display: ''
       - name: Beurre
         quantity: 125
         unit: g
-        display: ''
       - name: Sucre glace
         quantity: 80
         unit: g
-        display: ''
       - name: Œuf
         quantity: 1
-        unit: ''
-        display: ''
   - label: Crème au citron
     ingredients:
       - name: Citrons
         quantity: 4
-        unit: ''
-        display: ''
       - name: Zeste
         quantity: null
-        unit: ''
         display: 1 zeste de citron
       - name: Sucre
         quantity: 150
         unit: g
-        display: ''
 steps:
   - title: Préparer la pâte
     content: Mélangez la farine et le sucre glace, puis sablez avec le beurre froid. Ajoutez l'œuf et formez une boule sans trop travailler.
@@ -75,7 +65,6 @@ steps:
     media:
       - src: /src/assets/recipes/tarte-citron-meringuee-cremeux-citron-300x200.jpg
         alt: Meringue dorée au chalumeau.
-        title: ''
   - title: Cuire à blanc
     content: Foncez un moule beurré, piquez le fond et cuisez à blanc 15 minutes à 180 °C.
     tip:
@@ -84,15 +73,11 @@ steps:
     media:
       - src: /src/assets/recipes/tarte-citron-meringuee-pochage-meringue-italienne-300x200.jpg
         alt: Meringue dorée au chalumeau.
-        title: ''
   - title: Faire le dressage
     content: Foncez un moule beurré, piquez le fond et cuisez à blanc 15 minutes à 180 °C.
-    tip: null
     media:
       - src: /src/assets/recipes/tarte-citron-meringuee-gel-citron-300x200.jpg
         alt: Meringue dorée au chalumeau.
-        title: ''
-sections: []
 chefNote:
   title: Le secret de la meringue
   body: Une meringue réussie repose sur des blancs bien propres, sans la moindre trace de jaune.
