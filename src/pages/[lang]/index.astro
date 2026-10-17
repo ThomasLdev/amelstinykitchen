@@ -15,7 +15,8 @@ import BaseLayout from "@layouts/BaseLayout.astro";
 import { selectFeaturedTags, selectHeroRecipe, selectPopularRecipes } from "@lib/content/home";
 import { inLocale, localize } from "@lib/content/i18n";
 import { formatDuration, isPublished, recipeTransitionName, totalTime } from "@lib/content/recipe";
-import { CURRENT_SEASON } from "@lib/content/recipe-filters";
+import { currentSeason, SEASONS } from "@lib/content/season";
+import { seasonImages } from "@lib/content/season-images";
 import { ogImage } from "@lib/seo/images";
 import { websiteLd } from "@lib/seo/jsonld";
 import { siteConfig, socialProfiles } from "@site";
@@ -76,14 +77,24 @@ const tagCards = selectFeaturedTags(tags, recipes).map(({ tag, recipeCount }) =>
   href: `${recipesUrl}?tag=${tag.id}`,
   meta: t.home.tags.recipesCount(recipeCount),
 }));
-// "current" is resolved by the recipes page in the browser: a static build cannot know the date.
-const seasonCard = recipes.some((recipe) => recipe.data.seasons.length > 0) && {
-  name: t.home.tags.seasonal.name,
-  href: `${recipesUrl}?season=${CURRENT_SEASON}`,
-  badge: t.home.tags.seasonal.badge,
-};
+// One card per season with recipes; TagGrid's script shows the visitor's, the build's without JS.
+const buildSeason = currentSeason(new Date());
+const seasonCards = SEASONS.map((season) => ({
+  season,
+  recipeCount: recipes.filter((recipe) => recipe.data.seasons.includes(season)).length,
+}))
+  .filter(({ recipeCount }) => recipeCount > 0)
+  .map(({ season, recipeCount }) => ({
+    name: t.recipes.seasons[season],
+    href: `${recipesUrl}?season=${season}`,
+    meta: t.home.tags.recipesCount(recipeCount),
+    badge: t.home.tags.inSeason,
+    image: seasonImages[season],
+    season,
+    hidden: season !== buildSeason,
+  }));
 // The season card takes a tag's place, keeping one row from 900px.
-const featuredTags = seasonCard ? [seasonCard, ...tagCards.slice(0, 4)] : tagCards;
+const featuredTags = seasonCards.length > 0 ? [...seasonCards, ...tagCards.slice(0, 4)] : tagCards;
 
 const site = Astro.site ?? new URL(Astro.url.origin);
 const homeUrl = getAbsoluteLocaleUrl(locale, "");

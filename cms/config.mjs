@@ -6,6 +6,8 @@ const settings = {
   // Root-absolute: Vite resolves `/src/…` from the project root, so `image()` accepts it.
   public_folder: "/src/assets",
   slug: { encoding: "ascii", clean_accents: true },
+  // Otherwise empty optional fields are written as '' or null, which the Zod schemas reject.
+  output: { omit_empty_optional_fields: true },
   i18n: {
     structure: "multiple_folders",
     locales: ["fr", "en"],

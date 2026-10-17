@@ -3,11 +3,6 @@
  * statically rendered list and drive the client-side filters.
  */
 
-import { currentSeason } from "@lib/content/season";
-
-/** Season filter value resolved in the browser, so a static link follows the date. */
-export const CURRENT_SEASON = "current";
-
 export const SORT_KEYS = ["popular", "recent", "quick"] as const;
 
 export type SortKey = (typeof SORT_KEYS)[number];
@@ -92,12 +87,11 @@ export function activeFilterCount(state: FilterState): number {
 export const isSortKey = (value: string | null): value is SortKey =>
   SORT_KEYS.includes(value as SortKey);
 
-export function stateFromParams(params: URLSearchParams, now = new Date()): FilterState {
+export function stateFromParams(params: URLSearchParams): FilterState {
   const sort = params.get("sort");
-  const season = params.get("season") ?? "";
   return {
     category: params.get("category") ?? "",
-    season: season === CURRENT_SEASON ? currentSeason(now) : season,
+    season: params.get("season") ?? "",
     tags: params.getAll("tag"),
     query: params.get("q") ?? "",
     sort: isSortKey(sort) ? sort : DEFAULT_STATE.sort,

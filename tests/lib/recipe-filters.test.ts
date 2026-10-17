@@ -103,12 +103,6 @@ describe("URL state", () => {
     expect(stateToParams(DEFAULT_STATE).toString()).toBe("");
   });
 
-  it("resolves the current season from the visitor's date", () => {
-    const params = new URLSearchParams("season=current");
-    expect(stateFromParams(params, new Date(2026, 0, 15)).season).toBe("winter");
-    expect(stateFromParams(params, new Date(2026, 9, 17)).season).toBe("autumn");
-  });
-
   it("ignores an unknown sort", () => {
     expect(stateFromParams(new URLSearchParams("sort=random")).sort).toBe("popular");
   });

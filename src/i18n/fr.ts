@@ -55,7 +55,7 @@ const fr = {
       title: "Parcourir les",
       titleEm: "envies",
       sub: "Des idées pour cuisiner selon l'humeur du jour.",
-      seasonal: { name: "Recettes de saison", badge: "Selon le mois" },
+      inSeason: "De saison",
       recipesCount: (count: number) =>
         count === 0 ? "Aucune recette" : count === 1 ? "1 recette" : `${count} recettes`,
     },

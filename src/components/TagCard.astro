@@ -1,19 +1,42 @@
 ---
+import { Picture } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
 interface Props {
   name: string;
   href: string;
   meta?: string;
   badge?: string;
+  /** Decorative backdrop: the name already says what it shows. */
+  image?: ImageMetadata;
   class?: string;
   [key: string]: unknown;
 }
 
-const { name, href, meta, badge, class: className, ...rest } = Astro.props;
+const { name, href, meta, badge, image, class: className, ...rest } = Astro.props;
 const initial = name.charAt(0).toLocaleUpperCase();
 ---
 
-<a class:list={["tag-card", badge && "tag-card--highlight", className]} href={href} {...rest}>
-  <span class="tag-card__initial" aria-hidden="true">{initial}</span>
+<a
+  class:list={["tag-card", badge && "tag-card--highlight", image && "tag-card--media", className]}
+  href={href}
+  {...rest}
+>
+  {image ? (
+    <Picture
+      src={image}
+      alt=""
+      formats={["avif", "webp"]}
+      widths={[320, 480, 720, 960]}
+      sizes="(min-width: 900px) 14rem, (min-width: 600px) 33vw, 100vw"
+      class="tag-card__image"
+      pictureAttributes={{ class: "tag-card__picture" }}
+    />
+  ) : (
+    <span class="tag-card__initial" aria-hidden="true">
+      {initial}
+    </span>
+  )}
   <h3 class="tag-card__name">{name}</h3>
   {badge && <span class="tag-card__badge">{badge}</span>}
   {meta && <span class="tag-card__meta">{meta}</span>}
@@ -72,6 +95,36 @@ const initial = name.charAt(0).toLocaleUpperCase();
     }
   }
 
+  /* Text over a photo: a scrim keeps it readable, darker where the name sits. */
+  .tag-card--media {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    align-content: end;
+    min-block-size: 6.5rem;
+    border-color: var(--ink);
+    background: var(--ink);
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(to top, var(--scrim), var(--overlay));
+    }
+
+    @media (min-width: 600px) {
+      grid-template-areas:
+        "badge"
+        "name"
+        "meta";
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr auto auto;
+      border-color: var(--ink);
+      background: var(--ink);
+    }
+  }
+
   .tag-card__initial {
     display: none;
     grid-area: initial;
@@ -101,6 +154,14 @@ const initial = name.charAt(0).toLocaleUpperCase();
     text-transform: uppercase;
     color: var(--accent-soft);
 
+    .tag-card--media & {
+      margin-block-end: 0.25rem;
+      padding: 0.25rem 0.625rem;
+      border-radius: var(--radius-pill);
+      background: var(--ink);
+      color: var(--on-ink);
+    }
+
     @media (min-width: 600px) {
       align-self: start;
       justify-self: end;
@@ -108,6 +169,10 @@ const initial = name.charAt(0).toLocaleUpperCase();
       border-radius: var(--radius-pill);
       background: var(--ink);
       color: var(--on-ink);
+
+      .tag-card--media & {
+        justify-self: start;
+      }
     }
   }
 
@@ -130,6 +195,10 @@ const initial = name.charAt(0).toLocaleUpperCase();
       .tag-card--highlight & {
         color: var(--ink);
       }
+
+      .tag-card--media & {
+        color: var(--on-ink);
+      }
     }
   }
 
@@ -149,6 +218,27 @@ const initial = name.charAt(0).toLocaleUpperCase();
       .tag-card--highlight & {
         color: var(--ink-3);
       }
+
+      .tag-card--media & {
+        color: var(--on-ink-soft);
+      }
+    }
+  }
+
+  .tag-card__picture {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+  }
+
+  .tag-card__image {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-zoom);
+
+    .tag-card:hover & {
+      transform: scale(1.04);
     }
   }
 }
