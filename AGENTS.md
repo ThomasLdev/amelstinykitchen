@@ -67,8 +67,8 @@ layers, palettes, a11y, HTML natif avant JS) est dans le skill `design-system`.
 
 ## i18n (FR/EN uniquement)
 
-Deux langues, pas plus. Pas de skill i18n dédié : on suit la convention
-documentée dans le skill `astro-content`.
+Deux langues, pas plus. Pas de skill i18n dédié : la convention est ici, la
+mécanique (`astro:i18n`, routing) dans la doc via le MCP `astro-docs`.
 
 - `i18n` d'Astro dans `astro.config.mjs` : `locales: ['fr', 'en']`,
   `defaultLocale: 'fr'`. Routing `/[lang]/...`.
@@ -103,25 +103,27 @@ est une `devDependency` épinglée (`@sveltia/cms`), servie depuis `node_modules
 
 ## Astro best practices (obligatoire)
 
-On respecte **strictement** la doc officielle. Avant d'écrire ou de modifier du
-code Astro, charger le skill correspondant :
+On respecte **strictement** la doc officielle, consultée via le MCP
+**`astro-docs`** (`https://mcp.docs.astro.build/mcp`, déclaré dans `.mcp.json`
+et `opencode.json`). Avant d'écrire ou de modifier du code Astro (composants,
+layouts, slots, îlots, images, content collections, loaders, schémas Zod,
+routes dynamiques, i18n), **chercher la page concernée via le MCP** plutôt que
+de se fier à sa mémoire : la doc fait foi pour `astro@7.x`.
 
-- **Composants, layouts, slots, props, styles, îlots, images** →
-  skill `astro-components`.
-- **Content collections, `content.config.ts`, schémas Zod, loaders,
-  `getCollection`/`render`, routes dynamiques, i18n** → skill `astro-content`.
+Les skills du projet ne couvrent que nos conventions propres :
+
 - **CSS, tokens, palettes, thème, composants du front public, accessibilité** →
   skill `design-system`.
 - **Tests unitaires/e2e, fixtures, choix du niveau de test** →
   skill `astro-testing`.
 
-Pour toute question version-spécifique, la doc fait foi :
-https://docs.astro.build — consulter en priorité
-[routing](https://docs.astro.build/en/guides/routing/),
-[components](https://docs.astro.build/en/basics/astro-components/),
-[content collections](https://docs.astro.build/en/guides/content-collections/),
-[styling](https://docs.astro.build/en/guides/styling/),
-[i18n](https://docs.astro.build/en/guides/internationalization/).
+Conventions maison en plus de la doc :
+
+- Props typées via une interface `Props`, défauts par déstructuration.
+- `getCollection()` n'a pas d'ordre garanti : toujours trier explicitement.
+- Commentaires : uniquement le **pourquoi** non évident (contrainte, contournement,
+  choix a11y inattendu), une ligne courte. Jamais de paraphrase du code. Les
+  fixtures de contenu font exception (voir `astro-testing`).
 
 ## Review
 

@@ -1,6 +1,6 @@
 ---
 name: design-system
-description: Design system du blog — CSS natif moderne (layers, tokens, nesting), thème à palettes/densités, composants Astro à styles scopés, HTML natif avant JS, accessibilité WCAG 2.2 AA. Use when creating, editing, or composing a public front component (.astro), writing CSS or tokens in src/styles/, adding a button/card/section, switching palette, or making an interactive element (dialog, accordion, popover). Ne pas activer pour la logique de contenu/collections (voir astro-content) ni pour le contenu éditorial.
+description: Design system du blog — CSS natif moderne (layers, tokens, nesting), thème à palettes/densités, composants Astro à styles scopés, HTML natif avant JS, accessibilité WCAG 2.2 AA. Use when creating, editing, or composing a public front component (.astro), writing CSS or tokens in src/styles/, adding a button/card/section, switching palette, or making an interactive element (dialog, accordion, popover). Ne pas activer pour la logique de contenu/collections (voir AGENTS.md) ni pour le contenu éditorial.
 ---
 
 # Design System — Astro
@@ -17,8 +17,8 @@ avec styles **scopés par composant**. On garde l'esprit du design existant
   (`peach` défaut, `sage`, `cream`) + densités (`aerated` défaut, `compact`).
 - **Architecture CSS globale** : `src/styles/app.css` — ordre des `@layer` +
   imports de `tokens.css` et `theme.css`. **Global = théming uniquement.**
-- **Skill associé** : `astro-components` pour la mécanique Astro (props, slots,
-  `class:list`, îlots). Ce skill-ci fixe les **normes de design**.
+- **Mécanique Astro** (props, slots, `class:list`, îlots) : MCP `astro-docs`.
+  Ce skill-ci fixe les **normes de design**.
 
 ## Architecture CSS — global = théming uniquement
 
@@ -322,7 +322,7 @@ Chaque composant ajouté/modifié passe cette checklist avant d'être fini.
 - Les chaînes d'UI (chrome, labels a11y) vivent dans un module typé
   `src/i18n/` (un objet par locale) ou dans la collection, jamais en dur FR dans
   un composant réutilisé. Ajouter une clé = l'ajouter **en fr ET en**.
-- Voir le skill `astro-content` pour le modèle de contenu bilingue.
+- Modèle de contenu bilingue : section i18n de `AGENTS.md`.
 
 ### Definition of Done — composant
 

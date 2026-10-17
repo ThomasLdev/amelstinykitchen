@@ -1,6 +1,6 @@
 ---
 name: astro-testing
-description: Stratégie et conventions de test du blog Astro — décide entre test unitaire (Vitest + Container API) et end-to-end (Playwright) selon le gain du test, structure un fichier par composant/feature, gère les fixtures de contenu isolées du contenu éditorial. Use when adding, changing or reviewing tests (tests/**, e2e/**), vitest.config.ts, playwright.config.ts, test fixtures, or when a change to a component, script, page or content schema needs test coverage. Ne pas activer pour écrire le composant lui-même (voir astro-components / design-system).
+description: Stratégie et conventions de test du blog Astro — décide entre test unitaire (Vitest + Container API) et end-to-end (Playwright) selon le gain du test, structure un fichier par composant/feature, gère les fixtures de contenu isolées du contenu éditorial. Use when adding, changing or reviewing tests (tests/**, e2e/**), vitest.config.ts, playwright.config.ts, test fixtures, or when a change to a component, script, page or content schema needs test coverage. Ne pas activer pour écrire le composant lui-même (voir design-system).
 ---
 
 # Tests — Astro
