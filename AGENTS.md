@@ -74,11 +74,32 @@ documentée dans le skill `astro-content`.
   `defaultLocale: 'fr'`. Routing `/[lang]/...`.
 - **Une seule** collection par type de contenu ; chaque entrée porte `locale`
   et un `translationKey` partagé entre la paire FR/EN.
-- Fichiers rangés par langue : `src/content/blog/fr/...`, `.../en/...`.
+- Fichiers rangés par langue : `src/content/recipes/fr/...`, `.../en/...`
+  (recettes, articles). Exception : tags et catégories gardent un fichier par
+  entrée avec `{ fr: {…}, en: {…} }`, pour que les `reference()` restent un id
+  stable (lus via `localize()` de `@lib/content/i18n`).
+- Paires reliées par `translationKey` (`translationsOf()`) : pas de hreflang
+  ni de lien de langue vers une traduction absente.
 - URL construites via `getRelativeLocaleUrl` / `Astro.currentLocale` — jamais
   de `/fr` ou `/en` codés en dur.
 - Fallback **explicite** : une traduction manquante est masquée ou redirigée
   vers le FR, jamais servie silencieusement sous une URL EN.
+
+## CMS (Sveltia, local uniquement)
+
+Le contenu s'édite via Sveltia CMS sur `npm run dev` → `localhost:4321/admin/`
+(Chrome/Edge/Brave, « Travailler avec un dépôt local »). Servi par
+l'intégration `cms/integration.mjs` en dev seulement, jamais buildé. Sveltia
+est une `devDependency` épinglée (`@sveltia/cms`), servie depuis `node_modules`.
+
+- **Le schéma Zod est la seule source** : les champs CMS sont générés
+  (`cms/config.mjs`) depuis `.astro/collections/*.schema.json`. Chaque champ
+  porte `.meta(cms({ label, translate?, widget?, … }))` (`@lib/content/cms`) ;
+  un champ sans hints fait échouer la config. `translate: true` = saisi par
+  langue, sinon saisi une fois et dupliqué.
+- Seuls les réglages de collection (dossier, slug, médias) sont écrits à la
+  main dans `cms/config.mjs`.
+- Images en chemin racine `/src/assets/...` (accepté par `image()`).
 
 ## Astro best practices (obligatoire)
 

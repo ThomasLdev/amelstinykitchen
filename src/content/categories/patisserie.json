@@ -1,11 +1,18 @@
 {
-  "title": { "fr": "Pâtisserie", "en": "Baking" },
-  "paths": { "fr": "patisserie", "en": "baking" },
-  "description": {
-    "fr": "Gâteaux, tartes et douceurs à partager.",
-    "en": "Cakes, tarts and sweet treats to share."
+  "fr": {
+    "title": "Pâtisserie",
+    "paths": "patisserie",
+    "description": "Gâteaux, tartes et douceurs à partager.",
+    "isFeatured": true,
+    "position": 1,
+    "image": "/src/assets/categories/patisserie.png"
   },
-  "isFeatured": true,
-  "position": 1,
-  "image": "../../assets/categories/patisserie.png"
+  "en": {
+    "title": "Baking",
+    "paths": "baking",
+    "description": "Cakes, tarts and sweet treats to share.",
+    "isFeatured": true,
+    "position": 1,
+    "image": "/src/assets/categories/patisserie.png"
+  }
 }

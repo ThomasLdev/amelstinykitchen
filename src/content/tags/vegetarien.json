@@ -1,5 +1,12 @@
 {
-  "title": { "fr": "Végétarien", "en": "Vegetarian" },
-  "paths": { "fr": "vegetarien", "en": "vegetarian" },
-  "isFeatured": true
+  "fr": {
+    "title": "Végétarien",
+    "paths": "vegetarien",
+    "isFeatured": true
+  },
+  "en": {
+    "title": "Vegetarian",
+    "paths": "vegetarian",
+    "isFeatured": true
+  }
 }

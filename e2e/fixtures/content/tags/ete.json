@@ -1,6 +1,14 @@
 {
-  "title": { "fr": "Été", "en": "Summer" },
-  "paths": { "fr": "ete", "en": "summer" },
-  "isFeatured": true,
-  "season": "summer"
+  "fr": {
+    "title": "Été",
+    "paths": "ete",
+    "isFeatured": true,
+    "season": "summer"
+  },
+  "en": {
+    "title": "Summer",
+    "paths": "summer",
+    "isFeatured": true,
+    "season": "summer"
+  }
 }

@@ -1,5 +1,12 @@
 {
-  "title": { "fr": "Catégorie filtre", "en": "Filter category" },
-  "paths": { "fr": "categorie-filtre", "en": "filter-category" },
-  "position": 1
+  "fr": {
+    "title": "Catégorie filtre",
+    "paths": "categorie-filtre",
+    "position": 1
+  },
+  "en": {
+    "title": "Filter category",
+    "paths": "filter-category",
+    "position": 1
+  }
 }

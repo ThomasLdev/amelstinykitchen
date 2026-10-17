@@ -75,4 +75,10 @@ test.describe("SEO", () => {
 
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   });
+
+  test("the CMS admin is never part of the production build", async ({ request }) => {
+    for (const path of ["/admin/", "/admin/config.yml", "/admin/sveltia-cms.js"]) {
+      expect((await request.get(path)).status(), path).toBe(404);
+    }
+  });
 });

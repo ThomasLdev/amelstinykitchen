@@ -1,6 +1,7 @@
 import { getCollection } from "astro:content";
 import { getAbsoluteLocaleUrl } from "astro:i18n";
 import { type Locale, languages, useTranslations } from "@i18n";
+import { inLocale } from "@lib/content/i18n";
 import { isPublished } from "@lib/content/recipe";
 import type { ResolvedRecipe } from "@lib/seo/recipe";
 import { resolveRecipe } from "@lib/seo/resolve";
@@ -20,7 +21,9 @@ export async function resolvedRecipesByLocale(): Promise<Record<Locale, Resolved
         [
           locale,
           await Promise.all(
-            recipes.map((recipe) => resolveRecipe(recipe, locale, site, { images: false })),
+            recipes
+              .filter(inLocale(locale))
+              .map((recipe) => resolveRecipe(recipe, site, { images: false })),
           ),
         ] as const,
     ),

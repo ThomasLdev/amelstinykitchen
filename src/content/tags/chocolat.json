@@ -1,5 +1,12 @@
 {
-  "title": { "fr": "Chocolat", "en": "Chocolate" },
-  "paths": { "fr": "chocolat", "en": "chocolate" },
-  "isFeatured": false
+  "fr": {
+    "title": "Chocolat",
+    "paths": "chocolat",
+    "isFeatured": false
+  },
+  "en": {
+    "title": "Chocolate",
+    "paths": "chocolate",
+    "isFeatured": false
+  }
 }

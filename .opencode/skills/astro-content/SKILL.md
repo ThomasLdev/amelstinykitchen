@@ -175,6 +175,11 @@ const blog = defineCollection({
 - Use `translationKey` (not the auto `id`) to link a pair, so URLs can differ
   between languages.
 - Do not duplicate content across locales without this pairing.
+- Taxonomies (tags, categories) are the exception: one file per entry holding
+  `{ fr: {…}, en: {…} }`, so `reference()` ids stay stable across locales.
+- Every schema field carries `.meta(cms({ … }))` (`@lib/content/cms`): the
+  Sveltia CMS fields are generated from it (`cms/config.mjs`). Add the hints
+  whenever you add a field, or the CMS config fails to load.
 
 ## Review checklist
 
