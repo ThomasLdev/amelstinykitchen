@@ -1,11 +1,12 @@
 // cspell:ignore citon choco chocolt coeur crme oeufs
 import {
   byRelevance,
-  createRecipeSearch,
   findTerms,
   matchedIngredients,
+  recipeSearchFields,
   type SearchFields,
 } from "@lib/content/recipe-search";
+import { createRecipeSearch } from "@lib/content/recipe-search-engine";
 import { describe, expect, it } from "vitest";
 
 const recipe = (id: string, fields: Partial<SearchFields>) => ({
@@ -120,5 +121,29 @@ describe("byRelevance", () => {
       { id: "d", date: 0 },
     ];
     expect(entries.sort(byRelevance(hits)).map(({ id }) => id)).toEqual(["d", "c", "a", "b"]);
+  });
+});
+
+describe("recipeSearchFields", () => {
+  it("indexes the labels with the SEO keywords, and each ingredient by name", () => {
+    const fields = recipeSearchFields(
+      {
+        title: "Tarte",
+        keywords: ["dessert"],
+        excerpt: "Acidulée",
+        ingredientGroups: [
+          { ingredients: [{ name: "Farine" }] },
+          { ingredients: [{ name: "Citron" }] },
+        ],
+      },
+      ["Tartes", "Été"],
+    );
+
+    expect(fields).toEqual({
+      title: "Tarte",
+      labels: "Tartes Été dessert",
+      ingredients: ["Farine", "Citron"],
+      excerpt: "Acidulée",
+    });
   });
 });

@@ -22,7 +22,6 @@ import { assertTranslations, inLocale, translationsOf } from "@lib/content/i18n"
 import {
   formatDuration,
   ingredientCount,
-  isPublished,
   recipePath,
   recipeSharedFields,
   recipeTransitionName,
@@ -30,6 +29,7 @@ import {
   totalTime,
 } from "@lib/content/recipe";
 import { factsLine, recipeCard } from "@lib/content/recipe-card";
+import { getPublishedRecipes } from "@lib/content/recipe-catalog";
 import { SEASONS } from "@lib/content/season";
 import { ogImage } from "@lib/seo/images";
 import { breadcrumbLd, recipeLd } from "@lib/seo/jsonld";
@@ -39,9 +39,7 @@ import { siteConfig, socialProfiles } from "@site";
 
 export async function getStaticPaths() {
   assertTranslations(await getCollection("recipes"), recipeSharedFields);
-  const recipes = await getCollection("recipes", (entry) =>
-    isPublished(entry, import.meta.env.PROD),
-  );
+  const recipes = await getPublishedRecipes();
 
   return recipes.map((recipe) => ({
     params: { lang: recipe.data.locale, slug: recipe.data.paths },
@@ -247,7 +245,7 @@ const related = selectRelatedRecipes(recipe, recipes).map((entry) => recipeCard(
             {data.sections.map((section) => (
               <section class="post-section">
                 {section.title && <h2 class="post-section__title">{section.title}</h2>}
-                <Prose html={section.content} />
+                <Prose text={section.content} />
                 {section.media.length > 0 && (
                   <MediaCarousel
                     media={section.media}

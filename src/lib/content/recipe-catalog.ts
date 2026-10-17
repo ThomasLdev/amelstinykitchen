@@ -16,6 +16,18 @@ interface CatalogRecipe {
   search: SearchFields;
 }
 
+/** Drafts show in dev only. Newest first; every locale when none is given. */
+export async function getPublishedRecipes(locale?: Locale): Promise<CollectionEntry<"recipes">[]> {
+  const recipes = await getCollection(
+    "recipes",
+    (entry) => isPublished(entry, import.meta.env.PROD) && (!locale || inLocale(locale)(entry)),
+  );
+  return recipes.sort(
+    (a, b) =>
+      b.data.publishDate.valueOf() - a.data.publishDate.valueOf() || a.id.localeCompare(b.id),
+  );
+}
+
 export async function loadTaxonomies(locale: Locale) {
   const localized = <T extends { id: string; data: Record<Locale, unknown> }>(entries: T[]) =>
     new Map(entries.map((entry) => [entry.id, localize(entry, locale)]));
@@ -26,22 +38,15 @@ export async function loadTaxonomies(locale: Locale) {
 }
 
 /**
- * Published recipes of a locale, newest first, with their localized labels:
+ * Published recipes of a locale with their localized labels:
  * shared by the recipes list and the search index so both search the same text.
  */
 export async function loadRecipeCatalog(locale: Locale): Promise<CatalogRecipe[]> {
   const t = useTranslations(locale);
-  const recipes = await getCollection(
-    "recipes",
-    (entry) => isPublished(entry, import.meta.env.PROD) && inLocale(locale)(entry),
-  );
+  const recipes = await getPublishedRecipes(locale);
   const { categories, tags } = await loadTaxonomies(locale);
 
-  const sorted = recipes.sort(
-    (a, b) =>
-      b.data.publishDate.valueOf() - a.data.publishDate.valueOf() || a.id.localeCompare(b.id),
-  );
-  return sorted.map((recipe) => {
+  return recipes.map((recipe) => {
     const { data } = recipe;
     const categoryLabel = categories.get(data.category.id)?.data.title ?? "";
     const recipeTags = data.tags.flatMap((ref) => {

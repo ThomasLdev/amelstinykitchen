@@ -29,7 +29,7 @@ const tipWarning = tip?.type === "warning";
 
     <div class="step__body">
       {title && <h3 class="step__title">{title}</h3>}
-      {content && <Prose html={content} class="step__content" />}
+      {content && <Prose markdown={content} class="step__content" />}
 
       {media && media.length > 0 && (
         <div class="step__media">

@@ -71,6 +71,10 @@ export const excerpt = z
   .default("")
   .meta(cms({ label: "Chapô", widget: "text", translate: true }));
 
+export const longText = (label: string) =>
+  z.string().meta(cms({ label, widget: "text", translate: true }));
+
+/** The only formatted field: steps may need bold, lists or links. */
 export const markdown = (label: string) =>
   z.string().meta(cms({ label, widget: "markdown", translate: true }));
 
@@ -116,7 +120,7 @@ export function sharedSchemas<T extends z.ZodType>(image: () => T) {
 
   const section = z.object({
     title: text("Titre"),
-    content: markdown("Contenu"),
+    content: longText("Contenu"),
     media: mediaList("Illustrations"),
   });
 

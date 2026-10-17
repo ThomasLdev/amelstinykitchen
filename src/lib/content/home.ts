@@ -48,15 +48,17 @@ export function selectFeaturedTags<T extends TagLike>(
   recipes: RecipeLike[],
   limit = HOME_LIMIT,
 ): Array<{ tag: T; recipeCount: number }> {
+  // Tags without a recipe are left out: their filtered list would be empty.
   return tags
     .filter((tag) => tag.data.isFeatured)
     .sort((a, b) => a.id.localeCompare(b.id))
-    .slice(0, limit)
     .map((tag) => ({
       tag,
       recipeCount: recipes.filter((recipe) => recipe.data.tags.some((ref) => ref.id === tag.id))
         .length,
-    }));
+    }))
+    .filter(({ recipeCount }) => recipeCount > 0)
+    .slice(0, limit);
 }
 
 export function selectSeasonRecipes<T extends RecipeLike & { data: { seasons: Season[] } }>(

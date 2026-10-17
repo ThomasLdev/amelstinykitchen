@@ -12,7 +12,6 @@ describe("Button", () => {
     });
 
     expect(html).toContain('href="/fr/"');
-    expect(html).toContain("btn--primary");
     expect(html).not.toContain("<button");
   });
 

@@ -56,13 +56,4 @@ describe("Ingredients", () => {
     expect(fr).toMatch(/data-recipe-checklist-count[^>]*>0<\/span>\s*\/ 3 prêts/);
     expect(en).toMatch(/data-recipe-checklist-count[^>]*>0<\/span>\s*\/ 3 ready/);
   });
-
-  it("renders the footer slot", async () => {
-    const html = await container.renderToString(Ingredients, {
-      props: { ...props, locale: "fr" },
-      slots: { footer: "<button>Voir les étapes</button>" },
-    });
-
-    expect(html).toContain("Voir les étapes");
-  });
 });

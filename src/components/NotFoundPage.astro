@@ -11,9 +11,9 @@ import Section from "@components/Section.astro";
 import { type Locale, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { selectFeaturedTags, selectHeroRecipe } from "@lib/content/home";
-import { inLocale, localize } from "@lib/content/i18n";
-import { isPublished } from "@lib/content/recipe";
+import { localize } from "@lib/content/i18n";
 import { recipeCard } from "@lib/content/recipe-card";
+import { getPublishedRecipes } from "@lib/content/recipe-catalog";
 
 interface Props {
   locale: Locale;
@@ -22,10 +22,7 @@ interface Props {
 const { locale } = Astro.props;
 const t = useTranslations(locale);
 
-const recipes = await getCollection(
-  "recipes",
-  (entry) => isPublished(entry, import.meta.env.PROD) && inLocale(locale)(entry),
-);
+const recipes = await getPublishedRecipes(locale);
 const tags = (await getCollection("tags")).map((tag) => localize(tag, locale));
 
 const homeUrl = getRelativeLocaleUrl(locale, "");
@@ -34,14 +31,10 @@ const recipesUrl = getRelativeLocaleUrl(locale, "recipes");
 const featured = selectHeroRecipe(recipes);
 const recipe = featured && recipeCard(featured, locale);
 
-// The recipes page only offers tags in use.
-const cravings = selectFeaturedTags(tags, recipes, tags.length)
-  .filter(({ recipeCount }) => recipeCount > 0)
-  .slice(0, 4)
-  .map(({ tag }) => ({
-    label: tag.data.title,
-    href: `${recipesUrl}?tag=${tag.id}`,
-  }));
+const cravings = selectFeaturedTags(tags, recipes, 4).map(({ tag }) => ({
+  label: tag.data.title,
+  href: `${recipesUrl}?tag=${tag.id}`,
+}));
 ---
 
 <BaseLayout title={`${t.notFound.title} · ${t.meta.title}`} locale={locale} noindex>

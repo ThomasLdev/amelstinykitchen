@@ -5,12 +5,12 @@ import { createContainer } from "../helpers";
 const container = await createContainer();
 
 describe("Footer", () => {
-  it("renders the recipes disclosure and the current year", async () => {
+  it("links each season to the recipes list filtered by it", async () => {
     const html = await container.renderToString(Footer, { props: { locale: "fr" } });
 
-    expect(html).toContain("<details");
-    expect(html).toContain("Recettes");
-    expect(html).toContain(String(new Date().getFullYear()));
+    for (const season of ["spring", "summer", "autumn", "winter"]) {
+      expect(html).toMatch(new RegExp(`href="/fr/recipes/\\?season=${season}"`));
+    }
   });
 
   it("links to the translated page in the other language", async () => {

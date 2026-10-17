@@ -7,6 +7,7 @@ import {
   excerpt,
   isFeatured,
   locale,
+  longText,
   markdown,
   metaDescription,
   metaTitle,
@@ -192,7 +193,7 @@ const recipes = defineCollection({
               }),
             ),
           chefNote: z
-            .object({ title: text("Titre"), body: markdown("Texte") })
+            .object({ title: text("Titre"), body: longText("Texte") })
             .optional()
             .meta(
               cms({

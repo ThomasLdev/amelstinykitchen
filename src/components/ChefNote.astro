@@ -19,11 +19,7 @@ const t = useTranslations(locale);
       <span class="chef-note__label">{t.recipe.chef.label}</span>
     </div>
     <div class="chef-note__body">
-      {title && (
-        <h3 class="chef-note__title">
-          <Fragment set:html={title} />
-        </h3>
-      )}
+      {title && <h3 class="chef-note__title">{title}</h3>}
       {body && <p class="chef-note__text">{body}</p>}
     </div>
   </aside>

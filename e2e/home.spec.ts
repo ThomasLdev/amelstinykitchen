@@ -80,7 +80,7 @@ test("cravings block features the visitor's season, not the build's", async ({ p
   ]);
 });
 
-test('desktop shows a single "all recipes" link, next to the title', async ({ page }) => {
+test('exposes a single "all recipes" link on desktop', async ({ page }) => {
   await page.goto(HOME_FR);
   await expect(page.getByRole("link", { name: fr.home.popular.viewAll })).toHaveCount(1);
 });

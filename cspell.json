@@ -20,11 +20,13 @@
     "llms",
     "minisearch",
     "opencode",
+    "satteri",
     "sveltia",
     "symfony",
     "tinie",
     "tinos",
-    "tinybakery"
+    "tinybakery",
+    "unstub"
   ],
   "ignoreRegExpList": ["data:image/svg\\+xml,[^\"]+"],
   "ignorePaths": [

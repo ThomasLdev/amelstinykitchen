@@ -18,9 +18,10 @@ import {
   selectPopularRecipes,
   selectSeasonRecipes,
 } from "@lib/content/home";
-import { inLocale, localize } from "@lib/content/i18n";
-import { formatDuration, isPublished, totalTime } from "@lib/content/recipe";
+import { localize } from "@lib/content/i18n";
+import { formatDuration, totalTime } from "@lib/content/recipe";
 import { factsLine, recipeCard, recipeFacts, recipeHref } from "@lib/content/recipe-card";
+import { getPublishedRecipes } from "@lib/content/recipe-catalog";
 import { currentSeason, SEASONS } from "@lib/content/season";
 import { seasonImages } from "@lib/content/season-images";
 import { ogImage } from "@lib/seo/images";
@@ -32,10 +33,7 @@ export const getStaticPaths = localeParams;
 const locale = toLocale(Astro.params.lang);
 const t = useTranslations(locale);
 
-const recipes = await getCollection(
-  "recipes",
-  (entry) => isPublished(entry, import.meta.env.PROD) && inLocale(locale)(entry),
-);
+const recipes = await getPublishedRecipes(locale);
 const tags = (await getCollection("tags")).map((tag) => localize(tag, locale));
 
 const recipesUrl = getRelativeLocaleUrl(locale, "recipes");
@@ -60,14 +58,11 @@ const popular = selectPopularRecipes(recipes).map((recipe) => {
   };
 });
 
-const cravingTags = selectFeaturedTags(tags, recipes, tags.length)
-  .filter(({ recipeCount }) => recipeCount > 0)
-  .slice(0, 7)
-  .map(({ tag }) => ({
-    name: tag.data.title,
-    href: `${recipesUrl}?tag=${tag.id}`,
-    image: tag.data.image,
-  }));
+const cravingTags = selectFeaturedTags(tags, recipes, 7).map(({ tag }) => ({
+  name: tag.data.title,
+  href: `${recipesUrl}?tag=${tag.id}`,
+  image: tag.data.image,
+}));
 
 // Every season with recipes is rendered: the script shows the visitor's, the build's without JS.
 const buildSeason = currentSeason(new Date());
