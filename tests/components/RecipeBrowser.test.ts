@@ -3,6 +3,7 @@ import fr from "@i18n/fr";
 import type { RecipeFacet } from "@lib/content/recipe-filters";
 import type { BrowserStrings } from "@scripts/recipes/browser";
 import { describe, expect, it } from "vitest";
+import cover from "../fixtures/cover.png";
 import { createContainer } from "../helpers";
 
 const container = await createContainer();
@@ -47,6 +48,17 @@ describe("RecipeBrowser", () => {
     );
     expect(facets).toEqual(props.items.map(({ facet }) => facet));
     expect(html).toContain("data-recipe-list");
+  });
+
+  it("loads the images of the cards visible on first paint right away, the others lazily", async () => {
+    const items = ["a", "b", "c", "d", "e", "f"].map((id) => {
+      const { card, facet } = item(id, "tartes");
+      return { card: { ...card, image: cover }, facet };
+    });
+    const html = await container.renderToString(RecipeBrowser, { props: { ...props, items } });
+
+    const loading = [...html.matchAll(/<img[^>]*loading="(\w+)"/g)].map(([, value]) => value);
+    expect(loading).toEqual(["eager", "eager", "eager", "eager", "lazy", "lazy"]);
   });
 
   it("renders a count, a quick chip and a removable chip for every filter value", async () => {
