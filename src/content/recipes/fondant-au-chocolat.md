@@ -12,6 +12,16 @@ category: "desserts"
 tags:
   - "chocolat"
   - "vegetarien"
+cuisine:
+  fr: "Française"
+  en: "French"
+keywords:
+  - fr: "fondant au chocolat"
+    en: "chocolate fondant"
+  - fr: "dessert rapide"
+    en: "quick dessert"
+  - fr: "cœur coulant"
+    en: "molten centre"
 difficulty: "easy"
 preparationTime: 10
 cookingTime: 10

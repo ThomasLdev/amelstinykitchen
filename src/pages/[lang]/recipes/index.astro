@@ -1,6 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import { getRelativeLocaleUrl } from "astro:i18n";
+import { getAbsoluteLocaleUrl, getRelativeLocaleUrl } from "astro:i18n";
 import Breadcrumb from "@components/Breadcrumb.astro";
 import Container from "@components/Container.astro";
 import PageHeader from "@components/PageHeader.astro";
@@ -11,6 +11,7 @@ import type { Season } from "@lib/content/home";
 import { translate } from "@lib/content/i18n";
 import { formatDuration, isPublished, totalTime } from "@lib/content/recipe";
 import { type RecipeFacet, sortRecipes } from "@lib/content/recipe-filters";
+import { breadcrumbLd, itemListLd } from "@lib/seo/jsonld";
 
 export function getStaticPaths() {
   return Object.keys(languages).map((lang) => ({ params: { lang } }));
@@ -51,6 +52,7 @@ const items = recipes.map((recipe) => {
 
   return {
     facet,
+    url: getAbsoluteLocaleUrl(locale, `recipes/${data.paths[locale]}`),
     card: {
       href: getRelativeLocaleUrl(locale, `recipes/${data.paths[locale]}`),
       title,
@@ -69,6 +71,16 @@ const sorted = sortRecipes(
   items.map((item) => ({ ...item.facet, item })),
   "popular",
 ).map(({ item }) => item);
+
+const title = `${t.recipes.meta.title} · ${t.meta.title}`;
+const pageUrl = getAbsoluteLocaleUrl(locale, "recipes");
+const jsonLd = [
+  itemListLd({ url: pageUrl, name: t.recipes.meta.title, items: sorted.map((item) => item.url) }),
+  breadcrumbLd([
+    { name: t.recipe.breadcrumb.home, url: getAbsoluteLocaleUrl(locale, "") },
+    { name: t.recipes.breadcrumb },
+  ]),
+];
 
 // Categories and tags without a recipe are left out; the four seasons always show.
 const usedCategories = new Set(items.map(({ facet }) => facet.category));
@@ -93,9 +105,11 @@ const tagOptions = [...tags.values()]
 ---
 
 <BaseLayout
-  title={`${t.recipes.meta.title} · ${t.meta.title}`}
+  title={title}
   description={t.recipes.meta.description}
   locale={locale}
+  alternates={{ fr: "recipes", en: "recipes" }}
+  jsonLd={jsonLd}
 >
   <Container>
     <PageHeader title={t.recipes.title} titleEm={t.recipes.titleEm}>

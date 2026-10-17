@@ -1,6 +1,6 @@
 ---
 import { type CollectionEntry, getCollection, getEntries } from "astro:content";
-import { getRelativeLocaleUrl } from "astro:i18n";
+import { getAbsoluteLocaleUrl, getRelativeLocaleUrl } from "astro:i18n";
 import Container from "@components/Container.astro";
 import FeaturedRecipe from "@components/FeaturedRecipe.astro";
 import HomeHero from "@components/HomeHero.astro";
@@ -15,6 +15,9 @@ import BaseLayout from "@layouts/BaseLayout.astro";
 import { selectFeaturedTags, selectHeroRecipe, selectPopularRecipes } from "@lib/content/home";
 import { translate } from "@lib/content/i18n";
 import { formatDuration, isPublished, totalTime } from "@lib/content/recipe";
+import { ogImage } from "@lib/seo/images";
+import { websiteLd } from "@lib/seo/jsonld";
+import { siteConfig, socialProfiles } from "@site";
 
 export function getStaticPaths() {
   return Object.keys(languages).map((lang) => ({ params: { lang } }));
@@ -70,10 +73,32 @@ const featuredTags = selectFeaturedTags(tags, recipes, new Date()).map(
   }),
 );
 
+const site = Astro.site ?? new URL(Astro.url.origin);
+const homeUrl = getAbsoluteLocaleUrl(locale, "");
+const heroMedia = heroRecipe?.data.media[0];
+const shareImage =
+  heroMedia && (await ogImage(heroMedia.src, translate(heroMedia.alt, locale), site));
+const jsonLd = [
+  websiteLd({
+    url: homeUrl,
+    name: siteConfig.name,
+    description: t.meta.description,
+    locale,
+    publisher: { name: siteConfig.author.name, url: homeUrl, sameAs: socialProfiles() },
+  }),
+];
+
 const ideas = featuredTags.slice(0, 4).map(({ name }) => ({ label: name, href: searchHref(name) }));
 ---
 
-<BaseLayout title={t.meta.title} description={t.meta.description} locale={locale}>
+<BaseLayout
+  title={t.meta.title}
+  description={t.meta.description}
+  locale={locale}
+  alternates={{ fr: "", en: "" }}
+  image={shareImage}
+  jsonLd={jsonLd}
+>
   <Container>
     <HomeHero
       kicker={t.home.intro.kicker}

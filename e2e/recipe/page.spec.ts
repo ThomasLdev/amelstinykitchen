@@ -17,11 +17,10 @@ test.describe("recipe page", () => {
 
     await expect(page.locator("html")).toHaveAttribute("lang", "fr");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Recette complète");
-    await expect(
-      page
-        .getByRole("navigation", { name: fr.a11y.breadcrumb })
-        .getByRole("link", { name: "Catégorie test" }),
-    ).toBeVisible();
+    // No category page yet: the crumb is shown as text, never as a dead link.
+    const breadcrumb = page.getByRole("navigation", { name: fr.a11y.breadcrumb });
+    await expect(breadcrumb).toContainText("Catégorie test");
+    await expect(breadcrumb.getByRole("link", { name: "Catégorie test" })).toHaveCount(0);
     await expect(ingredientsPanel(page).getByRole("checkbox")).toHaveCount(COMPLETE.ingredients);
     await expect(stepsPanel(page).locator("article")).toHaveCount(COMPLETE.steps);
     await expect(ingredientsPanel(page)).toContainText(`0 / ${COMPLETE.ingredients} prêts`);

@@ -7,6 +7,10 @@ title:
 paths:
   fr: "recette-narrative"
   en: "narrative-recipe"
+# No excerpt (cards stay without summary): the meta description comes from metaDescription.
+metaDescription:
+  fr: "Description SEO de la recette narrative."
+  en: "SEO description of the narrative recipe."
 category: "categorie-test"
 difficulty: "easy"
 isFeatured: true

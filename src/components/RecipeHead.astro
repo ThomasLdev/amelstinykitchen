@@ -11,7 +11,7 @@ interface Props {
   title: string;
   tags?: string[];
   excerpt?: string;
-  /** Short context line (category, tags) shown instead of the breadcrumb on mobile. */
+  /** Short context line (category, tags) shown instead of the tag chips on mobile. */
   kicker?: string;
   /** Fragment of the recipe body targeted by the "jump to recipe" link. */
   recipeAnchor?: string;
@@ -33,15 +33,17 @@ const t = useTranslations(locale);
 ---
 
 <header class:list={["recipe-head", className]} {...rest}>
+  {Astro.slots.has("breadcrumb") && (
+    <div class="recipe-head__breadcrumb">
+      <slot name="breadcrumb" />
+    </div>
+  )}
+
   <div class="recipe-head__media">
     <slot name="media" />
   </div>
 
   <div class="recipe-head__lede">
-    <div class="recipe-head__breadcrumb">
-      <slot name="breadcrumb" />
-    </div>
-
     <div class="recipe-head__intro">
       {kicker && <Kicker class="recipe-head__kicker">{kicker}</Kicker>}
       <div class="recipe-head__title-row">
@@ -127,10 +129,9 @@ const t = useTranslations(locale);
       color: var(--ink-2);
     }
 
-    /* Mobile: the kicker (category · tags) stands in for the breadcrumb and
-       chips to keep the hero compact; category links remain in the nav.
-       Share moves next to the title, so the actions row is desktop only. */
-    .recipe-head__breadcrumb,
+    /* Mobile: the kicker (category · tags) stands in for the chips to keep
+       the hero compact. Share moves next to the title, so the actions row is
+       desktop only. */
     .recipe-head__tags,
     .recipe-head__actions {
       display: none;
@@ -156,8 +157,15 @@ const t = useTranslations(locale);
     @media (min-width: 900px) {
       display: grid;
       grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-      align-items: center;
-      gap: var(--space-6);
+      /* The outer 1fr rows centre breadcrumb + lede as one block beside the
+         media, as if the breadcrumb were still inside the lede. */
+      grid-template-rows: 1fr auto auto 1fr;
+      grid-template-areas:
+        ". media"
+        "breadcrumb media"
+        "lede media"
+        ". media";
+      gap: 0 var(--space-6);
       padding-block: var(--space-4) var(--space-6);
 
       .recipe-head__lede {
@@ -165,7 +173,8 @@ const t = useTranslations(locale);
       }
 
       .recipe-head__breadcrumb {
-        display: block;
+        grid-area: breadcrumb;
+        margin-block-end: var(--space-4);
       }
 
       .recipe-head__kicker {
@@ -188,13 +197,12 @@ const t = useTranslations(locale);
       }
 
       .recipe-head__lede {
-        grid-column: 1;
-        grid-row: 1;
+        grid-area: lede;
       }
 
       .recipe-head__media {
-        grid-column: 2;
-        grid-row: 1;
+        grid-area: media;
+        align-self: center;
       }
 
       .recipe-head__excerpt {
@@ -208,26 +216,29 @@ const t = useTranslations(locale);
     @media print {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 15rem;
+      /* Overrides the screen grid, which a landscape page is wide enough to match. */
+      grid-template-rows: none;
+      grid-template-areas: "lede media";
       align-items: start;
       gap: 1.5rem;
       padding-block: 0 1.5rem;
       break-inside: avoid;
 
       .recipe-head__lede {
-        grid-column: 1;
-        grid-row: 1;
+        grid-area: lede;
         gap: 1rem;
       }
 
       .recipe-head__media {
-        grid-column: 2;
-        grid-row: 1;
+        grid-area: media;
+        align-self: start;
       }
 
       .recipe-head__title {
         font-size: 2.25rem;
       }
 
+      .recipe-head__breadcrumb,
       .recipe-head__actions,
       .recipe-head__title-share {
         display: none;

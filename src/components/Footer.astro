@@ -3,23 +3,37 @@ import { getRelativeLocaleUrl } from "astro:i18n";
 import Container from "@components/Container.astro";
 import Icon from "@components/Icon.astro";
 import Logo from "@components/Logo.astro";
-import { type Locale, useTranslations } from "@i18n";
+import { type Locale, languages, useTranslations } from "@i18n";
+import { siteConfig } from "@site";
 
 interface Props {
   locale: Locale;
+  /** Locale-relative path of the current page per locale, for the language switch. */
+  alternates?: Partial<Record<Locale, string>>;
   class?: string;
   [key: string]: unknown;
 }
 
-const { locale, class: className, ...rest } = Astro.props;
+const { locale, alternates = {}, class: className, ...rest } = Astro.props;
 const t = useTranslations(locale);
 const year = new Date().getFullYear();
 const homeHref = getRelativeLocaleUrl(locale, "");
 const recipesHref = getRelativeLocaleUrl(locale, "recipes");
 const socials = [
-  { label: t.footer.instagram, href: "#" },
-  { label: t.footer.pinterest, href: "#" },
-];
+  { label: t.footer.instagram, href: siteConfig.social.instagram },
+  { label: t.footer.pinterest, href: siteConfig.social.pinterest },
+].filter((social) => social.href !== "");
+
+const switchLocale = (Object.keys(languages) as Locale[]).find((lang) => lang !== locale);
+const switchPath = switchLocale && alternates[switchLocale];
+const languageSwitch =
+  switchLocale && switchPath !== undefined
+    ? {
+        lang: switchLocale,
+        href: getRelativeLocaleUrl(switchLocale, switchPath),
+        label: useTranslations(switchLocale).footer.languageName,
+      }
+    : undefined;
 ---
 
 <footer class:list={["footer", className]} data-site-footer {...rest}>
@@ -62,15 +76,30 @@ const socials = [
         {" · "}
         {t.footer.copyright}
       </span>
-      <ul class="footer__socials" aria-label={t.footer.socialsAriaLabel}>
-        {socials.map((social) => (
-          <li class="footer__socials-item">
-            <a href={social.href} class="footer__social">
-              {social.label}
-            </a>
-          </li>
-        ))}
-      </ul>
+      <div class="footer__aside">
+        {socials.length > 0 && (
+          <ul class="footer__socials" aria-label={t.footer.socialsAriaLabel}>
+            {socials.map((social) => (
+              <li class="footer__socials-item">
+                <a href={social.href} class="footer__social" rel="me">
+                  {social.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+        {languageSwitch && (
+          <a
+            href={languageSwitch.href}
+            class="footer__lang"
+            hreflang={languageSwitch.lang}
+            lang={languageSwitch.lang}
+          >
+            <Icon name="languages" size={16} />
+            {languageSwitch.label}
+          </a>
+        )}
+      </div>
     </div>
   </Container>
 </footer>
@@ -169,7 +198,8 @@ const socials = [
 
   .footer__link,
   .footer__home,
-  .footer__social {
+  .footer__social,
+  .footer__lang {
     transition: color var(--transition-base);
   }
 
@@ -205,6 +235,21 @@ const socials = [
     color: var(--accent-soft);
   }
 
+  .footer__aside {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.625rem 1.25rem;
+  }
+
+  .footer__lang {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.75rem;
+    font-size: 0.6875rem;
+  }
+
   .footer__socials {
     display: flex;
     flex-wrap: wrap;
@@ -223,11 +268,20 @@ const socials = [
   }
 
   .footer__social {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+
+  .footer__social,
+  .footer__lang {
     color: var(--on-ink-muted);
   }
 
   .footer__social:hover,
-  .footer__social:focus-visible {
+  .footer__social:focus-visible,
+  .footer__lang:hover,
+  .footer__lang:focus-visible {
     color: var(--accent-soft);
   }
 

@@ -24,6 +24,8 @@ const fr = {
     search: "Recherche",
   },
   footer: {
+    /** Name of this language, in itself (language switch). */
+    languageName: "Français",
     tagline: "Des recettes simples et généreuses, à partager sans façon.",
     recipesTitle: "Recettes",
     recipesAriaLabel: "Catégories de recettes",
@@ -106,9 +108,28 @@ const fr = {
       tip: "Astuce.",
       warning: "Attention.",
     },
+    related: {
+      kicker: "À cuisiner aussi",
+      title: "Dans le même",
+      titleEm: "esprit",
+    },
     chef: {
       label: "L'astuce pour cette recette",
     },
+  },
+  markdown: {
+    /** French typography: a space before the colon. */
+    separator: " : ",
+    source: "Source",
+    category: "Catégorie",
+    cuisine: "Cuisine",
+    recipes: "Recettes",
+  },
+  notFound: {
+    title: "Page introuvable",
+    text: "Cette page n'existe pas ou a été déplacée.",
+    home: "Retour à l'accueil",
+    recipes: "Voir toutes les recettes",
   },
   recipes: {
     meta: {
