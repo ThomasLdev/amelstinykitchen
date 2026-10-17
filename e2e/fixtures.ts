@@ -23,7 +23,7 @@ export const COMPLETE = {
 /** recette-narrative.md has no English translation. */
 export const NARRATIVE_TITLE_FR = "Recette narrative";
 export const DRAFT_TITLE_FR = "Recette brouillon";
-export const FEATURED_TAG = { id: "tag-test", title: "Tag test", publishedRecipes: 1 } as const;
+export const FEATURED_TAG = { id: "tag-test", title: "Tag test" } as const;
 
 export const ingredientsPanel = (page: Page) => page.locator("[data-recipe-checklist]");
 export const stepsPanel = (page: Page) => page.locator(".recipe-steps");

@@ -1,4 +1,10 @@
-import { selectFeaturedTags, selectHeroRecipe, selectPopularRecipes } from "@lib/content/home";
+import {
+  selectFeaturedTags,
+  selectHeroRecipe,
+  selectPopularRecipes,
+  selectSeasonRecipes,
+} from "@lib/content/home";
+import type { Season } from "@lib/content/season";
 import { describe, expect, it } from "vitest";
 
 const recipe = (
@@ -9,6 +15,7 @@ const recipe = (
     publishDate: string;
     updatedDate: string;
     tags: string[];
+    seasons: Season[];
   }> = {},
 ) => ({
   id,
@@ -18,6 +25,7 @@ const recipe = (
     publishDate: new Date(data.publishDate ?? "2026-01-01"),
     updatedDate: data.updatedDate ? new Date(data.updatedDate) : undefined,
     tags: (data.tags ?? []).map((tagId) => ({ id: tagId })),
+    seasons: data.seasons ?? [],
   },
 });
 
@@ -64,6 +72,22 @@ describe("selectFeaturedTags", () => {
     ).toEqual([
       ["citron", 2],
       ["vegan", 0],
+    ]);
+  });
+});
+
+describe("selectSeasonRecipes", () => {
+  it("keeps the season's recipes, featured first, then the most recently touched", () => {
+    const recipes = [
+      recipe("old", { seasons: ["winter"], publishDate: "2025-01-01" }),
+      recipe("summer", { seasons: ["summer"], isFeatured: true }),
+      recipe("featured", { seasons: ["winter", "autumn"], isFeatured: true }),
+      recipe("updated", { seasons: ["winter"], updatedDate: "2026-06-01" }),
+    ];
+    expect(selectSeasonRecipes(recipes, "winter").map((r) => r.id)).toEqual([
+      "featured",
+      "updated",
+      "old",
     ]);
   });
 });

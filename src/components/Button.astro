@@ -1,6 +1,6 @@
 ---
 interface Props {
-  variant?: "primary" | "ghost" | "soft";
+  variant?: "primary" | "ghost" | "soft" | "ink";
   size?: "sm" | "md";
   href?: string;
   class?: string;
@@ -75,6 +75,17 @@ const classes = ["btn", `btn--${variant}`, size !== "md" && `btn--${size}`, clas
       &:hover {
         border-color: var(--accent);
         color: var(--accent-ink);
+      }
+    }
+
+    &.btn--ink {
+      background: var(--ink);
+      color: var(--on-ink);
+
+      &:hover {
+        background: var(--accent-ink);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-soft);
       }
     }
 

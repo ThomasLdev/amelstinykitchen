@@ -3,6 +3,8 @@
  * editorial rules are unit-testable without the content layer.
  */
 
+import type { Season } from "@lib/content/season";
+
 interface RecipeLike {
   id: string;
   data: {
@@ -55,4 +57,16 @@ export function selectFeaturedTags<T extends TagLike>(
       recipeCount: recipes.filter((recipe) => recipe.data.tags.some((ref) => ref.id === tag.id))
         .length,
     }));
+}
+
+export function selectSeasonRecipes<T extends RecipeLike & { data: { seasons: Season[] } }>(
+  recipes: T[],
+  season: Season,
+): T[] {
+  return recipes
+    .filter((recipe) => recipe.data.seasons.includes(season))
+    .sort(
+      (a, b) =>
+        Number(b.data.isFeatured) - Number(a.data.isFeatured) || byDateDesc(lastTouched)(a, b),
+    );
 }

@@ -22,12 +22,18 @@ test("root redirects to the French locale", async ({ page }) => {
   await expect(page).toHaveURL(/\/fr\/?$/);
 });
 
-test("intro searches with the typed query", async ({ page }) => {
+test("intro search opens the recipes list filtered by the typed query", async ({ page }) => {
   await page.goto(HOME_FR);
   await expect(page.locator("main h1")).toContainText(fr.home.intro.titleEm);
-  await page.getByLabel(fr.home.search.label).fill("citron");
+  await page.getByLabel(fr.home.search.label).fill("filtre");
   await page.getByRole("button", { name: fr.home.search.submit }).click();
-  await expect(page).toHaveURL(/\/fr\/search\/?\?q=citron$/);
+
+  await expect(page.getByRole("searchbox", { name: fr.recipes.search.label })).toHaveValue(
+    "filtre",
+  );
+  await expect(recipeList(page).getByRole("heading", { level: 3 })).toHaveText([
+    FILTER_RECIPE.title,
+  ]);
 });
 
 test("featured card shows the newest published recipe, never a draft", async ({ page }) => {
@@ -52,27 +58,22 @@ test("popular block lists featured published recipes", async ({ page }) => {
   await expect(page.getByText(DRAFT_TITLE_FR)).toHaveCount(0);
 });
 
-test("cravings block counts published recipes and links each tag to its filter", async ({
-  page,
-}) => {
+test("cravings discs link each featured tag to its filter", async ({ page }) => {
   await page.goto(HOME_FR);
-  const cravings = block(page, fr.home.tags.titleEm);
-  const tagLink = cravings.getByRole("link", { name: FEATURED_TAG.title });
-  // The draft also carries the tag but is not published.
-  await expect(tagLink).toContainText(fr.home.tags.recipesCount(FEATURED_TAG.publishedRecipes));
-  await tagLink.click();
+  const discs = page.getByRole("navigation", { name: fr.home.tags.nav });
+  await discs.getByRole("link", { name: FEATURED_TAG.title }).click();
   await expect(page.getByRole("checkbox", { name: FEATURED_TAG.title })).toBeChecked();
 });
 
-test("cravings block shows the visitor's season, not the build's", async ({ page }) => {
+test("cravings block features the visitor's season, not the build's", async ({ page }) => {
   await page.clock.setFixedTime(new Date(2027, 0, 15));
   await page.goto(HOME_FR);
   const cravings = block(page, fr.home.tags.titleEm);
-  await expect(cravings.getByRole("link", { name: fr.recipes.seasons.summer })).toBeHidden();
-  const winter = cravings.getByRole("link", { name: FILTER_RECIPE.season });
-  await expect(winter).toContainText(fr.home.tags.inSeason);
-  await winter.click();
+  const [before, em, after] = fr.home.tags.seasonTitle.winter;
+  await expect(cravings.getByRole("heading", { level: 3 })).toHaveText(`${before}${em}${after}`);
+  await expect(cravings.getByRole("link", { name: FILTER_RECIPE.title })).toBeVisible();
 
+  await cravings.getByRole("link", { name: fr.home.tags.seasonRecipes.winter(1) }).click();
   await expect(page.getByRole("radio", { name: FILTER_RECIPE.season })).toBeChecked();
   await expect(recipeList(page).getByRole("heading", { level: 3 })).toHaveText([
     FILTER_RECIPE.title,

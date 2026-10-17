@@ -1,0 +1,44 @@
+---
+import CravingsNav from "@components/CravingsNav.astro";
+import SeasonFeature from "@components/SeasonFeature.astro";
+import type { ComponentProps } from "astro/types";
+
+interface Props {
+  seasons: ComponentProps<typeof SeasonFeature>[];
+  nav: ComponentProps<typeof CravingsNav>;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { seasons, nav, class: className, ...rest } = Astro.props;
+---
+
+<div class:list={["cravings", className]} {...rest}>
+  {nav.items.length > 0 && <CravingsNav {...nav} class="cravings__nav" />}
+  {seasons.map((season) => <SeasonFeature {...season} />)}
+</div>
+
+<script>
+import "@scripts/season-cards";
+</script>
+
+<style>
+@layer components {
+  .cravings {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+
+    @media (min-width: 720px) {
+      gap: 1.75rem;
+    }
+  }
+
+  /* Phones swipe the discs first; wider screens lead with the season. */
+  .cravings__nav {
+    @media (min-width: 720px) {
+      order: 1;
+    }
+  }
+}
+</style>
