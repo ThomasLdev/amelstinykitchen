@@ -54,8 +54,10 @@ src/styles/
   `Container.astro`, `Section.astro`, `Stack.astro`, `SrOnly.astro`,
   `SkipLink.astro`…, ou des classes dans le `<style>` du composant concerné.
 - **Pas de style d'éléments** (`h1-h4`, `p`, `em`) en global au-delà de la typo
-  de `body` du thème : le rendu du texte riche vit dans un composant `<Prose>`
-  scopé, pas dans un `base.css`.
+  de `body` du thème : le rendu du texte riche vit dans le composant `<Prose>`
+  scopé, pas dans un `base.css`. `<Prose markdown>` rend le markdown (contenu
+  des étapes uniquement) ; `<Prose text>` rend du texte simple échappé, en
+  paragraphes sur les lignes vides. Pas d'autre `set:html` de contenu.
 
 ## Styles par composant (convention Astro)
 
@@ -119,6 +121,9 @@ Règles clés :
   Ajouter une classe. Exceptions : `theme.css` (son rôle).
 - **Nesting natif** et `&` autorisés (le concat SASS `&__el` n'existe pas en CSS
   natif — ne pas l'utiliser).
+- **Piège `:global()` imbriqué** : dans `.prose { … }`, `:global(.prose > p)`
+  devient `.prose .prose > p` et ne matche rien. Pour viser les enfants du bloc
+  lui-même : `& > :global(:first-child)`.
 
 ### Naming
 
@@ -260,8 +265,29 @@ par défaut.
   composant `Icon.astro` unique alimenté par un set (ex. `astro-icon`/Iconify)
   ou des fichiers `src/icons/*.svg` importés. Un seul point d'entrée pour les
   icônes.
-- États (ouvert/fermé, actif…) : préférer un attribut `data-*` sur l'élément
-  plutôt qu'une classe globale `is-*`.
+- **Classes = style, `data-*` = JS** (règle ferme). Le script et les tests
+  n'utilisent jamais une classe comme sélecteur : chaque élément lu par le JS
+  porte un hook `data-*` dédié (`data-recipe-list`, `data-filters-open`…), et la
+  classe reste libre d'être renommée.
+- États (ouvert/fermé, actif…) posés par le JS : un attribut ARIA quand il
+  existe (`aria-pressed`, `aria-current`, `aria-expanded`), sinon `data-*`
+  (`data-nav-state`) ; le CSS peut lire cet état. Jamais de classe `is-*`.
+- **Le script vit avec son composant** : le composant importe son script
+  (`<script>import "@scripts/…";</script>`), pour que le comportement suive le
+  composant sur toutes les pages. Des libellés à réécrire côté client passent
+  par `data-strings`, typés par l'interface exportée du script (`satisfies`).
+- **Panneau / bottom sheet** : composer `Sheet.astro` (fermeture, backdrop,
+  glisser vers le bas, mode `sidebar` en desktop) avec `SheetAction` /
+  `SheetSubmit` ; ne pas réécrire ces comportements dans un nouveau composant.
+- Un bloc rendu sans JS reste utilisable ; les contrôles qui n'ont de sens
+  qu'avec le script sont rendus visibles et masqués par
+  `@media (scripting: none)` (déclaré après leur propre `display`), jamais
+  révélés par le script : leur place est prise dès le premier rendu.
+- **Zéro décalage au chargement** (voir `AGENTS.md`) : image = ratio connu
+  avant chargement (pas d'`aspect-ratio: auto` qui écrase celui des attributs
+  `width`/`height`), contenu asynchrone = skeleton de même taille, état
+  initial posé par un script sans transition (activer la `transition` une
+  fois l'état posé).
 
 ## Accessibilité (WCAG 2.2 AA — non négociable)
 
@@ -390,3 +416,5 @@ Règle : en cas de doute clavier/ARIA, **lire la spec avant de coder**.
 - ❌ SVG inline copié-collé du design (passer par le composant `Icon`).
 - ❌ Réintroduire Tailwind, PostCSS, ou un préprocesseur.
 - ❌ JS là où le CSS/HTML natif suffit.
+- ❌ Sélectionner une classe CSS depuis un script ou un test (hook `data-*`).
+- ❌ `set:html` sur du contenu ailleurs que dans `<Prose markdown>`.

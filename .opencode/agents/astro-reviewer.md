@@ -42,6 +42,27 @@ Your job is to **review, not modify**. Never edit files. Report findings only.
   `public/` only for exact-path assets, no layout shift.
 - **Structure**: pages only in `src/pages/`, sensible placement of
   layouts/components/styles.
+- **Project conventions** (see `AGENTS.md`, sections "Front & CSS",
+  "JS client" and "Conventions maison"):
+  - Client scripts: no catch-all module mixing state, rendering, URL, dialog and
+    events; each concern in its own `create…()` module, pure decisions in
+    `src/lib/`. A script is imported by the component it drives, not the page.
+  - No CSS class used as a selector in scripts or tests (`.foo` in
+    `querySelector`, `closest`, Playwright `locator`): hooks are `data-*`,
+    test locators are roles/accessible names first.
+  - No duplicated domain rule: recipe URLs via `recipePath`/`recipeHref`,
+    published recipes via `getPublishedRecipes`, cards via `recipeCard`,
+    taxonomies via `loadTaxonomies`. Flag any re-implementation.
+  - i18n: no `locale === "fr"` in logic, no hard-coded UI string in a
+    component or a test, client scripts never import `@i18n` (both
+    dictionaries end up in the bundle).
+  - Content: markdown only in step content via `<Prose markdown>`; no other
+    `set:html` of content.
+  - Comments in English, only for obscure code or a particularity; flag
+    paraphrasing comments and "what this function does" docblocks.
+  - Tests: a new pure module in `src/lib/` comes with unit tests (coverage
+    thresholds in `vitest.config.ts` are blocking); no layout/position e2e
+    assertions.
 
 ## Output format
 

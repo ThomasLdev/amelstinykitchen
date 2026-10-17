@@ -1,6 +1,6 @@
 ---
 name: astro-testing
-description: Stratégie et conventions de test du blog Astro — décide entre test unitaire (Vitest + Container API) et end-to-end (Playwright) selon le gain du test, structure un fichier par composant/feature, gère les fixtures de contenu isolées du contenu éditorial. Use when adding, changing or reviewing tests (tests/**, e2e/**), vitest.config.ts, playwright.config.ts, test fixtures, or when a change to a component, script, page or content schema needs test coverage. Ne pas activer pour écrire le composant lui-même (voir design-system).
+description: Stratégie et conventions de test du blog Astro — décide entre test unitaire (Vitest + Container API) et end-to-end (Playwright) selon le gain du test, structure un fichier par composant/feature, gère les fixtures de contenu isolées du contenu éditorial. Use when adding, changing or reviewing tests (tests/**, e2e/**), vitest.config.ts (coverage, seuils), playwright.config.ts, test fixtures, or when a change to a component, script, page or content schema needs test coverage. Ne pas activer pour écrire le composant lui-même (voir design-system).
 ---
 
 # Tests — Astro
@@ -29,11 +29,17 @@ https://docs.astro.build/en/guides/testing/ — la doc fait foi.
 
 Ne **pas** tester :
 
-- Le style/CSS visuel (couleurs, espacements, tailles) → revue visuelle.
+- Le style/CSS visuel (couleurs, espacements, tailles, **positions** : pas de
+  `boundingBox()` pour vérifier qu'un bloc est « au-dessus » d'un autre, pas
+  d'assertion sur une classe CSS) → revue visuelle. Exception : la
+  **stabilité au chargement** (zéro layout shift, règle de `AGENTS.md`) se
+  teste avec la métrique du navigateur, pas avec des positions :
+  `e2e/layout-shift.ts` (`loadShifts()`) + `layout-stability{,.mobile}.spec.ts`.
+  Une nouvelle page s'y ajoute.
 - Les comportements du framework ou du navigateur (Astro scope le CSS, un
   `<details>` s'ouvre…).
-- Les valeurs par défaut triviales, le texte statique, chaque variante d'un
-  composant purement présentationnel.
+- Les valeurs par défaut triviales, le texte statique (l'année du footer…),
+  chaque variante d'un composant purement présentationnel, le rendu d'un slot.
 - Le même comportement deux fois (unitaire **et** e2e) sans raison.
 
 ## 2. Choisir le niveau : unitaire ou e2e
@@ -55,11 +61,26 @@ CSS, mocker `window`, reconstruire un layout), **passer en e2e**. Si un e2e ne
 vérifie qu'un attribut du HTML sans interaction, **descendre en unitaire**.
 
 **Rendre la logique testable** : sortir la décision d'un script client dans un
-module **pur, sans effet de bord à l'import** (ex. `src/scripts/nav-state.ts`
-appelé par `nav.ts`). Un module qui fait `document.querySelectorAll` au
-chargement ne peut pas être importé dans Vitest (`document` n'existe pas).
-Exporter une fonction pure existante (`formatQuantity`) pour la tester est
-légitime.
+module **pur, sans effet de bord à l'import** — de préférence dans `src/lib/`
+(ex. `recipe-filters.ts` pour `scripts/recipes/`, `quantity.ts` pour le
+scaler), sinon à côté du script (`src/scripts/nav-state.ts` appelé par
+`nav.ts`). Un module qui fait `document.querySelectorAll` au chargement ne peut
+pas être importé dans Vitest (`document` n'existe pas).
+
+**Code qui lit les collections** : séparer le fetch du mapping pur et tester le
+mapping avec des entrées construites à la main (ex. `catalogRecipe()` à côté de
+`loadRecipeCatalog()`). Pour tester le fetch lui-même (filtre des brouillons,
+tri), mocker `astro:content` en appliquant **le vrai callback de filtre** à des
+entrées de test, et basculer prod/dev avec `vi.stubEnv("PROD", true)`.
+`getCollection()` répond dans Vitest mais lit le **contenu éditorial** : ne
+jamais s'en servir tel quel.
+
+```ts
+vi.mock("astro:content", () => ({
+  getCollection: async (name: string, filter?: (entry: unknown) => boolean) =>
+    (store[name] ?? []).filter((entry) => filter?.(entry) ?? true),
+}));
+```
 
 ## 3. Organisation : un fichier par composant / feature
 
@@ -119,8 +140,18 @@ describe("Ingredients", () => {
   `params`. Les pages qui dépendent de `getCollection`/props de
   `getStaticPaths` (dont la home) → e2e, avec la logique de sélection sortie
   dans un module pur testé en unitaire (ex. `src/lib/content/home.ts`).
-- Libellés UI : importer les dictionnaires (`@i18n/fr`, `@i18n/en`) plutôt que
-  recopier les chaînes.
+- **Libellés UI : toujours depuis les dictionnaires** (`@i18n/fr`, `@i18n/en`),
+  en entrée (props) comme en assertion — jamais une chaîne d'interface recopiée.
+  Un gabarit (`"%count% / %total% prêts"`) se reconstruit depuis sa clé. Les
+  données arbitraires de test (« Desserts », une soupe fictive) restent libres.
+- **Contrat markup ↔ script** : chaque composant dont le markup est lu par un
+  script a un test des hooks `data-*` qu'il expose (ex.
+  `tests/components/RecipeBrowser.test.ts` : `data-strings` parsable, une
+  `data-facet` par carte, un hook par valeur de filtre). Un hook renommé casse
+  le JS en silence ; ce test le voit.
+- Pièges du HTML rendu : les éléments stylés portent `data-astro-cid-…`
+  (matcher `<p[\s>]`, pas `<p>`) ; un attribut à valeur vide sort nu
+  (`data-filter-count`, pas `data-filter-count=""`).
 
 ## 5. E2E : Playwright sur un build de fixtures
 
@@ -149,6 +180,8 @@ Fixtures de contenu (`e2e/fixtures/content/`, même arborescence que
 - Couvrir les branches : quantité scalable / unité seule / `display`, astuce
   et avertissement, plusieurs médias, sans étapes (fallback), `draft: true`.
 - Images générées (aplats), dans `e2e/fixtures/content/assets/`.
+- Champs texte en **texte simple** : seul le contenu des étapes accepte du
+  markdown, jamais de HTML dans une fixture.
 - Exposer routes et faits dans `e2e/fixtures.ts` (`RECIPE_FR`,
   `COMPLETE.ingredients`…) : les specs n'écrivent pas les slugs en dur.
 - Ajouter une feature qui dépend du contenu → enrichir/ajouter une fixture,
@@ -158,7 +191,17 @@ Fixtures de contenu (`e2e/fixtures/content/`, même arborescence que
 
 - Locators par **rôle et nom accessible** d'abord (`getByRole("button",
   { name: fr.recipe.servings.increase })`), hooks `data-*` ensuite.
-  Les noms viennent des dictionnaires i18n.
+  **Jamais de classe CSS** (`.recipe-steps`, `.ing-item__qty`) : renommer une
+  classe ne doit casser aucun test. S'il manque un nom accessible, en ajouter
+  un au markup (ex. `aria-labelledby` sur une `<section>` → région nommée)
+  plutôt que de viser une classe ; une valeur se lit souvent dans le nom
+  accessible (`toHaveAccessibleName("Farine 250 g")`).
+- Les noms viennent des dictionnaires i18n ; les **données de fixtures**
+  (titres, ingrédients, catégorie, requêtes) viennent des constantes de
+  `e2e/fixtures.ts`, jamais d'une chaîne écrite dans la spec.
+- `getByText` matche une sous-chaîne : utiliser `{ exact: true }` quand le
+  texte pourrait être noyé dans du HTML échappé (`<p>Texte</p>` affiché tel
+  quel passe sinon).
 - Asserter avec les matchers auto-retry (`toHaveText`, `toBeVisible`,
   `toHaveAttribute`), jamais de `waitForTimeout`.
 - Vérifier l'état **et** son effet quand c'est la valeur du test (radio
@@ -185,6 +228,11 @@ Fixtures de contenu (`e2e/fixtures/content/`, même arborescence que
 - **Navigateur en arrière-plan** (automatisation de Chrome hors Playwright) :
   `requestAnimationFrame`, les events `scroll`, `IntersectionObserver` et le
   focus sont suspendus → ne pas conclure à un bug, tester via Playwright.
+- **Layout shifts** : en local, tout arrive avant le premier rendu et rien ne
+  bouge. `loadShifts()` retarde donc les sous-ressources (scripts plus que le
+  reste) via `page.route`. Un sabotage qui ne déplace rien dans les fixtures
+  (bloc sur la même ligne qu'un autre, footer hors écran) ne fait pas échouer
+  le test : c'est voulu, seul ce qui bouge réellement compte.
 - `localStorage` est vierge à chaque test Playwright (contexte neuf) : un
   test de persistance fait `page.reload()` dans le même test.
 
@@ -204,10 +252,29 @@ Fixtures de contenu (`e2e/fixtures/content/`, même arborescence que
 - Le `globalTeardown` (`astro sync`) est sauté en CI. En local, lancer avec
   `CI=1` le saute aussi : refaire `npx astro sync` si un dev server tourne.
 
+## 6 ter. Coverage
+
+`npm run test:coverage` (Vitest + `@vitest/coverage-v8`), lancé en CI avec
+rapport HTML en artefact. Les seuils de `vitest.config.ts` sont bloquants :
+global quelques points sous l'existant, et un seuil propre à `src/lib/**`
+(la logique pure ne doit pas être diluée).
+
+- **Vitest n'a pas d'équivalent de `@covers`** : toute ligne exécutée compte,
+  même indirectement. Le périmètre se règle par `coverage.exclude`, groupé par
+  raison : testé en e2e (routes, layout, glue DOM des scripts), rien à tester
+  (dictionnaires, config, types), composants de pure présentation. Les modules
+  purs des scripts restent mesurés (extglob `!(nav-state|load-index)` ; la
+  négation `!` dans `exclude` n'est pas supportée).
+- Un fichier sans rien à tester → `exclude`, avec sa raison. **Ne jamais
+  baisser un seuil** pour faire passer un module non testé.
+- Le chiffre n'est pas un but : on comble un trou par un test qui protège une
+  règle (§1), pas par un test qui exécute des lignes.
+
 ## 7. Commandes & Definition of Done
 
 ```bash
 npm run test       # Vitest
+npm run test:coverage   # Vitest + coverage (seuils bloquants)
 npm run test:e2e   # Playwright (build de fixtures + preview :4322)
 npx playwright install chromium   # une fois
 ```
@@ -215,9 +282,14 @@ npx playwright install chromium   # une fois
 Avant de considérer un changement testé :
 
 - [ ] Chaque test répond à une condition du §1 ; rien de redondant.
+- [ ] Un nouveau test **échoue** quand on casse la règle qu'il protège
+      (sabotage temporaire du code, puis restauration).
+- [ ] Aucun sélecteur par classe CSS ; aucun libellé UI ni donnée de fixture
+      en dur dans une spec.
 - [ ] Niveau choisi selon §2 (le plus bas qui prouve le comportement).
 - [ ] Un fichier par composant/feature, au bon endroit (§3).
 - [ ] Aucune dépendance au contenu éditorial ni aux images de `src/assets`.
 - [ ] Libellés tirés des dictionnaires i18n ; routes de `e2e/fixtures.ts`.
-- [ ] `npm run test`, `npm run test:e2e`, `npm run lint`, `npm run check`,
-      `npm run knip` et `npm run spell` passent.
+- [ ] `npm run test:coverage` (seuils compris), `npm run test:e2e`,
+      `npm run lint`, `npm run check`, `npm run knip` et `npm run spell`
+      passent.

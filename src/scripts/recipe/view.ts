@@ -1,7 +1,6 @@
 /**
  * Mobile recipe view: buttons that switch the ingredients/steps segmented
- * control (the panels themselves are toggled in CSS via `:has()`). The
- * buttons are rendered `hidden` and only revealed once wired up here.
+ * control (the panels themselves are toggled in CSS via `:has()`).
  */
 
 export function initView(root: HTMLElement): void {
@@ -12,7 +11,6 @@ export function initView(root: HTMLElement): void {
     const input = root.querySelector<HTMLInputElement>(`input[value="${CSS.escape(value)}"]`);
     if (!input) continue;
 
-    button.hidden = false;
     button.addEventListener("click", () => {
       input.checked = true;
       input.focus({ preventScroll: true });

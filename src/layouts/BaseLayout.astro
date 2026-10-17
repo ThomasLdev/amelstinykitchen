@@ -30,9 +30,10 @@ const t = useTranslations(locale);
     <style is:global is:inline>
     @layer tokens, base, components;
     </style>
-    <Font cssVariable="--font-tinos" preload={[{ weight: 400, style: "normal" }]} />
-    <Font cssVariable="--font-ubuntu" preload={[{ weight: 400, style: "normal" }]} />
-    <Font cssVariable="--font-ubuntu-mono" />
+    <!-- Every variant painted above the fold: with `display: optional` a late one would never show. -->
+    <Font cssVariable="--font-tinos" preload />
+    <Font cssVariable="--font-ubuntu" preload />
+    <Font cssVariable="--font-ubuntu-mono" preload />
     <slot name="head" />
   </head>
   <body>

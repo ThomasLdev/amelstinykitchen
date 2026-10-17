@@ -3,7 +3,7 @@ import fr from "@i18n/fr";
 import type { RecipeFacet } from "@lib/content/recipe-filters";
 import type { BrowserStrings } from "@scripts/recipes/browser";
 import { describe, expect, it } from "vitest";
-import { count, createContainer } from "../helpers";
+import { createContainer } from "../helpers";
 
 const container = await createContainer();
 
@@ -71,10 +71,12 @@ describe("RecipeBrowser", () => {
     expect(html).toMatch(/data-filter-remove="q"[^>]*hidden/);
   });
 
-  it("starts as a plain list: enhanced controls hidden, relevance offered only with a query", async () => {
+  it("renders the script-driven controls up front, relevance offered only with a query", async () => {
     const html = await container.renderToString(RecipeBrowser, { props });
 
-    expect(count(html, /data-enhanced[^>]*hidden|hidden[^>]*data-enhanced/g)).toBe(4);
+    // Revealing them at boot would push the results down.
+    expect(html).not.toMatch(/<button[^>]*data-filters-open[^>]*\shidden[\s>]/);
+    expect(html).toMatch(/<input[^>]*name="q"/);
     expect(html).toMatch(/<option[^>]*value="relevance"[^>]*hidden[^>]*disabled/);
     expect(html).toContain(`>${fr.recipes.count.other.replace("%count%", "3")}<`);
   });

@@ -62,7 +62,7 @@ const strings = JSON.stringify({
   data-strings={strings}
   {...rest}
 >
-  <div class="browser__search" data-enhanced hidden>
+  <div class="browser__search">
     <label class="browser__search-field" for="recipes-q">
       <Icon name="search" size={18} class="browser__search-icon" />
       <SrOnly>{t.search.label}</SrOnly>
@@ -85,15 +85,13 @@ const strings = JSON.stringify({
         aria-haspopup="dialog"
         aria-controls="recipes-filters"
         data-filters-open
-        data-enhanced
-        hidden
       >
         <Icon name="sliders-horizontal" size={18} />
         {t.filters.open}
         <span class="browser__badge" data-filters-badge hidden></span>
       </button>
 
-      <label class="browser__sort" data-enhanced hidden>
+      <label class="browser__sort">
         <SrOnly>{t.sort.label}</SrOnly>
         <span class="browser__sort-label" aria-hidden="true">{t.sort.label}</span>
         <span class="browser__select">
@@ -110,7 +108,7 @@ const strings = JSON.stringify({
       </label>
     </div>
 
-    <fieldset class="browser__quick" data-enhanced hidden>
+    <fieldset class="browser__quick">
       <legend><SrOnly>{t.filters.quick}</SrOnly></legend>
       {[all, ...categories].map((option) => (
         <button
@@ -235,10 +233,6 @@ import "@scripts/recipes";
   .browser__search {
     grid-area: search;
 
-    &[hidden] {
-      display: none;
-    }
-
     padding-block-end: 0.75rem;
 
     @media (min-width: 900px) {
@@ -331,10 +325,6 @@ import "@scripts/recipes";
     justify-content: center;
     gap: 0.5rem;
 
-    &[hidden] {
-      display: none;
-    }
-
     &[data-active] {
       border-color: var(--ink);
       background: var(--ink);
@@ -369,10 +359,6 @@ import "@scripts/recipes";
     gap: 0.625rem;
     font-size: 0.875rem;
     color: var(--ink-2);
-
-    &[hidden] {
-      display: none;
-    }
   }
 
   /* Phones rely on the select showing the current sort; the SrOnly copy names it. */
@@ -422,11 +408,17 @@ import "@scripts/recipes";
     overflow-x: auto;
     scrollbar-width: none;
 
-    &[hidden] {
+    @media (min-width: 900px) {
       display: none;
     }
+  }
 
-    @media (min-width: 900px) {
+  /* Script-only controls: in the first paint, dropped without JS. After their own `display`. */
+  .browser__search,
+  .browser__filters-btn,
+  .browser__sort,
+  .browser__quick {
+    @media (scripting: none) {
       display: none;
     }
   }
