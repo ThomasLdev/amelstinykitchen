@@ -1,0 +1,285 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import Icon from "@components/Icon.astro";
+import { type Locale, useTranslations } from "@i18n";
+
+interface Props {
+  locale: Locale;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { locale, class: className, ...rest } = Astro.props;
+const t = useTranslations(locale).header.searchDialog;
+
+// Read by src/scripts/search-dialog.ts for the labels it writes.
+const strings = JSON.stringify({
+  count: t.count,
+  empty: t.empty,
+  loading: t.loading,
+  error: t.error,
+});
+// Endpoints with an extension are served without the trailing slash.
+const indexUrl = getRelativeLocaleUrl(locale, "search-index.json").replace(/\/$/, "");
+---
+
+<dialog
+  class:list={["search-dialog", className]}
+  aria-label={t.label}
+  data-search-dialog
+  data-index={indexUrl}
+  data-strings={strings}
+  {...rest}
+>
+  <div class="search-dialog__panel">
+    <span class="search-dialog__grip" aria-hidden="true"></span>
+    <div class="search-dialog__head">
+      <label class="search-dialog__field">
+        <Icon name="search" size={18} class="search-dialog__icon" />
+        <input
+          class="search-dialog__input"
+          type="search"
+          aria-label={t.label}
+          placeholder={t.placeholder}
+          autocomplete="off"
+          enterkeyhint="search"
+          data-search-input
+        >
+      </label>
+      <button type="button" class="search-dialog__cancel" data-search-close>{t.cancel}</button>
+    </div>
+    <div class="search-dialog__body">
+      <p class="search-dialog__status" aria-live="polite" data-search-status></p>
+      <ul class="search-dialog__results" data-search-results></ul>
+    </div>
+  </div>
+
+  <template data-search-result>
+    <li class="search-dialog__result">
+      <!-- biome-ignore lint/a11y/useValidAnchor: href and text are set per result by the script. -->
+      <!-- biome-ignore lint/a11y/useAnchorContent: href and text are set per result by the script. -->
+      <a class="search-dialog__link">
+        <img class="search-dialog__thumb" alt="" width="56" height="56" loading="lazy">
+        <span class="search-dialog__text">
+          <span class="search-dialog__title" data-search-title></span>
+          <span class="search-dialog__meta" data-search-meta></span>
+        </span>
+      </a>
+    </li>
+  </template>
+</dialog>
+
+<script>
+import "@scripts/search-dialog";
+</script>
+
+<style>
+@layer components {
+  .search-dialog {
+    inset: auto 0 0;
+    inline-size: 100%;
+    max-inline-size: none;
+    block-size: 94dvh;
+    max-block-size: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-start-start-radius: var(--radius-lg);
+    border-start-end-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow-sheet);
+    overflow: hidden;
+    translate: 0 100%;
+    transition:
+      translate var(--transition-drawer),
+      display var(--transition-drawer) allow-discrete,
+      overlay var(--transition-drawer) allow-discrete;
+
+    &[open] {
+      display: flex;
+      translate: 0 0;
+
+      @starting-style {
+        translate: 0 100%;
+      }
+    }
+
+    &::backdrop {
+      background: var(--overlay);
+    }
+
+    @media (min-width: 720px) {
+      inset: 10dvh 0 auto;
+      inline-size: min(40rem, 100% - 2 * var(--gutter));
+      block-size: auto;
+      max-block-size: 75dvh;
+      margin-inline: auto;
+      border-radius: var(--radius-lg);
+      translate: 0 -0.75rem;
+      opacity: 0;
+      transition:
+        translate var(--transition-base),
+        opacity var(--transition-base),
+        display var(--transition-base) allow-discrete,
+        overlay var(--transition-base) allow-discrete;
+
+      &[open] {
+        translate: 0 0;
+        opacity: 1;
+
+        @starting-style {
+          translate: 0 -0.75rem;
+          opacity: 0;
+        }
+      }
+    }
+  }
+
+  .search-dialog__panel {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-inline-size: 0;
+    min-block-size: 0;
+  }
+
+  .search-dialog__grip {
+    align-self: center;
+    inline-size: 2.25rem;
+    block-size: 5px;
+    margin-block: 0.5rem 0.125rem;
+    border-radius: var(--radius-pill);
+    background: var(--line);
+
+    @media (min-width: 720px) {
+      display: none;
+    }
+  }
+
+  .search-dialog__head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem var(--gutter) 0.75rem;
+    border-block-end: 1px solid var(--line);
+
+    @media (min-width: 720px) {
+      padding-block: 1rem;
+    }
+  }
+
+  .search-dialog__field {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 0.625rem;
+    min-inline-size: 0;
+    block-size: 3rem;
+    padding-inline: 1rem;
+    border-radius: var(--radius-pill);
+    background: var(--bg);
+
+    &:has(.search-dialog__input:focus-visible) {
+      outline: 2px solid var(--accent-ink);
+      outline-offset: 2px;
+    }
+  }
+
+  .search-dialog__icon {
+    flex: none;
+    color: var(--ink-3);
+  }
+
+  .search-dialog__input {
+    flex: 1;
+    min-inline-size: 0;
+    border: 0;
+    background: none;
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+  .search-dialog__cancel {
+    min-block-size: 2.75rem;
+    padding-inline: 0.625rem;
+    font-size: 0.9375rem;
+    color: var(--accent-ink);
+  }
+
+  .search-dialog__body {
+    flex: 1;
+    padding: 0.75rem var(--gutter) max(1rem, env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .search-dialog__status {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .search-dialog__results {
+    margin-block-start: 0.5rem;
+  }
+
+  .search-dialog__result {
+    border-block-end: 1px solid var(--line);
+  }
+
+  .search-dialog__link {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding-block: 0.625rem;
+  }
+
+  .search-dialog__thumb {
+    flex: none;
+    inline-size: 3.5rem;
+    block-size: 3.5rem;
+    border-radius: var(--radius-sm);
+    background: var(--accent-bg);
+    object-fit: cover;
+  }
+
+  .search-dialog__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-inline-size: 0;
+  }
+
+  .search-dialog__title {
+    font-family: var(--font-serif);
+    font-size: 1.125rem;
+    line-height: 1.25;
+    transition: color var(--transition-base);
+
+    .search-dialog__link:hover & {
+      color: var(--accent-ink);
+    }
+
+    &::highlight(search-dialog) {
+      background-color: var(--accent-soft);
+      color: var(--ink);
+    }
+  }
+
+  .search-dialog__meta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-3);
+  }
+
+  /* showModal() makes the page inert but still lets it scroll behind the dialog. */
+  :global(html:has(.search-dialog:modal)) {
+    overflow: hidden;
+  }
+}
+</style>

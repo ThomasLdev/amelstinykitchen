@@ -24,6 +24,15 @@ const en: Dictionary = {
     home: "Home",
     recipes: "Recipes",
     search: "Search",
+    searchDialog: {
+      label: "Search for a recipe",
+      placeholder: "A recipe, an ingredient…",
+      cancel: "Cancel",
+      empty: "No recipe matches.",
+      loading: "Loading…",
+      error: "Search is unavailable, please try again later.",
+      count: { zero: "0 recipes", one: "1 recipe", other: "%count% recipes" },
+    },
   },
   footer: {
     /** Name of this language, in itself (language switch). */

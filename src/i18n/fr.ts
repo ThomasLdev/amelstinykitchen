@@ -24,6 +24,16 @@ const fr = {
     home: "Accueil",
     recipes: "Recettes",
     search: "Recherche",
+    searchDialog: {
+      label: "Rechercher une recette",
+      placeholder: "Une recette, un ingrédient…",
+      cancel: "Annuler",
+      empty: "Aucune recette ne correspond.",
+      loading: "Chargement…",
+      error: "La recherche est indisponible, réessayez plus tard.",
+      /** Client-side, `%count%` is replaced by the number. */
+      count: { zero: "0 recette", one: "1 recette", other: "%count% recettes" },
+    },
   },
   footer: {
     /** Name of this language, in itself (language switch). */

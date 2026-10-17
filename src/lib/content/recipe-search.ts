@@ -15,6 +15,20 @@ export interface SearchFields {
   excerpt: string;
 }
 
+/** One recipe of the header search index (`/[lang]/search-index.json`). */
+export interface SearchEntry {
+  id: string;
+  href: string;
+  title: string;
+  /** Category and total time. */
+  meta: string;
+  /** 112 px square thumbnail. */
+  image?: string;
+  /** Publication timestamp (ms), to order equal scores. */
+  date: number;
+  search: SearchFields;
+}
+
 interface SearchHit {
   score: number;
   /** Recipe words that matched, normalized, whatever the query spelling (typo, word start). */
