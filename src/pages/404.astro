@@ -1,40 +1,118 @@
 ---
+import { getCollection } from "astro:content";
 import { getRelativeLocaleUrl } from "astro:i18n";
 import Button from "@components/Button.astro";
 import Container from "@components/Container.astro";
-import PageHeader from "@components/PageHeader.astro";
+import Icon from "@components/Icon.astro";
+import NotFoundHero from "@components/NotFoundHero.astro";
+import NotFoundSuggestions from "@components/NotFoundSuggestions.astro";
+import SearchForm from "@components/SearchForm.astro";
+import Section from "@components/Section.astro";
 import { defaultLocale, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
+import { selectFeaturedTags, selectHeroRecipe } from "@lib/content/home";
+import { inLocale, localize } from "@lib/content/i18n";
+import { formatDuration, isPublished, totalTime } from "@lib/content/recipe";
 
 // Static hosting serves one 404 page for every URL, so it uses the default locale.
 const locale = defaultLocale;
 const t = useTranslations(locale);
+
+const recipes = await getCollection(
+  "recipes",
+  (entry) => isPublished(entry, import.meta.env.PROD) && inLocale(locale)(entry),
+);
+const tags = (await getCollection("tags")).map((tag) => localize(tag, locale));
+
+const homeUrl = getRelativeLocaleUrl(locale, "");
+const recipesUrl = getRelativeLocaleUrl(locale, "recipes");
+
+const featured = selectHeroRecipe(recipes);
+const recipe = featured && {
+  href: getRelativeLocaleUrl(locale, `recipes/${featured.data.paths}`),
+  title: featured.data.title,
+  meta: [
+    formatDuration(totalTime(featured.data.preparationTime, featured.data.cookingTime), locale),
+    t.recipe.difficulty[featured.data.difficulty],
+  ]
+    .filter(Boolean)
+    .join(" · "),
+  image: featured.data.media[0]?.src,
+};
+
+// The recipes page only offers tags in use; season tags are a filter of their own there.
+const cravings = selectFeaturedTags(tags, recipes, new Date(), tags.length)
+  .filter(({ recipeCount }) => recipeCount > 0)
+  .slice(0, 4)
+  .map(({ tag }) => ({
+    label: tag.data.title,
+    href: `${recipesUrl}?${tag.data.season ? `season=${tag.data.season}` : `tag=${tag.id}`}`,
+  }));
 ---
 
 <BaseLayout title={`${t.notFound.title} · ${t.meta.title}`} locale={locale} noindex>
   <Container>
-    <PageHeader title={t.notFound.title} />
-    <p class="not-found__text">{t.notFound.text}</p>
-    <div class="not-found__actions">
-      <Button href={getRelativeLocaleUrl(locale, "")}>{t.notFound.home}</Button>
-      <Button href={getRelativeLocaleUrl(locale, "recipes")} variant="ghost">
-        {t.notFound.recipes}
-      </Button>
-    </div>
+    <NotFoundHero
+      kicker={t.notFound.kicker}
+      title={t.notFound.heading}
+      titleEm={t.notFound.headingEm}
+      text={t.notFound.text}
+    >
+      <SearchForm
+        class="not-found__search"
+        action={recipesUrl}
+        label={t.notFound.searchLabel}
+        hideLabel
+        placeholder={t.home.search.placeholder}
+        submitLabel={t.home.search.submit}
+      />
+      <div class="not-found__actions">
+        <Button href={homeUrl}>
+          <Icon name="house" size={16} />
+          {t.notFound.home}
+        </Button>
+        <Button href={recipesUrl} variant="ghost">
+          {t.notFound.recipes}
+          <Icon name="arrow-right" size={16} />
+        </Button>
+      </div>
+    </NotFoundHero>
   </Container>
+
+  {(recipe || cravings.length > 0) && (
+    <Section>
+      <Container>
+        <NotFoundSuggestions
+          title={t.notFound.suggestions}
+          recipe={recipe}
+          recipeBadge={t.home.featured.badge}
+          linksTitle={t.notFound.cravings}
+          links={cravings}
+        />
+      </Container>
+    </Section>
+  )}
 </BaseLayout>
 
 <style>
 @layer components {
-  .not-found__text {
-    color: var(--ink-2);
+  .not-found__search {
+    inline-size: 100%;
+    margin-block-start: var(--space-1);
   }
 
   .not-found__actions {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: var(--space-2);
-    margin-block-start: var(--space-3);
+    inline-size: 100%;
+
+    @media (min-width: 600px) {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      inline-size: auto;
+    }
   }
 }
 </style>

@@ -1,5 +1,6 @@
 ---
 import Icon from "@components/Icon.astro";
+import SrOnly from "@components/SrOnly.astro";
 
 interface Idea {
   label: string;
@@ -10,6 +11,8 @@ interface Props {
   /** The query is sent as `?q=`. */
   action: string;
   label: string;
+  /** Names the field without a visible label, when the context already says it. */
+  hideLabel?: boolean;
   placeholder: string;
   submitLabel: string;
   ideas?: Idea[];
@@ -22,6 +25,7 @@ interface Props {
 const {
   action,
   label,
+  hideLabel = false,
   placeholder,
   submitLabel,
   ideas = [],
@@ -35,7 +39,15 @@ const ideasId = `${id}-ideas`;
 
 <search class:list={["search", className]} {...rest}>
   <form class="search__form" action={action} method="get">
-    <label class="search__label" for={id}>{label}</label>
+    {hideLabel ? (
+      <SrOnly as="label" for={id}>
+        {label}
+      </SrOnly>
+    ) : (
+      <label class="search__label" for={id}>
+        {label}
+      </label>
+    )}
     <div class="search__field">
       <Icon name="search" size={20} class="search__icon" />
       <input class="search__input" id={id} name="q" type="search" placeholder={placeholder}>

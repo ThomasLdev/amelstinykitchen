@@ -1,0 +1,239 @@
+---
+import { Picture } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
+interface Recipe {
+  href: string;
+  title: string;
+  meta?: string;
+  image?: ImageMetadata;
+}
+
+interface Link {
+  label: string;
+  href: string;
+}
+
+interface Props {
+  title: string;
+  recipe?: Recipe | undefined;
+  recipeBadge?: string;
+  linksTitle?: string;
+  links?: Link[];
+  class?: string;
+  [key: string]: unknown;
+}
+
+const {
+  title,
+  recipe,
+  recipeBadge,
+  linksTitle,
+  links = [],
+  class: className,
+  ...rest
+} = Astro.props;
+const titleId = "not-found-suggestions";
+const linksTitleId = `${titleId}-links`;
+---
+
+<section class:list={["suggestions", className]} aria-labelledby={titleId} {...rest}>
+  <h2 class="suggestions__title" id={titleId}>{title}</h2>
+  <div class="suggestions__grid">
+    {recipe && (
+      <a class="suggestions__recipe" href={recipe.href}>
+        <span class="suggestions__media">
+          {recipe.image && (
+            <Picture
+              src={recipe.image}
+              alt=""
+              formats={["avif", "webp"]}
+              widths={[144, 256]}
+              sizes="(min-width: 720px) 8rem, 4.5rem"
+              class="suggestions__image"
+            />
+          )}
+        </span>
+        <span class="suggestions__body">
+          {recipeBadge && <span class="suggestions__badge">{recipeBadge}</span>}
+          <span class="suggestions__recipe-title">{recipe.title}</span>
+          {recipe.meta && <span class="suggestions__meta">{recipe.meta}</span>}
+        </span>
+      </a>
+    )}
+    {links.length > 0 && (
+      <div class="suggestions__links">
+        {linksTitle && (
+          <h3 class="suggestions__links-title" id={linksTitleId}>
+            {linksTitle}
+          </h3>
+        )}
+        <ul class="suggestions__list" aria-labelledby={linksTitle ? linksTitleId : undefined}>
+          {links.map((link) => (
+            <li>
+              <a class="suggestions__link" href={link.href}>
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+@layer components {
+  .suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    max-inline-size: 55rem;
+    margin-inline: auto;
+  }
+
+  .suggestions__title {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .suggestions__grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+  }
+
+  .suggestions__recipe {
+    display: flex;
+    flex: 1 1 20rem;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.625rem;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--ink);
+    text-decoration: none;
+
+    @media (min-width: 720px) {
+      flex-basis: 24rem;
+      gap: 1.125rem;
+      padding: 0.75rem;
+    }
+  }
+
+  .suggestions__media {
+    flex: none;
+    inline-size: 4.5rem;
+    aspect-ratio: 1;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--accent-bg);
+
+    @media (min-width: 720px) {
+      inline-size: 8rem;
+    }
+  }
+
+  .suggestions__image {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+
+  .suggestions__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    @media (min-width: 720px) {
+      gap: 0.375rem;
+    }
+  }
+
+  .suggestions__badge {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+
+    @media (min-width: 720px) {
+      font-size: 0.75rem;
+    }
+  }
+
+  .suggestions__recipe-title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.1875rem, 2.4vw, 1.5rem);
+    line-height: 1.15;
+    transition: color var(--transition-base);
+
+    .suggestions__recipe:hover & {
+      color: var(--accent-ink);
+    }
+  }
+
+  .suggestions__meta {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--ink-3);
+  }
+
+  .suggestions__links {
+    display: flex;
+    flex: 1 1 20rem;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    border-radius: var(--radius-lg);
+    background: var(--accent-bg);
+
+    @media (min-width: 720px) {
+      padding: 1.5rem;
+    }
+  }
+
+  .suggestions__links-title {
+    font-family: var(--font-serif);
+    font-size: 1.375rem;
+    font-weight: 400;
+  }
+
+  .suggestions__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .suggestions__link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    block-size: 2.5rem;
+    padding-inline: 1rem;
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    font-size: 0.875rem;
+    color: var(--ink);
+    text-decoration: none;
+    transition: color var(--transition-base);
+
+    /* 44px hit area around the 40px pill. */
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -0.125rem 0;
+    }
+
+    &:hover {
+      color: var(--accent-ink);
+    }
+  }
+}
+</style>

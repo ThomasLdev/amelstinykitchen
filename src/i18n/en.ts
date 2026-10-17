@@ -128,9 +128,15 @@ const en: Dictionary = {
   },
   notFound: {
     title: "Page not found",
-    text: "This page does not exist or has moved.",
+    kicker: "Error 404 · page not found",
+    heading: "This page is no longer",
+    headingEm: "on the menu",
+    text: "The link may be old, or the recipe has been renamed. Search for it directly, or head back somewhere familiar.",
+    searchLabel: "Search for a recipe",
     home: "Back to the homepage",
-    recipes: "Browse all recipes",
+    recipes: "All recipes",
+    suggestions: "In the meantime, a little comfort",
+    cravings: "Or by craving",
   },
   recipes: {
     meta: {
