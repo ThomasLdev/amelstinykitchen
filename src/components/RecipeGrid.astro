@@ -6,20 +6,22 @@ type Item = Parameters<typeof RecipeCard>[0];
 interface Props {
   items: Item[];
   variant?: Item["variant"];
+  /** Leading cards visible on first paint, whose images load right away. */
+  eagerCount?: number;
   class?: string;
   [key: string]: unknown;
 }
 
-const { items, variant = "list", class: className, ...rest } = Astro.props;
+const { items, variant = "list", eagerCount = 0, class: className, ...rest } = Astro.props;
 ---
 
 <ul
   class:list={["recipe-grid", variant !== "list" && `recipe-grid--${variant}`, className]}
   {...rest}
 >
-  {items.map((item) => (
+  {items.map((item, index) => (
     <li class="recipe-grid__item">
-      <RecipeCard {...item} variant={variant} />
+      <RecipeCard {...item} variant={variant} eager={index < eagerCount} />
     </li>
   ))}
 </ul>
