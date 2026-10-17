@@ -1,0 +1,16 @@
+---
+import NotFoundPage from "@components/NotFoundPage.astro";
+import { defaultLocale, isLocale, languages } from "@i18n";
+
+// The root 404 already speaks the default locale and catches everything else.
+export function getStaticPaths() {
+  return Object.keys(languages)
+    .filter((lang) => lang !== defaultLocale)
+    .map((lang) => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+const locale = isLocale(lang) ? lang : defaultLocale;
+---
+
+<NotFoundPage locale={locale} />
