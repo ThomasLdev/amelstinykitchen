@@ -1,5 +1,10 @@
 // cspell:ignore citon choco chocolt coeur crme oeufs
-import { createRecipeSearch, findTerms, type SearchFields } from "@lib/content/recipe-search";
+import {
+  createRecipeSearch,
+  findTerms,
+  matchedIngredients,
+  type SearchFields,
+} from "@lib/content/recipe-search";
 import { describe, expect, it } from "vitest";
 
 const recipe = (id: string, fields: Partial<SearchFields>) => ({
@@ -83,6 +88,16 @@ describe("findTerms", () => {
     expect(findTerms(text, terms).map(([start, end]) => text.slice(start, end))).toEqual([
       "velouté",
       "cœur",
+    ]);
+  });
+});
+
+describe("matchedIngredients", () => {
+  it("names each matched ingredient once and in full", () => {
+    const ingredients = ["Chocolat noir", "Beurre", "Chocolat noir", "Sucre"];
+    expect(matchedIngredients(ingredients, new Set(["chocolat", "beurre"]))).toEqual([
+      "Chocolat noir",
+      "Beurre",
     ]);
   });
 });

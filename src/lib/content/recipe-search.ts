@@ -120,3 +120,8 @@ export function findTerms(text: string, terms: ReadonlySet<string>): Array<[numb
   }
   return ranges;
 }
+
+/** Ingredients holding a matched word, named in full and once each: the cards do not list them. */
+export function matchedIngredients(ingredients: string[], terms: ReadonlySet<string>): string[] {
+  return [...new Set(ingredients)].filter((name) => findTerms(name, terms).length > 0);
+}

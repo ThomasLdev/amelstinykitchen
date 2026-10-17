@@ -1,4 +1,5 @@
-import { findTerms, type SearchEntry, type SearchHits } from "@lib/content/recipe-search";
+import { matchedIngredients, type SearchEntry, type SearchHits } from "@lib/content/recipe-search";
+import { termRanges } from "../term-ranges";
 
 const HIGHLIGHT = "recipe-search";
 
@@ -19,22 +20,16 @@ export function renderMatches(
 
     const line = row.querySelector<HTMLElement>("[data-search-match]");
     if (line) {
-      const names = hit ? [...new Set(entries?.get(id)?.search.ingredients)] : [];
-      const ingredients = hit ? names.filter((name) => findTerms(name, hit.terms).length) : [];
+      const ingredients = hit
+        ? matchedIngredients(entries?.get(id)?.search.ingredients ?? [], hit.terms)
+        : [];
       line.textContent = ingredients.length ? label.replace("%list%", ingredients.join(", ")) : "";
       line.hidden = ingredients.length === 0;
     }
 
     if (!hit) continue;
-    for (const element of row.querySelectorAll<HTMLElement>("[data-search-text]")) {
-      const text = element.firstChild;
-      if (!(text instanceof Text)) continue;
-      for (const [start, end] of findTerms(text.data, hit.terms)) {
-        const range = new Range();
-        range.setStart(text, start);
-        range.setEnd(text, end);
-        ranges.push(range);
-      }
+    for (const element of row.querySelectorAll("[data-search-text]")) {
+      ranges.push(...termRanges(element, hit.terms));
     }
   }
 

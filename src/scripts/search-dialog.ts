@@ -4,14 +4,16 @@
  */
 
 import { type Plural, plural } from "@lib/content/recipe-filters";
-import { findTerms } from "@lib/content/recipe-search";
+import { matchedIngredients } from "@lib/content/recipe-search";
 import { loadRecipeSearch, type RecipeSearch } from "./search-index";
+import { termRanges } from "./term-ranges";
 
 interface Strings {
   count: Plural;
   empty: string;
   loading: string;
   error: string;
+  match: string;
 }
 
 const HIGHLIGHT = "search-dialog";
@@ -59,21 +61,20 @@ function initSearchDialog(dialog: HTMLDialogElement): void {
             const image = item.querySelector("img");
             const title = item.querySelector<HTMLElement>("[data-search-title]");
             const meta = item.querySelector<HTMLElement>("[data-search-meta]");
+            const match = item.querySelector<HTMLElement>("[data-search-match]");
+            const terms = hits.get(entry.id)?.terms ?? new Set<string>();
             if (link) link.href = entry.href;
             if (image && entry.image) image.src = entry.image;
             if (meta) meta.textContent = entry.meta;
             if (title) {
               title.textContent = entry.title;
-              const text = title.firstChild;
-              const terms = hits.get(entry.id)?.terms;
-              if (text instanceof Text && terms) {
-                for (const [start, end] of findTerms(text.data, terms)) {
-                  const range = new Range();
-                  range.setStart(text, start);
-                  range.setEnd(text, end);
-                  ranges.push(range);
-                }
-              }
+              ranges.push(...termRanges(title, terms));
+            }
+            const ingredients = matchedIngredients(entry.search.ingredients, terms);
+            if (match && ingredients.length) {
+              match.textContent = strings.match.replace("%list%", ingredients.join(", "));
+              match.hidden = false;
+              ranges.push(...termRanges(match, terms));
             }
             return item;
           })

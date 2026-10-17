@@ -11,7 +11,7 @@ interface Props {
 }
 
 const { locale, class: className, ...rest } = Astro.props;
-const { header } = useTranslations(locale);
+const { header, recipes } = useTranslations(locale);
 const t = header.searchDialog;
 
 // Read by src/scripts/search-dialog.ts for the labels it writes.
@@ -20,6 +20,7 @@ const strings = JSON.stringify({
   empty: t.empty,
   loading: t.loading,
   error: t.error,
+  match: recipes.match,
 });
 const indexUrl = searchIndexUrl(locale);
 ---
@@ -62,6 +63,7 @@ const indexUrl = searchIndexUrl(locale);
         <span class="search-dialog__text">
           <span class="search-dialog__title" data-search-title></span>
           <span class="search-dialog__meta" data-search-meta></span>
+          <span class="search-dialog__match" data-search-match hidden></span>
         </span>
       </a>
     </li>
@@ -173,6 +175,17 @@ import "@scripts/search-dialog";
     .search-dialog__link:hover & {
       color: var(--accent-ink);
     }
+
+    &::highlight(search-dialog) {
+      background-color: var(--accent-soft);
+      color: var(--ink);
+    }
+  }
+
+  .search-dialog__match {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-3);
 
     &::highlight(search-dialog) {
       background-color: var(--accent-soft);

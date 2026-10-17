@@ -17,6 +17,10 @@ test.describe("header search", () => {
 
     await search.getByRole("searchbox").fill(COMPLETE.ingredient.toLowerCase());
     await expect(search.getByText(fr.header.searchDialog.count.one)).toBeVisible();
+    // Ingredients are not shown otherwise: the line says why the recipe is listed.
+    await expect(
+      search.getByText(fr.recipes.match.replace("%list%", COMPLETE.ingredient)),
+    ).toBeVisible();
     await search.getByRole("link", { name: COMPLETE.title.fr }).click();
     await expect(page).toHaveURL(RECIPE_FR);
   });
