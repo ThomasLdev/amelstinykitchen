@@ -19,9 +19,11 @@ const t = useTranslations(locale);
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- `sizes` keeps browsers that read SVG from picking the ICO. -->
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="icon" href="/favicon.ico">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
     <meta name="generator" content={Astro.generator}>
     <Seo {...Astro.props} />
     <!-- Ordre des cascade layers déclaré avant tout style de composant (voir design-system) -->
