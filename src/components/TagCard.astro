@@ -1,22 +1,23 @@
 ---
 interface Props {
   name: string;
+  href: string;
   meta?: string;
-  seasonLabel?: string;
+  badge?: string;
   class?: string;
   [key: string]: unknown;
 }
 
-const { name, meta, seasonLabel, class: className, ...rest } = Astro.props;
+const { name, href, meta, badge, class: className, ...rest } = Astro.props;
 const initial = name.charAt(0).toLocaleUpperCase();
 ---
 
-<article class:list={["tag-card", seasonLabel && "tag-card--season", className]} {...rest}>
+<a class:list={["tag-card", badge && "tag-card--highlight", className]} href={href} {...rest}>
   <span class="tag-card__initial" aria-hidden="true">{initial}</span>
   <h3 class="tag-card__name">{name}</h3>
-  {seasonLabel && <span class="tag-card__badge">{seasonLabel}</span>}
+  {badge && <span class="tag-card__badge">{badge}</span>}
   {meta && <span class="tag-card__meta">{meta}</span>}
-</article>
+</a>
 
 <style>
 @layer components {
@@ -33,6 +34,11 @@ const initial = name.charAt(0).toLocaleUpperCase();
     border: 1px solid var(--line);
     border-radius: var(--radius-md);
     background: var(--surface);
+    transition: border-color var(--transition-base);
+
+    &:hover {
+      border-color: var(--ink);
+    }
 
     @media (min-width: 600px) {
       grid-template-areas:
@@ -45,7 +51,7 @@ const initial = name.charAt(0).toLocaleUpperCase();
     }
   }
 
-  .tag-card--season {
+  .tag-card--highlight {
     grid-template-areas:
       "badge meta"
       "name meta";
@@ -113,7 +119,7 @@ const initial = name.charAt(0).toLocaleUpperCase();
     line-height: 1.2;
     color: var(--ink);
 
-    .tag-card--season & {
+    .tag-card--highlight & {
       font-size: 1.375rem;
       color: var(--on-ink);
     }
@@ -121,7 +127,7 @@ const initial = name.charAt(0).toLocaleUpperCase();
     @media (min-width: 600px) {
       font-size: 1.375rem;
 
-      .tag-card--season & {
+      .tag-card--highlight & {
         color: var(--ink);
       }
     }
@@ -133,14 +139,14 @@ const initial = name.charAt(0).toLocaleUpperCase();
     font-size: 0.75rem;
     color: var(--ink-3);
 
-    .tag-card--season & {
+    .tag-card--highlight & {
       color: var(--accent-soft);
     }
 
     @media (min-width: 600px) {
       font-size: 0.8125rem;
 
-      .tag-card--season & {
+      .tag-card--highlight & {
         color: var(--ink-3);
       }
     }

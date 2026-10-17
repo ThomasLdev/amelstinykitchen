@@ -43,13 +43,13 @@ const recipe = featured && {
   image: featured.data.media[0]?.src,
 };
 
-// The recipes page only offers tags in use; season tags are a filter of their own there.
-const cravings = selectFeaturedTags(tags, recipes, new Date(), tags.length)
+// The recipes page only offers tags in use.
+const cravings = selectFeaturedTags(tags, recipes, tags.length)
   .filter(({ recipeCount }) => recipeCount > 0)
   .slice(0, 4)
   .map(({ tag }) => ({
     label: tag.data.title,
-    href: `${recipesUrl}?${tag.data.season ? `season=${tag.data.season}` : `tag=${tag.id}`}`,
+    href: `${recipesUrl}?tag=${tag.id}`,
   }));
 ---
 

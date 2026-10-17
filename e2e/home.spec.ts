@@ -5,12 +5,13 @@ import {
   COMPLETE,
   DRAFT_TITLE_FR,
   FEATURED_TAG,
+  FILTER_RECIPE,
   HOME_EN,
   HOME_FR,
   NARRATIVE_TITLE_FR,
   RECIPE_EN,
   RECIPE_FR,
-  SEASON_TAGS_FR,
+  recipeList,
 } from "./fixtures";
 
 const block = (page: Page, titleEm: string) =>
@@ -51,26 +52,29 @@ test("popular block lists featured published recipes", async ({ page }) => {
   await expect(page.getByText(DRAFT_TITLE_FR)).toHaveCount(0);
 });
 
-test("cravings block counts published recipes and puts the current season first", async ({
+test("cravings block counts published recipes and links each tag to its filter", async ({
   page,
 }) => {
   await page.goto(HOME_FR);
   const cravings = block(page, fr.home.tags.titleEm);
-  const tagCard = cravings
-    .getByRole("listitem")
-    .filter({ has: page.getByRole("heading", { name: FEATURED_TAG.title }) });
-  await expect(tagCard).toBeVisible();
+  const tagLink = cravings.getByRole("link", { name: FEATURED_TAG.title });
   // The draft also carries the tag but is not published.
-  await expect(
-    tagCard.getByText(fr.home.tags.recipesCount(FEATURED_TAG.publishedRecipes)),
-  ).toBeVisible();
+  await expect(tagLink).toContainText(fr.home.tags.recipesCount(FEATURED_TAG.publishedRecipes));
+  await tagLink.click();
+  await expect(page.getByRole("checkbox", { name: FEATURED_TAG.title })).toBeChecked();
+});
 
-  await expect(cravings.getByText(fr.home.tags.inSeason)).toHaveCount(1);
-  const first = cravings.getByRole("listitem").first();
-  await expect(first).toContainText(fr.home.tags.inSeason);
-  await expect(first.getByRole("heading")).toHaveText(
-    new RegExp(`^(${SEASON_TAGS_FR.join("|")})$`),
-  );
+test("season card opens the recipes of the visitor's season, not the build's", async ({ page }) => {
+  await page.clock.setFixedTime(new Date(2027, 0, 15));
+  await page.goto(HOME_FR);
+  const cravings = block(page, fr.home.tags.titleEm);
+  await cravings.getByRole("link", { name: fr.home.tags.seasonal.name }).click();
+
+  await expect(page.getByRole("radio", { name: FILTER_RECIPE.season })).toBeChecked();
+  await expect(page).toHaveURL(/\?season=winter$/);
+  await expect(recipeList(page).getByRole("heading", { level: 3 })).toHaveText([
+    FILTER_RECIPE.title,
+  ]);
 });
 
 test('desktop shows a single "all recipes" link, next to the title', async ({ page }) => {

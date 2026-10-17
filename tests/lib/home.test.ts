@@ -1,10 +1,4 @@
-import {
-  currentSeason,
-  type Season,
-  selectFeaturedTags,
-  selectHeroRecipe,
-  selectPopularRecipes,
-} from "@lib/content/home";
+import { selectFeaturedTags, selectHeroRecipe, selectPopularRecipes } from "@lib/content/home";
 import { describe, expect, it } from "vitest";
 
 const recipe = (
@@ -27,12 +21,7 @@ const recipe = (
   },
 });
 
-const tag = (id: string, isFeatured = true, season?: Season) => ({
-  id,
-  data: { isFeatured, season },
-});
-
-const OCTOBER = new Date("2026-10-11T12:00:00Z");
+const tag = (id: string, isFeatured = true) => ({ id, data: { isFeatured } });
 
 describe("selectHeroRecipe", () => {
   it("picks the most recently published recipe, ties broken by id", () => {
@@ -62,16 +51,6 @@ describe("selectPopularRecipes", () => {
   });
 });
 
-describe("currentSeason", () => {
-  it("follows meteorological seasons, December being winter", () => {
-    expect(currentSeason(new Date("2026-12-01T00:00:00Z"))).toBe("winter");
-    expect(currentSeason(new Date("2026-02-28T23:00:00Z"))).toBe("winter");
-    expect(currentSeason(new Date("2026-03-01T00:00:00Z"))).toBe("spring");
-    expect(currentSeason(new Date("2026-08-31T23:00:00Z"))).toBe("summer");
-    expect(currentSeason(OCTOBER)).toBe("autumn");
-  });
-});
-
 describe("selectFeaturedTags", () => {
   it("keeps featured tags and counts the recipes using each one", () => {
     const recipes = [
@@ -81,25 +60,10 @@ describe("selectFeaturedTags", () => {
     const tags = [tag("citron"), tag("vegan"), tag("chocolat", false)];
 
     expect(
-      selectFeaturedTags(tags, recipes, OCTOBER).map(({ tag: t, recipeCount }) => [
-        t.id,
-        recipeCount,
-      ]),
+      selectFeaturedTags(tags, recipes).map(({ tag: t, recipeCount }) => [t.id, recipeCount]),
     ).toEqual([
       ["citron", 2],
       ["vegan", 0],
-    ]);
-  });
-
-  it("puts the tag of the current season first and flags it", () => {
-    const tags = [tag("automne", true, "autumn"), tag("ete", true, "summer"), tag("citron")];
-
-    expect(
-      selectFeaturedTags(tags, [], OCTOBER).map(({ tag: t, inSeason }) => [t.id, inSeason]),
-    ).toEqual([
-      ["automne", true],
-      ["citron", false],
-      ["ete", false],
     ]);
   });
 });

@@ -24,8 +24,6 @@ export const COMPLETE = {
 export const NARRATIVE_TITLE_FR = "Recette narrative";
 export const DRAFT_TITLE_FR = "Recette brouillon";
 export const FEATURED_TAG = { id: "tag-test", title: "Tag test", publishedRecipes: 1 } as const;
-/** One featured tag per season, so exactly one is in season whatever the build date. */
-export const SEASON_TAGS_FR = ["Printemps", "Été", "Automne", "Hiver"] as const;
 
 export const ingredientsPanel = (page: Page) => page.locator("[data-recipe-checklist]");
 export const stepsPanel = (page: Page) => page.locator(".recipe-steps");

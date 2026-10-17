@@ -1,5 +1,6 @@
 import { defineCollection, reference } from "astro:content";
 import { cms } from "@lib/content/cms";
+import { SEASONS } from "@lib/content/season";
 import { glob } from "astro/loaders";
 import { z } from "astro/zod";
 
@@ -29,12 +30,17 @@ const difficulty = z
     cms({ label: "Difficulté", options: { easy: "Facile", medium: "Moyen", advanced: "Avancé" } }),
   );
 
-const season = z.enum(["spring", "summer", "autumn", "winter"]).meta(
-  cms({
-    label: "Saison",
-    options: { spring: "Printemps", summer: "Été", autumn: "Automne", winter: "Hiver" },
-  }),
-);
+const seasons = z
+  .array(
+    z.enum(SEASONS).meta(
+      cms({
+        label: "Saison",
+        options: { spring: "Printemps", summer: "Été", autumn: "Automne", winter: "Hiver" },
+      }),
+    ),
+  )
+  .default([])
+  .meta(cms({ label: "Saisons", hint: "Laisser vide pour une recette de toute l'année." }));
 
 const text = (label: string, hint?: string) =>
   z.string().meta(cms({ label, translate: true, ...(hint && { hint }) }));
@@ -140,14 +146,10 @@ const tagsCollection = defineCollection({
       title: text("Titre"),
       paths,
       isFeatured,
-      /** "In season" on the homepage is evaluated at build time. */
-      season: season.optional(),
       image: taxonomyImage(image),
     });
 
-    return z
-      .object({ fr: tag, en: tag })
-      .superRefine(sameInBothLocales(["isFeatured", "season", "image"]));
+    return z.object({ fr: tag, en: tag }).superRefine(sameInBothLocales(["isFeatured", "image"]));
   },
 });
 
@@ -248,6 +250,7 @@ const recipes = defineCollection({
           metaDescription: metaDescription.optional(),
           category,
           tags,
+          seasons,
           /** schema.org `recipeCuisine` (e.g. "Française"). */
           cuisine: text("Cuisine", "Ex. « Française ».").optional(),
           /** schema.org `keywords`; the tag titles are used when empty. */

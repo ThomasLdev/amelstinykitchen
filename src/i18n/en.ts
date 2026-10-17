@@ -57,7 +57,7 @@ const en: Dictionary = {
       title: "Browse",
       titleEm: "cravings",
       sub: "Ideas to cook whatever you feel like today.",
-      inSeason: "In season",
+      seasonal: { name: "Seasonal recipes", badge: "By the month" },
       recipesCount: (count: number) =>
         count === 0 ? "No recipes" : count === 1 ? "1 recipe" : `${count} recipes`,
     },

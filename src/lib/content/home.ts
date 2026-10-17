@@ -14,11 +14,9 @@ interface RecipeLike {
   };
 }
 
-export type Season = "spring" | "summer" | "autumn" | "winter";
-
 interface TagLike {
   id: string;
-  data: { isFeatured: boolean; season?: Season | undefined };
+  data: { isFeatured: boolean };
 }
 
 const HOME_LIMIT = 5;
@@ -43,28 +41,17 @@ export function selectPopularRecipes<T extends RecipeLike>(recipes: T[], limit =
     .slice(0, limit);
 }
 
-/** Meteorological seasons, northern hemisphere (Dec–Feb is winter). */
-export function currentSeason(date: Date): Season {
-  const seasons: Season[] = ["winter", "spring", "summer", "autumn"];
-  return seasons[Math.floor(((date.getUTCMonth() + 1) % 12) / 3)] as Season;
-}
-
 export function selectFeaturedTags<T extends TagLike>(
   tags: T[],
   recipes: RecipeLike[],
-  now: Date,
   limit = HOME_LIMIT,
-): Array<{ tag: T; recipeCount: number; inSeason: boolean }> {
-  const season = currentSeason(now);
-  const inSeason = (tag: T) => tag.data.season === season;
-
+): Array<{ tag: T; recipeCount: number }> {
   return tags
     .filter((tag) => tag.data.isFeatured)
-    .sort((a, b) => Number(inSeason(b)) - Number(inSeason(a)) || a.id.localeCompare(b.id))
+    .sort((a, b) => a.id.localeCompare(b.id))
     .slice(0, limit)
     .map((tag) => ({
       tag,
-      inSeason: inSeason(tag),
       recipeCount: recipes.filter((recipe) => recipe.data.tags.some((ref) => ref.id === tag.id))
         .length,
     }));

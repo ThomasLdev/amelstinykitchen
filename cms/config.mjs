@@ -127,7 +127,7 @@ function widget(node, hints, path) {
       return { widget: "object", fields: toFields(value, path) };
     case "array": {
       const items = value.items;
-      if (items.cms?.widget === "relation") {
+      if (items.cms?.widget === "relation" || items.enum) {
         return { ...widget(items, items.cms, `${path}[]`), multiple: true };
       }
       if (items.type === "object") return { widget: "list", fields: toFields(items, path) };

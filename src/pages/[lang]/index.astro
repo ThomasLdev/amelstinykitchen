@@ -15,6 +15,7 @@ import BaseLayout from "@layouts/BaseLayout.astro";
 import { selectFeaturedTags, selectHeroRecipe, selectPopularRecipes } from "@lib/content/home";
 import { inLocale, localize } from "@lib/content/i18n";
 import { formatDuration, isPublished, recipeTransitionName, totalTime } from "@lib/content/recipe";
+import { CURRENT_SEASON } from "@lib/content/recipe-filters";
 import { ogImage } from "@lib/seo/images";
 import { websiteLd } from "@lib/seo/jsonld";
 import { siteConfig, socialProfiles } from "@site";
@@ -70,14 +71,19 @@ const popular = selectPopularRecipes(recipes).map((recipe) => ({
   transitionName: recipe === heroRecipe ? undefined : recipeTransitionName(recipe),
 }));
 
-// Built statically: "in season" is evaluated at build time.
-const featuredTags = selectFeaturedTags(tags, recipes, new Date()).map(
-  ({ tag, recipeCount, inSeason }) => ({
-    name: tag.data.title,
-    meta: t.home.tags.recipesCount(recipeCount),
-    seasonLabel: inSeason ? t.home.tags.inSeason : undefined,
-  }),
-);
+const tagCards = selectFeaturedTags(tags, recipes).map(({ tag, recipeCount }) => ({
+  name: tag.data.title,
+  href: `${recipesUrl}?tag=${tag.id}`,
+  meta: t.home.tags.recipesCount(recipeCount),
+}));
+// "current" is resolved by the recipes page in the browser: a static build cannot know the date.
+const seasonCard = recipes.some((recipe) => recipe.data.seasons.length > 0) && {
+  name: t.home.tags.seasonal.name,
+  href: `${recipesUrl}?season=${CURRENT_SEASON}`,
+  badge: t.home.tags.seasonal.badge,
+};
+// The season card takes a tag's place, keeping one row from 900px.
+const featuredTags = seasonCard ? [seasonCard, ...tagCards.slice(0, 4)] : tagCards;
 
 const site = Astro.site ?? new URL(Astro.url.origin);
 const homeUrl = getAbsoluteLocaleUrl(locale, "");
@@ -93,7 +99,7 @@ const jsonLd = [
   }),
 ];
 
-const ideas = featuredTags.slice(0, 4).map(({ name }) => ({ label: name, href: searchHref(name) }));
+const ideas = tagCards.slice(0, 4).map(({ name }) => ({ label: name, href: searchHref(name) }));
 ---
 
 <BaseLayout
