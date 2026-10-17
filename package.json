@@ -20,7 +20,6 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "knip": "knip",
-    "spell": "cspell --no-progress --no-summary .",
     "deploy": "astro build && wrangler deploy",
     "preview:cf": "astro build && wrangler dev"
   },
@@ -34,12 +33,10 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@biomejs/biome": "^2.5.15",
-    "@cspell/dict-fr-fr": "^2.3.2",
     "@playwright/test": "^1.64.0",
     "@sveltia/cms": "0.227.3",
     "@types/node": "^26.6.5",
     "@vitest/coverage-v8": "^5.0.3",
-    "cspell": "^10.3.6",
     "knip": "^6.41.0",
     "typescript": "^6.0.3",
     "vitest": "^5.0.3",

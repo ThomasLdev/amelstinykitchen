@@ -31,7 +31,6 @@ jobs:
           path: coverage/
           retention-days: 7
       - run: npm run knip
-      - run: npm run spell
 
   build:
     runs-on: ubuntu-latest

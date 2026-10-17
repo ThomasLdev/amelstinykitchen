@@ -1,4 +1,3 @@
-// cspell:ignore citon choco chocolt coeur crme oeufs
 import {
   byRelevance,
   findTerms,
