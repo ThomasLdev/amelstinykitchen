@@ -251,7 +251,7 @@ const chefNote = data.chefNote
               titleEm={t.recipe.steps.titleEm}
             />
 
-            <ol class="recipe-steps__list" role="list">
+            <ol class="recipe-steps__list">
               {steps.map((step) => (
                 <RecipeStep {...step} locale={locale} />
               ))}
