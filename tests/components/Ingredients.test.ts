@@ -33,6 +33,20 @@ describe("Ingredients", () => {
     expect(html).toContain('data-recipe-checklist-storage="recipe-tarte-ingredients"');
   });
 
+  it("renders the scalable quantity in the locale's notation before the script runs", async () => {
+    const html = await container.renderToString(Ingredients, {
+      props: {
+        ...props,
+        groups: [
+          { ingredients: [{ id: "r-1-0", name: "Levure", quantity: 0.5, unit: "c. à c." }] },
+        ],
+        locale: "fr",
+      },
+    });
+
+    expect(html).toMatch(/data-base-quantity="0\.5"[^>]*>\s*0,5\s*</);
+  });
+
   it("labels the servings value and localises the progress counter", async () => {
     const fr = await container.renderToString(Ingredients, { props: { ...props, locale: "fr" } });
     const en = await container.renderToString(Ingredients, { props: { ...props, locale: "en" } });

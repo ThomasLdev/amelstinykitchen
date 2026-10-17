@@ -8,7 +8,9 @@ import SheetAction from "@components/SheetAction.astro";
 import SheetSubmit from "@components/SheetSubmit.astro";
 import SrOnly from "@components/SrOnly.astro";
 import { type Locale, useTranslations } from "@i18n";
-import { plural, type RecipeFacet, SORT_KEYS } from "@lib/content/recipe-filters";
+import { plural } from "@i18n/plural";
+import { type RecipeFacet, SORT_KEYS } from "@lib/content/recipe-filters";
+import type { BrowserStrings } from "@scripts/recipes/browser";
 
 type Card = Parameters<typeof RecipeGrid>[0]["items"][number];
 
@@ -44,14 +46,13 @@ const activeChips = [
   ...tags.map((option) => ({ ...option, name: "tag" })),
 ];
 
-// Read by src/scripts/recipes/browser.ts for the labels it rewrites.
 const strings = JSON.stringify({
   count: t.count,
   apply: t.apply,
   remove: t.active.remove,
   query: t.active.query,
   match: t.match,
-});
+} satisfies BrowserStrings);
 ---
 
 <form

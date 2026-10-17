@@ -1,5 +1,6 @@
 // cspell:ignore citon choco chocolt coeur crme oeufs
 import {
+  byRelevance,
   createRecipeSearch,
   findTerms,
   matchedIngredients,
@@ -99,5 +100,25 @@ describe("matchedIngredients", () => {
       "Chocolat noir",
       "Beurre",
     ]);
+  });
+});
+
+describe("byRelevance", () => {
+  const hit = (score: number) => ({ score, terms: new Set<string>() });
+
+  it("orders by score, then the newest, then the id for a stable order", () => {
+    const hits = new Map([
+      ["b", hit(1)],
+      ["a", hit(1)],
+      ["c", hit(1)],
+      ["d", hit(5)],
+    ]);
+    const entries = [
+      { id: "b", date: 1 },
+      { id: "a", date: 1 },
+      { id: "c", date: 2 },
+      { id: "d", date: 0 },
+    ];
+    expect(entries.sort(byRelevance(hits)).map(({ id }) => id)).toEqual(["d", "c", "a", "b"]);
   });
 });

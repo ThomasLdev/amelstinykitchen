@@ -1,18 +1,16 @@
 import { getImage } from "astro:assets";
-import { getRelativeLocaleUrl } from "astro:i18n";
-import { defaultLocale, isLocale, languages } from "@i18n";
+import { localeParams, toLocale } from "@i18n";
 import { formatDuration } from "@lib/content/recipe";
+import { factsLine, recipeHref } from "@lib/content/recipe-card";
 import { loadRecipeCatalog } from "@lib/content/recipe-catalog";
-import type { SearchEntry } from "@lib/content/recipe-search";
+import type { SearchEntry } from "@lib/content/search-index";
 import type { APIRoute } from "astro";
 
-export function getStaticPaths() {
-  return Object.keys(languages).map((lang) => ({ params: { lang } }));
-}
+export const getStaticPaths = localeParams;
 
 /** Loaded by the header search on first open: every page can search without carrying the data. */
 export const GET: APIRoute = async ({ params }) => {
-  const locale = isLocale(params.lang) ? params.lang : defaultLocale;
+  const locale = toLocale(params.lang);
   const catalog = await loadRecipeCatalog(locale);
 
   const entries: SearchEntry[] = await Promise.all(
@@ -23,9 +21,9 @@ export const GET: APIRoute = async ({ params }) => {
         (await getImage({ src: cover.src, width: 112, height: 112, fit: "cover", format: "webp" }));
       return {
         id: recipe.data.translationKey,
-        href: getRelativeLocaleUrl(locale, `recipes/${recipe.data.paths}`),
+        href: recipeHref(recipe, locale),
         title: recipe.data.title,
-        meta: [categoryLabel, formatDuration(time, locale)].filter(Boolean).join(" · "),
+        meta: factsLine([categoryLabel, formatDuration(time, locale)]),
         ...(thumb && { image: thumb.src }),
         date: recipe.data.publishDate.valueOf(),
         search,

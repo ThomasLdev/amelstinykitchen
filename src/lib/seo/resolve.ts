@@ -1,9 +1,8 @@
 import { type CollectionEntry, getEntries, getEntry } from "astro:content";
 import { getAbsoluteLocaleUrl } from "astro:i18n";
+import { recipePath } from "@lib/content/recipe";
 import { schemaImages, stepImage } from "@lib/seo/images";
 import { type ResolvedRecipe, stripHtml } from "@lib/seo/recipe";
-
-export const recipePath = (recipe: CollectionEntry<"recipes">) => `recipes/${recipe.data.paths}`;
 
 /** Absolute URL of the Markdown twin served by `[slug].md.ts`. */
 const recipeMarkdownUrl = (recipe: CollectionEntry<"recipes">) =>

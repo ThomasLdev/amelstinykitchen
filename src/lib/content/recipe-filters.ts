@@ -3,7 +3,7 @@
  * statically rendered list and drive the client-side filters.
  */
 
-import { hasQuery, type SearchHits } from "@lib/content/recipe-search";
+import { byRelevance, hasQuery, type SearchHits } from "@lib/content/recipe-search";
 
 export const SORT_KEYS = ["relevance", "recent", "quick"] as const;
 
@@ -68,8 +68,7 @@ type Compare = (a: RecipeFacet, b: RecipeFacet, hits: SearchHits) => number;
 
 /** The id breaks ties: getCollection() order is not deterministic. */
 const compare: Record<SortKey, Compare> = {
-  relevance: (a, b, hits) =>
-    (hits?.get(b.id)?.score ?? 0) - (hits?.get(a.id)?.score ?? 0) || b.date - a.date,
+  relevance: (a, b, hits) => byRelevance(hits)(a, b),
   recent: (a, b) => b.date - a.date,
   // Recipes without a known time go last rather than first.
   quick: (a, b) => (a.time || Infinity) - (b.time || Infinity) || b.date - a.date,
@@ -96,6 +95,16 @@ export function categoryCounts(
     counts.set(recipe.category, (counts.get(recipe.category) ?? 0) + 1);
   }
   return counts;
+}
+
+export function removeFilter(state: FilterState, name: string, value: string): FilterState {
+  return {
+    ...state,
+    category: name === "category" ? "" : state.category,
+    season: name === "season" ? "" : state.season,
+    tags: name === "tag" ? state.tags.filter((tag) => tag !== value) : state.tags,
+    query: name === "q" ? "" : state.query,
+  };
 }
 
 /** Filters behind the mobile "Filters" button; the name filter has its own field. */
@@ -128,15 +137,4 @@ export function stateToParams(state: FilterState): URLSearchParams {
   if (state.query.trim()) params.set("q", state.query.trim());
   if (state.sort !== defaultSort(state.query)) params.set("sort", state.sort);
   return params;
-}
-
-export interface Plural {
-  zero: string;
-  one: string;
-  other: string;
-}
-
-export function plural(forms: Plural, count: number): string {
-  const form = count === 0 ? forms.zero : count === 1 ? forms.one : forms.other;
-  return form.replace("%count%", String(count));
 }

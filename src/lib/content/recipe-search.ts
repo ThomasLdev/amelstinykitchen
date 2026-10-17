@@ -15,18 +15,23 @@ export interface SearchFields {
   excerpt: string;
 }
 
-/** One recipe of the header search index (`/[lang]/search-index.json`). */
-export interface SearchEntry {
-  id: string;
-  href: string;
+interface RecipeText {
   title: string;
-  /** Category and total time. */
-  meta: string;
-  /** 112 px square thumbnail. */
-  image?: string;
-  /** Publication timestamp (ms), to order equal scores. */
-  date: number;
-  search: SearchFields;
+  keywords: string[];
+  excerpt: string;
+  ingredientGroups: Array<{ ingredients: Array<{ name: string }> }>;
+}
+
+/** `labels`: localized category, tags and seasons. */
+export function recipeSearchFields(recipe: RecipeText, labels: string[]): SearchFields {
+  return {
+    title: recipe.title,
+    labels: [...labels, ...recipe.keywords].join(" "),
+    ingredients: recipe.ingredientGroups.flatMap((group) =>
+      group.ingredients.map((ingredient) => ingredient.name),
+    ),
+    excerpt: recipe.excerpt,
+  };
 }
 
 interface SearchHit {
@@ -110,6 +115,13 @@ export function createRecipeSearch(
     );
   };
 }
+
+export const byRelevance =
+  (hits: SearchHits) =>
+  (a: { id: string; date: number }, b: { id: string; date: number }): number =>
+    (hits?.get(b.id)?.score ?? 0) - (hits?.get(a.id)?.score ?? 0) ||
+    b.date - a.date ||
+    a.id.localeCompare(b.id);
 
 /** Where the matched words sit in a displayed text, as [start, end) offsets. */
 export function findTerms(text: string, terms: ReadonlySet<string>): Array<[number, number]> {

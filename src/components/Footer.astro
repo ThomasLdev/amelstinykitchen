@@ -3,7 +3,7 @@ import { getRelativeLocaleUrl } from "astro:i18n";
 import Container from "@components/Container.astro";
 import Icon from "@components/Icon.astro";
 import Logo from "@components/Logo.astro";
-import { type Locale, languages, useTranslations } from "@i18n";
+import { type Locale, locales, useTranslations } from "@i18n";
 import { siteConfig } from "@site";
 
 interface Props {
@@ -24,7 +24,7 @@ const socials = [
   { label: t.footer.pinterest, href: siteConfig.social.pinterest },
 ].filter((social) => social.href !== "");
 
-const switchLocale = (Object.keys(languages) as Locale[]).find((lang) => lang !== locale);
+const switchLocale = locales.find((lang) => lang !== locale);
 const switchPath = switchLocale && alternates[switchLocale];
 const languageSwitch =
   switchLocale && switchPath !== undefined

@@ -6,7 +6,7 @@ interface Props {
   closeLabel: string;
   /**
    * Wide screens: `sidebar` keeps the content in the page, open and not modal
-   * (the owner's script toggles it from 900px); `dialog` centers it as a panel.
+   * from 900px; `dialog` centers it as a panel.
    */
   desktop?: "sidebar" | "dialog";
   id: string;
@@ -16,6 +16,8 @@ interface Props {
 
 const { title, closeLabel, desktop = "dialog", id, class: className, ...rest } = Astro.props;
 const titleId = `${id}-title`;
+// Same breakpoint as the `.sheet--sidebar` rules below.
+const sidebarMedia = "(width >= 900px)";
 // Where the sheet is a bottom sheet, and so can be dragged down to close.
 const dragMedia = desktop === "sidebar" ? "(width < 900px)" : "(width < 720px)";
 ---
@@ -26,6 +28,7 @@ const dragMedia = desktop === "sidebar" ? "(width < 900px)" : "(width < 720px)";
   aria-labelledby={titleId}
   data-sheet
   data-sheet-drag={dragMedia}
+  data-sheet-sidebar={desktop === "sidebar" ? sidebarMedia : undefined}
   {...rest}
 >
   <div class="sheet__panel">

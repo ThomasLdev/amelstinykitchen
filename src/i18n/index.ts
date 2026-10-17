@@ -7,10 +7,18 @@ export type Locale = keyof typeof languages;
 
 export const defaultLocale: Locale = "fr";
 
+export const locales = Object.keys(languages) as Locale[];
+
 export function useTranslations(locale: Locale): (typeof languages)[Locale] {
   return languages[locale];
 }
 
-export function isLocale(value: string | undefined): value is Locale {
-  return value === "fr" || value === "en";
+function isLocale(value: string | undefined): value is Locale {
+  return locales.includes(value as Locale);
 }
+
+export function toLocale(value: string | undefined): Locale {
+  return isLocale(value) ? value : defaultLocale;
+}
+
+export const localeParams = () => locales.map((lang) => ({ params: { lang } }));

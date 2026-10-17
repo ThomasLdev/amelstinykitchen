@@ -1,7 +1,8 @@
 /**
  * Shared Sheet behavior: the close button, a click on the backdrop and, where
- * it is a bottom sheet, dragging its header down close it. Opening, and what
- * closing means, stay with each sheet's owner script.
+ * it is a bottom sheet, dragging its header down close it; a `sidebar` sheet
+ * stays open in the page on wide screens. Opening, and what closing means,
+ * stay with each sheet's owner script.
  */
 
 /** Share of the sheet height past which a release closes it. */
@@ -61,6 +62,20 @@ function initDrag(sheet: HTMLDialogElement): void {
   }
 }
 
+/**
+ * Open but not modal where the media query matches. The attribute is set
+ * directly because show() would move focus into it on page load.
+ */
+function initSidebar(sheet: HTMLDialogElement, query: string): void {
+  const media = window.matchMedia(query);
+  const sync = (): void => {
+    if (sheet.matches(":modal")) sheet.close();
+    sheet.toggleAttribute("open", media.matches);
+  };
+  media.addEventListener("change", sync);
+  sync();
+}
+
 for (const sheet of document.querySelectorAll<HTMLDialogElement>("[data-sheet]")) {
   sheet.querySelector("[data-sheet-close]")?.addEventListener("click", () => sheet.close());
   // The panel fills the dialog, so a click on the dialog itself hits the backdrop.
@@ -68,4 +83,5 @@ for (const sheet of document.querySelectorAll<HTMLDialogElement>("[data-sheet]")
     if (event.target === sheet) sheet.close();
   });
   initDrag(sheet);
+  if (sheet.dataset.sheetSidebar) initSidebar(sheet, sheet.dataset.sheetSidebar);
 }

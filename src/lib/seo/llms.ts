@@ -1,12 +1,10 @@
 import { getCollection } from "astro:content";
 import { getAbsoluteLocaleUrl } from "astro:i18n";
-import { type Locale, languages, useTranslations } from "@i18n";
+import { type Locale, locales, useTranslations } from "@i18n";
 import { inLocale } from "@lib/content/i18n";
 import { isPublished } from "@lib/content/recipe";
 import type { ResolvedRecipe } from "@lib/seo/recipe";
 import { resolveRecipe } from "@lib/seo/resolve";
-
-export const locales = Object.keys(languages) as Locale[];
 
 /** Published recipes resolved per locale, newest first. */
 export async function resolvedRecipesByLocale(): Promise<Record<Locale, ResolvedRecipe[]>> {

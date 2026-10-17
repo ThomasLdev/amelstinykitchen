@@ -145,6 +145,9 @@ const fr = {
       label: "L'astuce pour cette recette",
     },
   },
+  units: {
+    hour: "h",
+  },
   markdown: {
     /** French typography: a space before the colon. */
     separator: " : ",

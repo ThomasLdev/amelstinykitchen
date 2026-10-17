@@ -1,5 +1,5 @@
 ---
-import { type CollectionEntry, getCollection, getEntries } from "astro:content";
+import { getCollection, getEntries } from "astro:content";
 import { getAbsoluteLocaleUrl, getRelativeLocaleUrl } from "astro:i18n";
 import Container from "@components/Container.astro";
 import Cravings from "@components/Cravings.astro";
@@ -10,7 +10,7 @@ import SearchForm from "@components/SearchForm.astro";
 import Section from "@components/Section.astro";
 import SectionHead from "@components/SectionHead.astro";
 import ViewAllLink from "@components/ViewAllLink.astro";
-import { defaultLocale, isLocale, languages, useTranslations } from "@i18n";
+import { localeParams, toLocale, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import {
   selectFeaturedTags,
@@ -19,19 +19,17 @@ import {
   selectSeasonRecipes,
 } from "@lib/content/home";
 import { inLocale, localize } from "@lib/content/i18n";
-import { formatDuration, isPublished, recipeTransitionName, totalTime } from "@lib/content/recipe";
+import { formatDuration, isPublished, totalTime } from "@lib/content/recipe";
+import { factsLine, recipeCard, recipeFacts, recipeHref } from "@lib/content/recipe-card";
 import { currentSeason, SEASONS } from "@lib/content/season";
 import { seasonImages } from "@lib/content/season-images";
 import { ogImage } from "@lib/seo/images";
 import { websiteLd } from "@lib/seo/jsonld";
 import { siteConfig, socialProfiles } from "@site";
 
-export function getStaticPaths() {
-  return Object.keys(languages).map((lang) => ({ params: { lang } }));
-}
+export const getStaticPaths = localeParams;
 
-const { lang } = Astro.params;
-const locale = isLocale(lang) ? lang : defaultLocale;
+const locale = toLocale(Astro.params.lang);
 const t = useTranslations(locale);
 
 const recipes = await getCollection(
@@ -40,40 +38,27 @@ const recipes = await getCollection(
 );
 const tags = (await getCollection("tags")).map((tag) => localize(tag, locale));
 
-const recipeHref = (recipe: CollectionEntry<"recipes">) =>
-  getRelativeLocaleUrl(locale, `recipes/${recipe.data.paths}`);
-
-const recipeFacts = ({ data }: CollectionEntry<"recipes">) => [
-  formatDuration(totalTime(data.preparationTime, data.cookingTime), locale),
-  t.recipe.difficulty[data.difficulty],
-];
-
-const factsLine = (facts: Array<string | null | undefined>) => facts.filter(Boolean).join(" · ");
-
 const recipesUrl = getRelativeLocaleUrl(locale, "recipes");
 
 const heroRecipe = selectHeroRecipe(recipes);
 const hero = heroRecipe && {
-  href: recipeHref(heroRecipe),
-  title: heroRecipe.data.title,
+  ...recipeCard(heroRecipe, locale),
   meta: factsLine([
-    ...recipeFacts(heroRecipe),
+    ...recipeFacts(heroRecipe, locale),
     ...(await getEntries(heroRecipe.data.tags)).map((tag) => tag.data[locale].title),
   ]),
-  image: heroRecipe.data.media[0]?.src,
   imageAlt: heroRecipe.data.media[0]?.alt ?? "",
-  transitionName: recipeTransitionName(heroRecipe),
 };
 
-const popular = selectPopularRecipes(recipes).map((recipe) => ({
-  href: recipeHref(recipe),
-  title: recipe.data.title,
-  excerpt: recipe.data.excerpt || undefined,
-  meta: factsLine(recipeFacts(recipe)),
-  image: recipe.data.media[0]?.src,
-  // Names must be unique per page and the hero may also be popular.
-  transitionName: recipe === heroRecipe ? undefined : recipeTransitionName(recipe),
-}));
+const popular = selectPopularRecipes(recipes).map((recipe) => {
+  const card = recipeCard(recipe, locale);
+  return {
+    ...card,
+    excerpt: recipe.data.excerpt || undefined,
+    // Names must be unique per page and the hero may also be popular.
+    transitionName: recipe === heroRecipe ? undefined : card.transitionName,
+  };
+});
 
 const cravingTags = selectFeaturedTags(tags, recipes, tags.length)
   .filter(({ recipeCount }) => recipeCount > 0)
@@ -95,7 +80,7 @@ const seasons = SEASONS.map((season) => ({ season, list: selectSeasonRecipes(rec
     badge: t.home.tags.inSeason,
     image: seasonImages[season],
     recipes: list.slice(0, 3).map((recipe) => ({
-      href: recipeHref(recipe),
+      href: recipeHref(recipe, locale),
       title: recipe.data.title,
       meta:
         formatDuration(totalTime(recipe.data.preparationTime, recipe.data.cookingTime), locale) ??

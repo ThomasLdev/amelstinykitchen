@@ -23,16 +23,18 @@ import {
   formatDuration,
   ingredientCount,
   isPublished,
+  recipePath,
   recipeSharedFields,
   recipeTransitionName,
   selectRelatedRecipes,
   totalTime,
 } from "@lib/content/recipe";
+import { factsLine, recipeCard } from "@lib/content/recipe-card";
 import { SEASONS } from "@lib/content/season";
 import { ogImage } from "@lib/seo/images";
 import { breadcrumbLd, recipeLd } from "@lib/seo/jsonld";
 import { isoDuration } from "@lib/seo/recipe";
-import { recipePath, resolveRecipe } from "@lib/seo/resolve";
+import { resolveRecipe } from "@lib/seo/resolve";
 import { siteConfig, socialProfiles } from "@site";
 
 export async function getStaticPaths() {
@@ -72,7 +74,7 @@ const chipLabels = [
     (season) => t.recipes.seasons[season],
   ),
 ];
-const kicker = [category?.data[locale].title, ...chipLabels].filter(Boolean).join(" · ");
+const kicker = factsLine([category?.data[locale].title, ...chipLabels]);
 
 const preparationTime = formatDuration(data.preparationTime, locale);
 const cookingTime = formatDuration(data.cookingTime, locale);
@@ -124,18 +126,7 @@ const alternates = Object.fromEntries(
   Object.entries(translations).map(([lang, entry]) => [lang, recipePath(entry)]),
 );
 
-const related = selectRelatedRecipes(recipe, recipes).map((entry) => ({
-  href: getRelativeLocaleUrl(locale, recipePath(entry)),
-  title: entry.data.title,
-  meta: [
-    formatDuration(totalTime(entry.data.preparationTime, entry.data.cookingTime), locale),
-    t.recipe.difficulty[entry.data.difficulty],
-  ]
-    .filter(Boolean)
-    .join(" · "),
-  image: entry.data.media[0]?.src,
-  transitionName: recipeTransitionName(entry),
-}));
+const related = selectRelatedRecipes(recipe, recipes).map((entry) => recipeCard(entry, locale));
 ---
 
 <BaseLayout

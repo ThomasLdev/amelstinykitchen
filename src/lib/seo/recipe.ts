@@ -1,4 +1,5 @@
 import type { Locale } from "@i18n";
+import { formatQuantity } from "@lib/content/quantity";
 
 export interface ResolvedIngredient {
   name: string;
@@ -67,8 +68,8 @@ export function formatIngredient(ingredient: ResolvedIngredient, locale: Locale)
   const { name, quantity, unit, display } = ingredient;
 
   if (!display && quantity !== null) {
-    const amount = new Intl.NumberFormat(locale).format(quantity);
-    return [amount, unit, name].filter(Boolean).join(" ");
+    // Nothing is scaled here: keep the amount as entered rather than the display rounding.
+    return [formatQuantity(quantity, locale, 3), unit, name].filter(Boolean).join(" ");
   }
 
   const amount = display || unit;

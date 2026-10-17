@@ -5,8 +5,8 @@ import {
   type FilterState,
   followDefaultSort,
   matches,
-  plural,
   type RecipeFacet,
+  removeFilter,
   sortRecipes,
   stateFromParams,
   stateToParams,
@@ -147,13 +147,11 @@ describe("activeFilterCount", () => {
   });
 });
 
-describe("plural", () => {
-  it("picks the zero / one / other form", () => {
-    const forms = { zero: "Aucune", one: "1 recette", other: "%count% recettes" };
-    expect([0, 1, 4].map((count) => plural(forms, count))).toEqual([
-      "Aucune",
-      "1 recette",
-      "4 recettes",
-    ]);
+describe("removeFilter", () => {
+  it("drops only the filter of the pressed chip", () => {
+    const active = state({ category: "x", season: "summer", tags: ["a", "b"], query: "tarte" });
+    expect(removeFilter(active, "tag", "a")).toEqual({ ...active, tags: ["b"] });
+    expect(removeFilter(active, "category", "x")).toEqual({ ...active, category: "" });
+    expect(removeFilter(active, "q", "")).toEqual({ ...active, query: "" });
   });
 });

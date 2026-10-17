@@ -143,6 +143,9 @@ const en: Dictionary = {
       label: "A word from the pastry chef",
     },
   },
+  units: {
+    hour: "hr",
+  },
   markdown: {
     separator: ": ",
     source: "Source",

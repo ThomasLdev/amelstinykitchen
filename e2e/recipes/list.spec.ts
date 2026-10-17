@@ -1,5 +1,5 @@
 import fr from "@i18n/fr";
-import { plural } from "@lib/content/recipe-filters";
+import { plural } from "@i18n/plural";
 import { expect, test } from "@playwright/test";
 import {
   COMPLETE,

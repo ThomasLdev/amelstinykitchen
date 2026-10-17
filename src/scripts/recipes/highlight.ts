@@ -1,11 +1,11 @@
-import { matchedIngredients, type SearchEntry, type SearchHits } from "@lib/content/recipe-search";
-import { termRanges } from "../term-ranges";
+import { matchedIngredients, type SearchHits } from "@lib/content/recipe-search";
+import type { SearchEntry } from "@lib/content/search-index";
+import { setHighlight, termRanges } from "../search/highlight";
 
 const HIGHLIGHT = "recipe-search";
 
 /**
- * Shows why each card matched: its matched words highlighted (CSS Custom
- * Highlight API, nothing on older browsers) and the matched ingredients,
+ * Shows why each card matched: its matched words highlighted and the matched ingredients,
  * which the card does not display otherwise.
  */
 export function renderMatches(
@@ -33,7 +33,5 @@ export function renderMatches(
     }
   }
 
-  if (!("highlights" in CSS)) return;
-  if (ranges.length) CSS.highlights.set(HIGHLIGHT, new Highlight(...ranges));
-  else CSS.highlights.delete(HIGHLIGHT);
+  setHighlight(HIGHLIGHT, ranges);
 }

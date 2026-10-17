@@ -2,6 +2,7 @@
 import Icon from "@components/Icon.astro";
 import SectionTitle from "@components/SectionTitle.astro";
 import { type Locale, useTranslations } from "@i18n";
+import { formatQuantity } from "@lib/content/quantity";
 
 interface Ingredient {
   id: string;
@@ -103,7 +104,7 @@ const [progressBefore = "", progressAfter = ""] = t.recipe.ingredients.progress
                 ) : ingredient.quantity !== null ? (
                   <>
                     <span data-recipe-portions-quantity data-base-quantity={ingredient.quantity}>
-                      {ingredient.quantity}
+                      {formatQuantity(ingredient.quantity, locale)}
                     </span>
                     {ingredient.unit && ` ${ingredient.unit}`}
                   </>
@@ -124,6 +125,10 @@ const [progressBefore = "", progressAfter = ""] = t.recipe.ingredients.progress
 
   <slot name="footer" />
 </aside>
+
+<script>
+import "@scripts/recipe/checklist";
+</script>
 
 <style>
 @layer components {

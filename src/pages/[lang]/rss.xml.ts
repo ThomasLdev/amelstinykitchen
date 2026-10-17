@@ -1,16 +1,15 @@
 import { getAbsoluteLocaleUrl } from "astro:i18n";
 import rss from "@astrojs/rss";
-import { defaultLocale, isLocale, languages, useTranslations } from "@i18n";
+import { localeParams, toLocale, useTranslations } from "@i18n";
 import { resolvedRecipesByLocale } from "@lib/seo/llms";
 import { siteConfig } from "@site";
 import type { APIRoute, GetStaticPaths } from "astro";
 
-export const getStaticPaths = (() =>
-  Object.keys(languages).map((lang) => ({ params: { lang } }))) satisfies GetStaticPaths;
+export const getStaticPaths = localeParams satisfies GetStaticPaths;
 
 /** Recipe feed per locale (feed readers, Pinterest auto-publish). */
 export const GET: APIRoute = async ({ params }) => {
-  const locale = isLocale(params.lang) ? params.lang : defaultLocale;
+  const locale = toLocale(params.lang);
   const t = useTranslations(locale);
   const recipes = (await resolvedRecipesByLocale())[locale];
 

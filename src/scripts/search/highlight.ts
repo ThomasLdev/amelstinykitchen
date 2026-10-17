@@ -1,6 +1,6 @@
 import { findTerms } from "@lib/content/recipe-search";
 
-/** Ranges over the matched words of an element holding a single text node, for CSS highlights. */
+/** Expects the element to hold a single text node. */
 export function termRanges(element: Element, terms: ReadonlySet<string>): Range[] {
   const text = element.firstChild;
   if (!(text instanceof Text)) return [];
@@ -10,4 +10,11 @@ export function termRanges(element: Element, terms: ReadonlySet<string>): Range[
     range.setEnd(text, end);
     return range;
   });
+}
+
+// Older browsers without the Custom Highlight API simply show no highlight.
+export function setHighlight(name: string, ranges: Range[]): void {
+  if (!("highlights" in CSS)) return;
+  if (ranges.length) CSS.highlights.set(name, new Highlight(...ranges));
+  else CSS.highlights.delete(name);
 }

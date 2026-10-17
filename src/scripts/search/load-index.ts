@@ -3,7 +3,8 @@
  * and the header search share it.
  */
 
-import { createRecipeSearch, type SearchEntry, type SearchHits } from "@lib/content/recipe-search";
+import { createRecipeSearch, type SearchHits } from "@lib/content/recipe-search";
+import type { SearchEntry } from "@lib/content/search-index";
 
 export interface RecipeSearch {
   entries: ReadonlyMap<string, SearchEntry>;

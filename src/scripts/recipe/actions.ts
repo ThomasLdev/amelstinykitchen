@@ -7,7 +7,7 @@ async function loadLazyImages(): Promise<void> {
   await Promise.all(images.map((image) => image.decode().catch(() => {})));
 }
 
-export function initActions(): void {
+function initActions(): void {
   for (const button of document.querySelectorAll<HTMLButtonElement>("[data-recipe-action-print]")) {
     button.addEventListener("click", async () => {
       await loadLazyImages();
@@ -30,3 +30,5 @@ export function initActions(): void {
     });
   }
 }
+
+initActions();
