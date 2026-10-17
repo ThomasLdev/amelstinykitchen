@@ -7,7 +7,7 @@ const container = await createContainer();
 const render = (props: Record<string, unknown>) =>
   container.renderToString(Seo, {
     props: { title: "Tarte", description: "Une tarte.", locale: "fr", ...props },
-    request: new Request("https://amelstinykitchen.fr/fr/recipes/tarte/"),
+    request: new Request("https://amelstinykitchen.com/fr/recipes/tarte/"),
   });
 
 describe("Seo", () => {
@@ -15,23 +15,23 @@ describe("Seo", () => {
     const html = await render({ alternates: { fr: "recipes/tarte", en: "recipes/pie" } });
 
     expect(html).toContain(
-      '<link rel="canonical" href="https://amelstinykitchen.fr/fr/recipes/tarte/">',
+      '<link rel="canonical" href="https://amelstinykitchen.com/fr/recipes/tarte/">',
     );
     expect(html).toContain(
-      '<link rel="alternate" hreflang="fr" href="https://amelstinykitchen.fr/fr/recipes/tarte/">',
+      '<link rel="alternate" hreflang="fr" href="https://amelstinykitchen.com/fr/recipes/tarte/">',
     );
     expect(html).toContain(
-      '<link rel="alternate" hreflang="en" href="https://amelstinykitchen.fr/en/recipes/pie/">',
+      '<link rel="alternate" hreflang="en" href="https://amelstinykitchen.com/en/recipes/pie/">',
     );
     expect(html).toContain(
-      '<link rel="alternate" hreflang="x-default" href="https://amelstinykitchen.fr/fr/recipes/tarte/">',
+      '<link rel="alternate" hreflang="x-default" href="https://amelstinykitchen.com/fr/recipes/tarte/">',
     );
     expect(html).toContain('<meta property="og:locale:alternate" content="en_US">');
   });
 
   it("declares the share image with its size for Open Graph and X", async () => {
     const html = await render({
-      image: { url: "https://amelstinykitchen.fr/a.jpg", width: 1200, height: 630, alt: "Tarte" },
+      image: { url: "https://amelstinykitchen.com/a.jpg", width: 1200, height: 630, alt: "Tarte" },
     });
 
     expect(html).toContain('<meta property="og:image:width" content="1200">');

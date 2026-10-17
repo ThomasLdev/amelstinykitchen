@@ -22,10 +22,10 @@ const fr = {
     home: "Accueil",
     recipes: "Recettes",
     search: "Recherche",
-    /** Name of this language, in itself (language switch). */
-    languageName: "Français",
   },
   footer: {
+    /** Name of this language, in itself (language switch). */
+    languageName: "Français",
     tagline: "Des recettes simples et généreuses, à partager sans façon.",
     recipesTitle: "Recettes",
     recipesAriaLabel: "Catégories de recettes",

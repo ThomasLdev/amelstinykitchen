@@ -6,7 +6,7 @@ const fontDir = "./src/assets/fonts";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://amelstinykitchen.fr",
+  site: "https://amelstinykitchen.com",
   // Matches wrangler's `auto-trailing-slash` so canonical URLs have one form.
   trailingSlash: "always",
   // Fixture builds (e2e) keep their own content-layer cache so they never mix

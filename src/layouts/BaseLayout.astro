@@ -33,10 +33,10 @@ const t = useTranslations(locale);
   </head>
   <body>
     <SkipLink>{t.a11y.skipToContent}</SkipLink>
-    <Header locale={locale} alternates={alternates} />
+    <Header locale={locale} />
     <main id="main">
       <slot />
     </main>
-    <Footer locale={locale} />
+    <Footer locale={locale} alternates={alternates} />
   </body>
 </html>

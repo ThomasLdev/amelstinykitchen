@@ -24,10 +24,10 @@ const en: Dictionary = {
     home: "Home",
     recipes: "Recipes",
     search: "Search",
-    /** Name of this language, in itself (language switch). */
-    languageName: "English",
   },
   footer: {
+    /** Name of this language, in itself (language switch). */
+    languageName: "English",
     tagline: "Simple, generous recipes meant to be shared.",
     recipesTitle: "Recipes",
     recipesAriaLabel: "Recipe categories",
