@@ -65,6 +65,15 @@ layers, palettes, a11y, HTML natif avant JS) est dans le skill `design-system`.
   bloc ni après le dernier. Le **breadcrumb** passe toujours par le slot
   `breadcrumb` de `BaseLayout` (position fixe, `view-transition-name`).
 - HTML/CSS natif d'abord, JS (`<script>` ou îlot) en dernier recours.
+- **Zéro décalage au chargement** : rien ne bouge (layout, taille ou retour à
+  la ligne du texte, placement) entre le premier rendu et la page chargée.
+  Toute zone qui se remplit plus tard a sa place réservée dès le HTML :
+  images avec ratio connu (jamais `aspect-ratio: auto` sur une image dont la
+  hauteur dépend du fichier), blocs asynchrones avec skeleton de même taille.
+  Un contrôle qui n'a de sens qu'avec JS est rendu visible et masqué par
+  `@media (scripting: none)`, jamais révélé par le script (`hidden` retiré au
+  boot). Les variantes de police visibles au-dessus de la ligne de flottaison
+  sont préchargées.
 - **Classes = style, `data-*` = JS.** Un script ou un test ne sélectionne
   jamais une classe CSS : renommer une classe ne doit rien casser hors du
   `<style>`. Les hooks JS sont des attributs `data-*` ; un état posé par le JS

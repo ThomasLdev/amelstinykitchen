@@ -214,7 +214,7 @@ const related = selectRelatedRecipes(recipe, recipes).map((entry) => recipeCard(
             recipeId={data.translationKey}
             locale={locale}
           >
-            <Button slot="footer" class="recipe-body__done" data-recipe-view-show="steps" hidden>
+            <Button slot="footer" class="recipe-body__done" data-recipe-view-show="steps">
               {t.recipe.ingredients.done}
             </Button>
           </Ingredients>
@@ -318,6 +318,13 @@ const related = selectRelatedRecipes(recipe, recipes).map((entry) => recipeCard(
 
     @media (min-width: 900px) {
       .recipe-body__view,
+      .recipe-body__done {
+        display: none;
+      }
+    }
+
+    /* Script-driven: in the first paint, dropped without JS. */
+    @media (scripting: none) {
       .recipe-body__done {
         display: none;
       }

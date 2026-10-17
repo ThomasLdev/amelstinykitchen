@@ -38,7 +38,12 @@ function initNav(nav: HTMLElement): void {
     }).observe(footer);
   }
 
-  nav.dataset.navState = "visible";
+  // Settled before the first transition can run, so a short page does not slide the nav out on load.
+  footerVisible = footer ? footer.getBoundingClientRect().top < window.innerHeight : false;
+  nav.dataset.navState = nextNavState(lastY, lastY, footerVisible) ?? "visible";
+  window.requestAnimationFrame(() => {
+    nav.dataset.navReady = "";
+  });
 }
 
 document.querySelectorAll<HTMLElement>("[data-nav]").forEach(initNav);

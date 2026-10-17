@@ -71,8 +71,12 @@ import "@scripts/nav";
     justify-content: center;
     padding-inline: var(--gutter);
     padding-block-end: var(--space-2);
-    transition: translate var(--transition-drawer);
     view-transition-name: site-nav;
+
+    /* Only once the script has set the initial state (src/scripts/nav.ts). */
+    &[data-nav-ready] {
+      transition: translate var(--transition-drawer);
+    }
 
     /* Mobile only (the desktop nav is static at the top): slid out of view
        while scrolling down or over the footer (state set by

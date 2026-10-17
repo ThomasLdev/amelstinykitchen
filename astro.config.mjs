@@ -5,6 +5,8 @@ import cmsAdmin from "./cms/integration.mjs";
 import nestedNotFound from "./integrations/nested-not-found.mjs";
 
 const fontDir = "./src/assets/fonts";
+// Preloaded in BaseLayout: a font that misses the first paint keeps its fallback rather than reflowing the page.
+const display = "optional";
 
 // https://astro.build/config
 export default defineConfig({
@@ -27,6 +29,7 @@ export default defineConfig({
       provider: fontProviders.local(),
       name: "Tinos",
       cssVariable: "--font-tinos",
+      display,
       fallbacks: ["Georgia", "serif"],
       options: {
         variants: [
@@ -40,6 +43,7 @@ export default defineConfig({
       provider: fontProviders.local(),
       name: "Ubuntu",
       cssVariable: "--font-ubuntu",
+      display,
       fallbacks: ["system-ui", "sans-serif"],
       options: {
         variants: [
@@ -60,6 +64,7 @@ export default defineConfig({
       provider: fontProviders.local(),
       name: "Ubuntu Mono",
       cssVariable: "--font-ubuntu-mono",
+      display,
       fallbacks: ["ui-monospace", "monospace"],
       options: {
         variants: [

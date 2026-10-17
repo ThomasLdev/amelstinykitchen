@@ -116,9 +116,6 @@ export function initRecipeBrowser(form: HTMLFormElement): void {
 
   write(initial);
   commit();
-  for (const element of form.querySelectorAll<HTMLElement>("[data-enhanced]")) {
-    element.hidden = false;
-  }
 
   // Preloaded by the page. If it fails, the name filter stays inactive; the other filters work.
   loadRecipeSearch(form.dataset.searchIndex ?? "").then(

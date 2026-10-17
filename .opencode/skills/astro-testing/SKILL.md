@@ -31,7 +31,11 @@ Ne **pas** tester :
 
 - Le style/CSS visuel (couleurs, espacements, tailles, **positions** : pas de
   `boundingBox()` pour vérifier qu'un bloc est « au-dessus » d'un autre, pas
-  d'assertion sur une classe CSS) → revue visuelle.
+  d'assertion sur une classe CSS) → revue visuelle. Exception : la
+  **stabilité au chargement** (zéro layout shift, règle de `AGENTS.md`) se
+  teste avec la métrique du navigateur, pas avec des positions :
+  `e2e/layout-shift.ts` (`loadShifts()`) + `layout-stability{,.mobile}.spec.ts`.
+  Une nouvelle page s'y ajoute.
 - Les comportements du framework ou du navigateur (Astro scope le CSS, un
   `<details>` s'ouvre…).
 - Les valeurs par défaut triviales, le texte statique (l'année du footer…),
@@ -224,6 +228,11 @@ Fixtures de contenu (`e2e/fixtures/content/`, même arborescence que
 - **Navigateur en arrière-plan** (automatisation de Chrome hors Playwright) :
   `requestAnimationFrame`, les events `scroll`, `IntersectionObserver` et le
   focus sont suspendus → ne pas conclure à un bug, tester via Playwright.
+- **Layout shifts** : en local, tout arrive avant le premier rendu et rien ne
+  bouge. `loadShifts()` retarde donc les sous-ressources (scripts plus que le
+  reste) via `page.route`. Un sabotage qui ne déplace rien dans les fixtures
+  (bloc sur la même ligne qu'un autre, footer hors écran) ne fait pas échouer
+  le test : c'est voulu, seul ce qui bouge réellement compte.
 - `localStorage` est vierge à chaque test Playwright (contexte neuf) : un
   test de persistance fait `page.reload()` dans le même test.
 

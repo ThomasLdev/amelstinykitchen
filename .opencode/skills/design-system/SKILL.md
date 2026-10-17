@@ -280,7 +280,14 @@ par défaut.
   glisser vers le bas, mode `sidebar` en desktop) avec `SheetAction` /
   `SheetSubmit` ; ne pas réécrire ces comportements dans un nouveau composant.
 - Un bloc rendu sans JS reste utilisable ; les contrôles qui n'ont de sens
-  qu'avec le script sont rendus `hidden data-enhanced` et révélés par lui.
+  qu'avec le script sont rendus visibles et masqués par
+  `@media (scripting: none)` (déclaré après leur propre `display`), jamais
+  révélés par le script : leur place est prise dès le premier rendu.
+- **Zéro décalage au chargement** (voir `AGENTS.md`) : image = ratio connu
+  avant chargement (pas d'`aspect-ratio: auto` qui écrase celui des attributs
+  `width`/`height`), contenu asynchrone = skeleton de même taille, état
+  initial posé par un script sans transition (activer la `transition` une
+  fois l'état posé).
 
 ## Accessibilité (WCAG 2.2 AA — non négociable)
 
