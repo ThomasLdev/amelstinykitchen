@@ -3,8 +3,7 @@ import fr from "@i18n/fr";
 import { expect, type Page, test } from "@playwright/test";
 import { COMPLETE, DRAFT_TITLE_FR, HOME_EN, HOME_FR, RECIPE_EN, RECIPE_FR } from "./fixtures";
 
-const dialog = (page: Page, label = fr.header.searchDialog.label) =>
-  page.getByRole("dialog", { name: label });
+const dialog = (page: Page, name = fr.header.search) => page.getByRole("dialog", { name });
 
 test.describe("header search", () => {
   test("lists matching recipes while typing, linked to their page", async ({ page }) => {
@@ -42,7 +41,7 @@ test.describe("header search", () => {
       .getByRole("navigation", { name: en.header.navAriaLabel })
       .getByRole("button", { name: en.header.search })
       .click();
-    const search = dialog(page, en.header.searchDialog.label);
+    const search = dialog(page, en.header.search);
 
     await search.getByRole("searchbox").fill(COMPLETE.title.en);
     await expect(search.getByRole("link", { name: COMPLETE.title.en })).toHaveAttribute(

@@ -27,7 +27,7 @@ const fr = {
     searchDialog: {
       label: "Rechercher une recette",
       placeholder: "Une recette, un ingrédient…",
-      cancel: "Annuler",
+      close: "Fermer la recherche",
       empty: "Aucune recette ne correspond.",
       loading: "Chargement…",
       error: "La recherche est indisponible, réessayez plus tard.",

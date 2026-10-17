@@ -1,10 +1,11 @@
 /**
  * Header search: a dialog listing matching recipes while typing. The index is
- * fetched on first open, so pages do not carry it.
+ * fetched on first open (or already there on the recipes list).
  */
 
 import { type Plural, plural } from "@lib/content/recipe-filters";
-import { createRecipeSearch, findTerms, type SearchEntry } from "@lib/content/recipe-search";
+import { findTerms } from "@lib/content/recipe-search";
+import { loadRecipeSearch, type RecipeSearch } from "./search-index";
 
 interface Strings {
   count: Plural;
@@ -23,40 +24,30 @@ function initSearchDialog(dialog: HTMLDialogElement): void {
   if (!input || !list || !status || !template) return;
   const strings = JSON.parse(dialog.dataset.strings ?? "{}") as Strings;
 
-  let entries: SearchEntry[] = [];
-  let search: ReturnType<typeof createRecipeSearch> | undefined;
-  let loading: Promise<void> | undefined;
+  let index: RecipeSearch | undefined;
   let failed = false;
 
-  const load = (): Promise<void> => {
-    loading ??= fetch(dialog.dataset.index ?? "")
-      .then((response) => {
-        if (!response.ok) throw new Error(`Search index: HTTP ${response.status}`);
-        return response.json() as Promise<SearchEntry[]>;
-      })
-      .then((data) => {
-        entries = data;
-        search = createRecipeSearch(entries);
+  const load = (): Promise<void> =>
+    loadRecipeSearch(dialog.dataset.index ?? "").then(
+      (loaded) => {
+        index = loaded;
         failed = false;
-      })
-      // Retried on the next open.
-      .catch(() => {
+      },
+      () => {
         failed = true;
-        loading = undefined;
-      });
-    return loading;
-  };
+      },
+    );
 
   const render = (): void => {
-    if (!search) {
+    if (!index) {
       list.replaceChildren();
       status.textContent = failed ? strings.error : input.value.trim() ? strings.loading : "";
       return;
     }
-    const hits = search(input.value);
+    const hits = index.search(input.value);
     const ranges: Range[] = [];
     const items = hits
-      ? entries
+      ? [...index.entries.values()]
           .filter((entry) => hits.has(entry.id))
           .sort(
             (a, b) =>
@@ -113,11 +104,6 @@ function initSearchDialog(dialog: HTMLDialogElement): void {
   const touch = window.matchMedia("(pointer: coarse)");
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && touch.matches) input.blur();
-  });
-  dialog.querySelector("[data-search-close]")?.addEventListener("click", () => dialog.close());
-  // The panel fills the dialog, so a click on the dialog itself hits the backdrop.
-  dialog.addEventListener("click", (event) => {
-    if (event.target === dialog) dialog.close();
   });
 
   for (const button of document.querySelectorAll("[data-search-open]")) {

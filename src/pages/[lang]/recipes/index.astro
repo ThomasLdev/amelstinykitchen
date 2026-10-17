@@ -9,7 +9,7 @@ import { defaultLocale, isLocale, languages, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { localize } from "@lib/content/i18n";
 import { formatDuration, recipeTransitionName } from "@lib/content/recipe";
-import { loadRecipeCatalog } from "@lib/content/recipe-catalog";
+import { loadRecipeCatalog, searchIndexUrl } from "@lib/content/recipe-catalog";
 import { type RecipeFacet, sortRecipes } from "@lib/content/recipe-filters";
 import { SEASONS } from "@lib/content/season";
 import { breadcrumbLd, itemListLd } from "@lib/seo/jsonld";
@@ -23,6 +23,7 @@ const locale = isLocale(lang) ? lang : defaultLocale;
 const t = useTranslations(locale);
 
 const catalog = await loadRecipeCatalog(locale);
+const indexUrl = searchIndexUrl(locale);
 const categories = new Map(
   (await getCollection("categories")).map((entry) => [entry.id, localize(entry, locale)]),
 );
@@ -31,7 +32,7 @@ const tags = new Map(
 );
 
 const items = catalog.map(
-  ({ recipe, categoryLabel, tags: recipeTags, seasons, seasonLabels, time, search }) => {
+  ({ recipe, categoryLabel, tags: recipeTags, seasons, seasonLabels, time }) => {
     const { data } = recipe;
     const facet: RecipeFacet = {
       id: data.translationKey,
@@ -40,7 +41,6 @@ const items = catalog.map(
       tags: recipeTags.map((tag) => tag.id),
       time,
       date: data.publishDate.valueOf(),
-      search,
     };
 
     return {
@@ -104,6 +104,8 @@ const tagOptions = [...tags.values()]
   alternates={{ fr: "recipes", en: "recipes" }}
   jsonLd={jsonLd}
 >
+  <!-- Fetched by the list as soon as it runs: a `?q=` link is filtered without waiting. -->
+  <link slot="head" rel="preload" href={indexUrl} as="fetch" crossorigin>
   <Breadcrumb
     slot="breadcrumb"
     items={[{ label: t.recipe.breadcrumb.home, href: getRelativeLocaleUrl(locale, "") }]}
@@ -120,6 +122,7 @@ const tagOptions = [...tags.values()]
       categories={categoryOptions}
       seasons={seasonOptions}
       tags={tagOptions}
+      data-search-index={indexUrl}
     />
   </Container>
 </BaseLayout>

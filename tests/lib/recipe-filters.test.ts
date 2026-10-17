@@ -20,7 +20,6 @@ const facet = (id: string, overrides: Partial<RecipeFacet> = {}): RecipeFacet =>
   tags: [],
   time: 30,
   date: 0,
-  search: { title: id, labels: "", ingredients: [], excerpt: "" },
   ...overrides,
 });
 

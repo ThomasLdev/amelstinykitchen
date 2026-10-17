@@ -1,9 +1,15 @@
 import { type CollectionEntry, getCollection } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
 import { type Locale, useTranslations } from "@i18n";
 import { inLocale, localize } from "@lib/content/i18n";
 import { isPublished, totalTime } from "@lib/content/recipe";
 import type { SearchFields } from "@lib/content/recipe-search";
 import { SEASONS, type Season } from "@lib/content/season";
+
+/** The search index of a locale (src/pages/[lang]/search-index.json.ts). */
+export const searchIndexUrl = (locale: Locale): string =>
+  // Endpoints with an extension are served without the trailing slash.
+  getRelativeLocaleUrl(locale, "search-index.json").replace(/\/$/, "");
 
 interface CatalogRecipe {
   recipe: CollectionEntry<"recipes">;

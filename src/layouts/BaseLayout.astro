@@ -33,6 +33,7 @@ const t = useTranslations(locale);
     <Font cssVariable="--font-tinos" preload={[{ weight: 400, style: "normal" }]} />
     <Font cssVariable="--font-ubuntu" preload={[{ weight: 400, style: "normal" }]} />
     <Font cssVariable="--font-ubuntu-mono" />
+    <slot name="head" />
   </head>
   <body>
     <SkipLink>{t.a11y.skipToContent}</SkipLink>

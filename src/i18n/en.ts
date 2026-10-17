@@ -27,7 +27,7 @@ const en: Dictionary = {
     searchDialog: {
       label: "Search for a recipe",
       placeholder: "A recipe, an ingredient…",
-      cancel: "Cancel",
+      close: "Close the search",
       empty: "No recipe matches.",
       loading: "Loading…",
       error: "Search is unavailable, please try again later.",

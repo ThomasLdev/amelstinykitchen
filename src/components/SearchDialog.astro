@@ -1,7 +1,8 @@
 ---
-import { getRelativeLocaleUrl } from "astro:i18n";
 import Icon from "@components/Icon.astro";
+import Sheet from "@components/Sheet.astro";
 import { type Locale, useTranslations } from "@i18n";
+import { searchIndexUrl } from "@lib/content/recipe-catalog";
 
 interface Props {
   locale: Locale;
@@ -10,7 +11,8 @@ interface Props {
 }
 
 const { locale, class: className, ...rest } = Astro.props;
-const t = useTranslations(locale).header.searchDialog;
+const { header } = useTranslations(locale);
+const t = header.searchDialog;
 
 // Read by src/scripts/search-dialog.ts for the labels it writes.
 const strings = JSON.stringify({
@@ -19,21 +21,21 @@ const strings = JSON.stringify({
   loading: t.loading,
   error: t.error,
 });
-// Endpoints with an extension are served without the trailing slash.
-const indexUrl = getRelativeLocaleUrl(locale, "search-index.json").replace(/\/$/, "");
+const indexUrl = searchIndexUrl(locale);
 ---
 
-<dialog
-  class:list={["search-dialog", className]}
-  aria-label={t.label}
+<Sheet
+  class:list={["search-sheet", className]}
+  id="search-dialog"
+  title={header.search}
+  closeLabel={t.close}
   data-search-dialog
   data-index={indexUrl}
   data-strings={strings}
   {...rest}
 >
-  <div class="search-dialog__panel">
-    <span class="search-dialog__grip" aria-hidden="true"></span>
-    <div class="search-dialog__head">
+  <div class="search-dialog">
+    <div class="search-dialog__bar">
       <label class="search-dialog__field">
         <Icon name="search" size={18} class="search-dialog__icon" />
         <input
@@ -46,12 +48,9 @@ const indexUrl = getRelativeLocaleUrl(locale, "search-index.json").replace(/\/$/
           data-search-input
         >
       </label>
-      <button type="button" class="search-dialog__cancel" data-search-close>{t.cancel}</button>
     </div>
-    <div class="search-dialog__body">
-      <p class="search-dialog__status" aria-live="polite" data-search-status></p>
-      <ul class="search-dialog__results" data-search-results></ul>
-    </div>
+    <p class="search-dialog__status" aria-live="polite" data-search-status></p>
+    <ul class="search-dialog__results" data-search-results></ul>
   </div>
 
   <template data-search-result>
@@ -67,7 +66,7 @@ const indexUrl = getRelativeLocaleUrl(locale, "search-index.json").replace(/\/$/
       </a>
     </li>
   </template>
-</dialog>
+</Sheet>
 
 <script>
 import "@scripts/search-dialog";
@@ -75,103 +74,31 @@ import "@scripts/search-dialog";
 
 <style>
 @layer components {
+  /* Phones: the filters' proportion, fixed so the sheet does not grow while typing; results scroll inside. */
+  .search-sheet {
+    @media (width < 720px) {
+      block-size: min(70dvh, 40rem);
+    }
+  }
+
   .search-dialog {
-    inset: auto 0 0;
-    inline-size: 100%;
-    max-inline-size: none;
-    block-size: 94dvh;
-    max-block-size: none;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    border-start-start-radius: var(--radius-lg);
-    border-start-end-radius: var(--radius-lg);
-    background: var(--surface);
-    color: var(--ink);
-    box-shadow: var(--shadow-sheet);
-    overflow: hidden;
-    translate: 0 100%;
-    transition:
-      translate var(--transition-drawer),
-      display var(--transition-drawer) allow-discrete,
-      overlay var(--transition-drawer) allow-discrete;
-
-    &[open] {
-      display: flex;
-      translate: 0 0;
-
-      @starting-style {
-        translate: 0 100%;
-      }
-    }
-
-    &::backdrop {
-      background: var(--overlay);
-    }
-
-    @media (min-width: 720px) {
-      inset: 10dvh 0 auto;
-      inline-size: min(40rem, 100% - 2 * var(--gutter));
-      block-size: auto;
-      max-block-size: 75dvh;
-      margin-inline: auto;
-      border-radius: var(--radius-lg);
-      translate: 0 -0.75rem;
-      opacity: 0;
-      transition:
-        translate var(--transition-base),
-        opacity var(--transition-base),
-        display var(--transition-base) allow-discrete,
-        overlay var(--transition-base) allow-discrete;
-
-      &[open] {
-        translate: 0 0;
-        opacity: 1;
-
-        @starting-style {
-          translate: 0 -0.75rem;
-          opacity: 0;
-        }
-      }
-    }
-  }
-
-  .search-dialog__panel {
     display: flex;
-    flex: 1;
     flex-direction: column;
-    min-inline-size: 0;
-    min-block-size: 0;
+    gap: 0.75rem;
   }
 
-  .search-dialog__grip {
-    align-self: center;
-    inline-size: 2.25rem;
-    block-size: 5px;
-    margin-block: 0.5rem 0.125rem;
-    border-radius: var(--radius-pill);
-    background: var(--line);
-
-    @media (min-width: 720px) {
-      display: none;
-    }
-  }
-
-  .search-dialog__head {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem var(--gutter) 0.75rem;
-    border-block-end: 1px solid var(--line);
-
-    @media (min-width: 720px) {
-      padding-block: 1rem;
-    }
+  /* Stays in view while the results scroll under it, over the sheet's top padding too. */
+  .search-dialog__bar {
+    position: sticky;
+    inset-block-start: -1.25rem;
+    z-index: 1;
+    margin-block-start: -1.25rem;
+    padding-block: 1.25rem 0.25rem;
+    background: var(--surface);
   }
 
   .search-dialog__field {
     display: flex;
-    flex: 1;
     align-items: center;
     gap: 0.625rem;
     min-inline-size: 0;
@@ -202,30 +129,12 @@ import "@scripts/search-dialog";
     }
   }
 
-  .search-dialog__cancel {
-    min-block-size: 2.75rem;
-    padding-inline: 0.625rem;
-    font-size: 0.9375rem;
-    color: var(--accent-ink);
-  }
-
-  .search-dialog__body {
-    flex: 1;
-    padding: 0.75rem var(--gutter) max(1rem, env(safe-area-inset-bottom));
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-
   .search-dialog__status {
     font-family: var(--font-mono);
     font-size: 0.75rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--ink-3);
-  }
-
-  .search-dialog__results {
-    margin-block-start: 0.5rem;
   }
 
   .search-dialog__result {
@@ -275,11 +184,6 @@ import "@scripts/search-dialog";
     font-family: var(--font-mono);
     font-size: 0.75rem;
     color: var(--ink-3);
-  }
-
-  /* showModal() makes the page inert but still lets it scroll behind the dialog. */
-  :global(html:has(.search-dialog:modal)) {
-    overflow: hidden;
   }
 }
 </style>

@@ -20,7 +20,8 @@ import {
   stateFromParams,
   stateToParams,
 } from "@lib/content/recipe-filters";
-import { createRecipeSearch, hasQuery, type SearchHits } from "@lib/content/recipe-search";
+import { hasQuery, type SearchHits } from "@lib/content/recipe-search";
+import { loadRecipeSearch, type RecipeSearch } from "../search-index";
 import { renderMatches } from "./highlight";
 
 interface Strings {
@@ -48,14 +49,15 @@ export function initRecipeBrowser(form: HTMLFormElement): void {
     recipes.push(facet);
     rows.set(facet.id, card.closest("li") ?? card);
   }
-  const searchIndex = createRecipeSearch(recipes);
+  // Until the index is there, a query filters nothing; it applies once loaded.
+  let index: RecipeSearch | undefined;
   let lastQuery: string | undefined;
   let lastHits: SearchHits;
   /** Controls and results ask for the same query in a row: search it once. */
   const hitsFor = (query: string): SearchHits => {
     if (query !== lastQuery) {
       lastQuery = query;
-      lastHits = searchIndex(query);
+      lastHits = index?.search(query);
     }
     return lastHits;
   };
@@ -153,7 +155,7 @@ export function initRecipeBrowser(form: HTMLFormElement): void {
       row.hidden = !visible.has(recipe.id);
       list.append(row);
     }
-    renderMatches(recipes, rows, hits, strings.match);
+    renderMatches(rows, index?.entries, hits, strings.match);
     if (empty) empty.hidden = visible.size > 0;
     const countText = plural(strings.count, visible.size);
     if (countLabel) countLabel.textContent = countText;
@@ -217,14 +219,9 @@ export function initRecipeBrowser(form: HTMLFormElement): void {
     commit();
     dialog.close("apply");
   });
-  dialog.querySelector("[data-filters-close]")?.addEventListener("click", () => dialog.close());
   dialog.querySelector("[data-filters-reset]")?.addEventListener("click", () => {
     write({ ...read(), category: "", season: "", tags: [] });
     renderControls(read());
-  });
-  // The panel fills the dialog, so a click on the dialog itself hit the backdrop.
-  dialog.addEventListener("click", (event) => {
-    if (event.target === dialog) dialog.close();
   });
   // Closing without applying (close button, Esc, backdrop) drops the draft.
   dialog.addEventListener("close", () => {
@@ -279,4 +276,15 @@ export function initRecipeBrowser(form: HTMLFormElement): void {
   for (const element of form.querySelectorAll<HTMLElement>("[data-enhanced]")) {
     element.hidden = false;
   }
+
+  // Preloaded by the page. If it fails, the name filter stays inactive; the other filters work.
+  loadRecipeSearch(form.dataset.searchIndex ?? "").then(
+    (loaded) => {
+      index = loaded;
+      lastQuery = undefined;
+      renderControls(isDraft() ? read() : applied);
+      renderResults(applied);
+    },
+    () => {},
+  );
 }

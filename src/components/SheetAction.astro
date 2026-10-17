@@ -1,0 +1,24 @@
+---
+/** Text button for the `start` slot of a Sheet header (e.g. "Reset"). */
+interface Props {
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { class: className, ...rest } = Astro.props;
+---
+
+<button type="button" class:list={["sheet-action", className]} {...rest}>
+  <slot />
+</button>
+
+<style>
+@layer components {
+  .sheet-action {
+    min-block-size: 2.75rem;
+    padding-inline: 0.625rem;
+    font-size: 0.9375rem;
+    color: var(--accent-ink);
+  }
+}
+</style>

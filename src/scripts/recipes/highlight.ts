@@ -1,5 +1,4 @@
-import type { RecipeFacet } from "@lib/content/recipe-filters";
-import { findTerms, type SearchHits } from "@lib/content/recipe-search";
+import { findTerms, type SearchEntry, type SearchHits } from "@lib/content/recipe-search";
 
 const HIGHLIGHT = "recipe-search";
 
@@ -9,24 +8,19 @@ const HIGHLIGHT = "recipe-search";
  * which the card does not display otherwise.
  */
 export function renderMatches(
-  recipes: RecipeFacet[],
   rows: ReadonlyMap<string, HTMLElement>,
+  entries: ReadonlyMap<string, SearchEntry> | undefined,
   hits: SearchHits,
   label: string,
 ): void {
   const ranges: Range[] = [];
-  for (const recipe of recipes) {
-    const row = rows.get(recipe.id);
-    const hit = hits?.get(recipe.id);
-    if (!row) continue;
+  for (const [id, row] of rows) {
+    const hit = hits?.get(id);
 
     const line = row.querySelector<HTMLElement>("[data-search-match]");
     if (line) {
-      const ingredients = hit
-        ? [...new Set(recipe.search.ingredients)].filter(
-            (name) => findTerms(name, hit.terms).length,
-          )
-        : [];
+      const names = hit ? [...new Set(entries?.get(id)?.search.ingredients)] : [];
+      const ingredients = hit ? names.filter((name) => findTerms(name, hit.terms).length) : [];
       line.textContent = ingredients.length ? label.replace("%list%", ingredients.join(", ")) : "";
       line.hidden = ingredients.length === 0;
     }

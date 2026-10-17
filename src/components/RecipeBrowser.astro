@@ -1,9 +1,11 @@
 ---
 import Button from "@components/Button.astro";
 import FilterGroup from "@components/FilterGroup.astro";
-import FilterSheet from "@components/FilterSheet.astro";
 import Icon from "@components/Icon.astro";
 import RecipeGrid from "@components/RecipeGrid.astro";
+import Sheet from "@components/Sheet.astro";
+import SheetAction from "@components/SheetAction.astro";
+import SheetSubmit from "@components/SheetSubmit.astro";
 import SrOnly from "@components/SrOnly.astro";
 import { type Locale, useTranslations } from "@i18n";
 import { plural, type RecipeFacet, SORT_KEYS } from "@lib/content/recipe-filters";
@@ -122,14 +124,15 @@ const strings = JSON.stringify({
     </fieldset>
   </div>
 
-  <FilterSheet
+  <Sheet
     class="browser__filters"
     id="recipes-filters"
     title={t.filters.title}
     closeLabel={t.filters.close}
-    resetLabel={t.filters.reset}
-    applyLabel={plural(t.apply, total)}
+    desktop="sidebar"
+    data-filters
   >
+    <SheetAction slot="start" data-filters-reset>{t.filters.reset}</SheetAction>
     {categories.length > 1 && (
       <FilterGroup
         type="radio"
@@ -155,7 +158,8 @@ const strings = JSON.stringify({
         appearance="switch"
       />
     )}
-  </FilterSheet>
+    <SheetSubmit slot="foot" data-filters-apply>{plural(t.apply, total)}</SheetSubmit>
+  </Sheet>
 
   <section class="browser__results">
     <div class="browser__status">

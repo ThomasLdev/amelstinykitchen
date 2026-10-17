@@ -3,7 +3,7 @@
  * statically rendered list and drive the client-side filters.
  */
 
-import { hasQuery, type SearchFields, type SearchHits } from "@lib/content/recipe-search";
+import { hasQuery, type SearchHits } from "@lib/content/recipe-search";
 
 export const SORT_KEYS = ["relevance", "recent", "quick"] as const;
 
@@ -18,7 +18,6 @@ export interface RecipeFacet {
   time: number;
   /** Publication timestamp (ms). */
   date: number;
-  search: SearchFields;
 }
 
 export interface FilterState {
