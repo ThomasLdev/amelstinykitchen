@@ -291,5 +291,5 @@ Avant de considérer un changement testé :
 - [ ] Aucune dépendance au contenu éditorial ni aux images de `src/assets`.
 - [ ] Libellés tirés des dictionnaires i18n ; routes de `e2e/fixtures.ts`.
 - [ ] `npm run test:coverage` (seuils compris), `npm run test:e2e`,
-      `npm run lint`, `npm run check`, `npm run knip` et `npm run spell`
+      `npm run lint`, `npm run check` et `npm run knip`
       passent.

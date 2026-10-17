@@ -39,6 +39,7 @@ const recipe = z.object({
     .default([])
     .meta(cms({ label: "Saisons" })),
   publishDate: z.coerce.date().meta(cms({ label: "Date" })),
+  cover: z.string().meta(cms({ label: "Image", widget: "image" })),
   steps: z
     .array(
       z.object({
@@ -77,6 +78,7 @@ describe("CMS config generator", () => {
       "tags",
       "seasons",
       "publishDate",
+      "cover",
       "steps",
     ]);
   });
@@ -95,6 +97,11 @@ describe("CMS config generator", () => {
     expect(field("seasons")).toMatchObject({ widget: "select", multiple: true, required: false });
     expect(field("paths").pattern).toEqual(["^[a-z-]+$", "Minuscules et tirets."]);
     expect(field("publishDate")).toMatchObject({ widget: "datetime", format: "YYYY-MM-DD" });
+    expect(field("cover")).toMatchObject({
+      widget: "image",
+      accept: expect.not.stringContaining("jfif"),
+    });
+    expect(field("cover").accept.split(",")).toContain(".jpg");
     expect(field("steps").fields[1]).toMatchObject({ widget: "number", value_type: "int", min: 1 });
   });
 

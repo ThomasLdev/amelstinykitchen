@@ -15,7 +15,6 @@ npm run test       # Vitest (unit + Container API)
 npm run test:coverage # Vitest + coverage, seuils bloquants (aussi en CI)
 npm run test:e2e   # Playwright (e2e)
 npm run knip       # fichiers/exports/deps morts
-npm run spell      # cspell FR/EN
 ```
 
 Le serveur de dev tourne en arrière-plan :

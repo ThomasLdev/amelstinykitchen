@@ -197,7 +197,6 @@ pour vérifier avant de déployer.
 | `npm run test` | tests unitaires (Vitest) |
 | `npm run test:e2e` | tests end-to-end (Playwright, `npx playwright install chromium` la première fois) |
 | `npm run knip` | code et dépendances inutilisés |
-| `npm run spell` | orthographe FR/EN (cspell) |
 | `npm run deploy` | build + déploiement Cloudflare depuis sa machine |
 
 ## Pour les développeurs

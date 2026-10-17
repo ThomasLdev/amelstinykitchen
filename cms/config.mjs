@@ -70,6 +70,9 @@ const collections = [
   },
 ];
 
+// By extension, not MIME: `image/jpeg` also matches `.jfif`, which Astro's `image()` leaves unresolved.
+const IMAGE_ACCEPT = ".jpg,.jpeg,.png,.webp,.avif,.gif";
+
 const isEmptyDefault = (value) =>
   value === undefined || value === null || value === "" || (Array.isArray(value) && !value.length);
 
@@ -88,6 +91,7 @@ function widget(node, hints, path) {
       display_fields: ["title"],
     };
   }
+  if (hints.widget === "image") return { widget: "image", accept: IMAGE_ACCEPT };
   if (hints.widget) return { widget: hints.widget };
 
   const value = unwrapNullable(node);
