@@ -1,15 +1,16 @@
 ---
 interface Props {
+  as?: "span" | "label";
   class?: string;
   [key: string]: unknown;
 }
 
-const { class: className, ...rest } = Astro.props;
+const { as: Tag = "span", class: className, ...rest } = Astro.props;
 ---
 
-<span class:list={["sr-only", className]} {...rest}>
+<Tag class:list={["sr-only", className]} {...rest}>
   <slot />
-</span>
+</Tag>
 
 <style>
 @layer components {

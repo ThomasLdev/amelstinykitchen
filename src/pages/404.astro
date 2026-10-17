@@ -1,40 +1,6 @@
 ---
-import { getRelativeLocaleUrl } from "astro:i18n";
-import Button from "@components/Button.astro";
-import Container from "@components/Container.astro";
-import PageHeader from "@components/PageHeader.astro";
-import { defaultLocale, useTranslations } from "@i18n";
-import BaseLayout from "@layouts/BaseLayout.astro";
-
-// Static hosting serves one 404 page for every URL, so it uses the default locale.
-const locale = defaultLocale;
-const t = useTranslations(locale);
+import NotFoundPage from "@components/NotFoundPage.astro";
+import { defaultLocale } from "@i18n";
 ---
 
-<BaseLayout title={`${t.notFound.title} · ${t.meta.title}`} locale={locale} noindex>
-  <Container>
-    <PageHeader title={t.notFound.title} />
-    <p class="not-found__text">{t.notFound.text}</p>
-    <div class="not-found__actions">
-      <Button href={getRelativeLocaleUrl(locale, "")}>{t.notFound.home}</Button>
-      <Button href={getRelativeLocaleUrl(locale, "recipes")} variant="ghost">
-        {t.notFound.recipes}
-      </Button>
-    </div>
-  </Container>
-</BaseLayout>
-
-<style>
-@layer components {
-  .not-found__text {
-    color: var(--ink-2);
-  }
-
-  .not-found__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-    margin-block-start: var(--space-3);
-  }
-}
-</style>
+<NotFoundPage locale={defaultLocale} />

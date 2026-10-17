@@ -2,6 +2,7 @@
 import sitemap from "@astrojs/sitemap";
 import { defineConfig, fontProviders } from "astro/config";
 import cmsAdmin from "./cms/integration.mjs";
+import nestedNotFound from "./integrations/nested-not-found.mjs";
 
 const fontDir = "./src/assets/fonts";
 
@@ -73,10 +74,15 @@ export default defineConfig({
   ],
   integrations: [
     cmsAdmin(),
+    nestedNotFound(),
     sitemap({
       // `/` is only a redirect to the default locale; hreflang lives in each page's <head>
       // because FR and EN slugs differ, which the sitemap `i18n` option cannot pair.
-      filter: (page) => new URL(page).pathname !== "/",
+      // Locale 404s are error pages (the root one is already left out by the integration).
+      filter: (page) => {
+        const { pathname } = new URL(page);
+        return pathname !== "/" && !pathname.endsWith("/404/");
+      },
     }),
   ],
   redirects: {

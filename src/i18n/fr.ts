@@ -127,9 +127,15 @@ const fr = {
   },
   notFound: {
     title: "Page introuvable",
-    text: "Cette page n'existe pas ou a été déplacée.",
+    kicker: "Erreur 404 · page introuvable",
+    heading: "Cette page n'est plus",
+    headingEm: "au menu",
+    text: "Le lien est peut-être ancien, ou la recette a changé de nom. Cherchez-la directement, ou repartez d'un endroit connu.",
+    searchLabel: "Rechercher une recette",
     home: "Retour à l'accueil",
-    recipes: "Voir toutes les recettes",
+    recipes: "Toutes les recettes",
+    suggestions: "En attendant, de quoi se consoler",
+    cravings: "Ou par envie",
   },
   recipes: {
     meta: {

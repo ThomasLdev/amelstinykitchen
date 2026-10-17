@@ -1,0 +1,118 @@
+---
+import Kicker from "@components/Kicker.astro";
+
+interface Props {
+  kicker: string;
+  title: string;
+  titleEm?: string;
+  text?: string;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { kicker, title, titleEm, text, class: className, ...rest } = Astro.props;
+---
+
+<section class:list={["not-found-hero", className]} {...rest}>
+  {/* Decorative: the kicker already says "404" in words. */}
+  <div class="not-found-hero__art" aria-hidden="true">
+    <span>4</span>
+    <svg
+      class="not-found-hero__plate"
+      aria-hidden="true"
+      viewBox="0 0 210 190"
+      fill="none"
+      stroke-linecap="round"
+    >
+      <path class="not-found-hero__cutlery" d="M22 30v40M14 30v26a8 8 0 0 0 16 0V30M22 78v84" />
+      <circle class="not-found-hero__dish" cx="105" cy="95" r="62" />
+      <circle class="not-found-hero__rim" cx="105" cy="95" r="40" stroke-dasharray="4 8" />
+      <path
+        class="not-found-hero__cutlery"
+        d="M188 30c-10 6-12 26-12 48h12v84"
+        stroke-linejoin="round"
+      />
+    </svg>
+    <span>4</span>
+  </div>
+  <Kicker class="not-found-hero__kicker">{kicker}</Kicker>
+  <h1 class="not-found-hero__title">
+    {title} {titleEm && <em class="not-found-hero__title-em">{titleEm}</em>}
+  </h1>
+  {text && <p class="not-found-hero__text">{text}</p>}
+  <slot />
+</section>
+
+<style>
+@layer components {
+  .not-found-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    max-inline-size: 40rem;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .not-found-hero__art {
+    display: flex;
+    align-items: center;
+    gap: 0.06em;
+    font-family: var(--font-serif);
+    font-size: clamp(6.5rem, 14vw, 12.5rem);
+    line-height: 1;
+    color: var(--ink);
+  }
+
+  .not-found-hero__plate {
+    inline-size: 1.05em;
+    block-size: 0.95em;
+  }
+
+  .not-found-hero__cutlery {
+    stroke: var(--accent);
+    stroke-width: 5;
+  }
+
+  .not-found-hero__dish {
+    fill: var(--surface);
+    stroke: var(--accent-soft);
+    stroke-width: 4;
+  }
+
+  .not-found-hero__rim {
+    stroke: var(--accent-bg);
+    stroke-width: 3;
+  }
+
+  .not-found-hero__kicker {
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+
+    @media (min-width: 600px) {
+      font-size: 0.8125rem;
+    }
+  }
+
+  .not-found-hero__title {
+    font-family: var(--font-serif);
+    font-size: clamp(2.125rem, 5vw, 3.25rem);
+    font-weight: 400;
+    line-height: 1.08;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+
+  .not-found-hero__title-em {
+    color: var(--accent-ink);
+  }
+
+  .not-found-hero__text {
+    font-size: clamp(1rem, 1.6vw, 1.125rem);
+    line-height: 1.6;
+    color: var(--ink-2);
+    text-wrap: pretty;
+  }
+}
+</style>
