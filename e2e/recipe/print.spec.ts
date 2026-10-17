@@ -13,6 +13,7 @@ test.describe("recipe print layout", () => {
       "[data-site-footer]",
       ".recipe-head__actions",
       "[data-recipe-view]",
+      ".recipe-related",
     ]) {
       await expect(page.locator(chrome)).toBeHidden();
     }

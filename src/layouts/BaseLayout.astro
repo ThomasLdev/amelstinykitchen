@@ -1,6 +1,7 @@
 ---
 import { Font } from "astro:assets";
 import "@styles/app.css";
+import Container from "@components/Container.astro";
 import Footer from "@components/Footer.astro";
 import Header from "@components/Header.astro";
 import Seo from "@components/Seo.astro";
@@ -34,9 +35,36 @@ const t = useTranslations(locale);
   <body>
     <SkipLink>{t.a11y.skipToContent}</SkipLink>
     <Header locale={locale} />
-    <main id="main">
+    <main id="main" class="main">
+      {Astro.slots.has("breadcrumb") && (
+        <Container class="main__breadcrumb">
+          <slot name="breadcrumb" />
+        </Container>
+      )}
       <slot />
     </main>
     <Footer locale={locale} alternates={alternates} />
   </body>
 </html>
+
+<style>
+@layer components {
+  .main {
+    padding-block: var(--page-space-start) var(--page-space-end);
+
+    @media print {
+      padding-block: 0;
+    }
+  }
+
+  /* A single spot shared by every page, so the breadcrumb stays still across navigations. */
+  .main__breadcrumb {
+    margin-block-end: var(--space-3);
+    view-transition-name: breadcrumb;
+
+    @media print {
+      display: none;
+    }
+  }
+}
+</style>

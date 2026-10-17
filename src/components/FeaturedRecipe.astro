@@ -1,6 +1,7 @@
 ---
 import { Picture } from "astro:assets";
 import Icon from "@components/Icon.astro";
+import { viewTransitionStyle } from "@lib/view-transition";
 import type { ImageMetadata } from "astro";
 
 interface Props {
@@ -10,11 +11,22 @@ interface Props {
   badge?: string;
   image?: ImageMetadata;
   imageAlt?: string;
+  transitionName?: string;
   class?: string;
   [key: string]: unknown;
 }
 
-const { href, title, meta, badge, image, imageAlt = "", class: className, ...rest } = Astro.props;
+const {
+  href,
+  title,
+  meta,
+  badge,
+  image,
+  imageAlt = "",
+  transitionName,
+  class: className,
+  ...rest
+} = Astro.props;
 
 // The card is one link: name it by its title, not by every fact inside it.
 const titleId = `featured-${href.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "")}`;
@@ -22,7 +34,7 @@ const titleId = `featured-${href.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, 
 
 <article class:list={["featured", className]} {...rest}>
   <a class="featured__link" href={href} aria-labelledby={titleId}>
-    <div class="featured__media">
+    <div class="featured__media" style={viewTransitionStyle(transitionName)}>
       {image && (
         <Picture
           src={image}

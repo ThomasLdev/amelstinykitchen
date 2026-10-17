@@ -51,6 +51,8 @@
   --max-width-lg: 68rem;
   --max-width-xl: 80rem;
   --gutter: clamp(1rem, 4vw, 2rem);
+  --page-space-start: var(--gutter);
+  --page-space-end: var(--space-6);
   --nav-h: 3.75rem;
 
   --transition-fast: 0.15s ease;

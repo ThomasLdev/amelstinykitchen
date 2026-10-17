@@ -14,7 +14,7 @@ import { defaultLocale, isLocale, languages, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { selectFeaturedTags, selectHeroRecipe, selectPopularRecipes } from "@lib/content/home";
 import { translate } from "@lib/content/i18n";
-import { formatDuration, isPublished, totalTime } from "@lib/content/recipe";
+import { formatDuration, isPublished, recipeTransitionName, totalTime } from "@lib/content/recipe";
 import { ogImage } from "@lib/seo/images";
 import { websiteLd } from "@lib/seo/jsonld";
 import { siteConfig, socialProfiles } from "@site";
@@ -54,6 +54,7 @@ const hero = heroRecipe && {
   ]),
   image: heroRecipe.data.media[0]?.src,
   imageAlt: heroRecipe.data.media[0] ? translate(heroRecipe.data.media[0].alt, locale) : "",
+  transitionName: recipeTransitionName(heroRecipe),
 };
 
 const popular = selectPopularRecipes(recipes).map((recipe) => ({
@@ -62,6 +63,8 @@ const popular = selectPopularRecipes(recipes).map((recipe) => ({
   excerpt: translate(recipe.data.excerpt, locale) || undefined,
   meta: factsLine(recipeFacts(recipe)),
   image: recipe.data.media[0]?.src,
+  // Names must be unique per page and the hero may also be popular.
+  transitionName: recipe === heroRecipe ? undefined : recipeTransitionName(recipe),
 }));
 
 // Built statically: "in season" is evaluated at build time.

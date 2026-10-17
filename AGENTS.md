@@ -59,6 +59,10 @@ layers, palettes, a11y, HTML natif avant JS) est dans le skill `design-system`.
 - Les helpers de layout/utilitaires sont des **composants scopés**
   (`Container`, `Section`, `SrOnly`…), pas des classes globales.
 - Couleurs/polices/espaces uniquement via custom properties de `tokens.css`.
+- **Haut/bas de page** portés par `<main>` de `BaseLayout` (`--page-space-start`
+  / `--page-space-end`) : aucun composant n'ajoute d'espace avant le premier
+  bloc ni après le dernier. Le **breadcrumb** passe toujours par le slot
+  `breadcrumb` de `BaseLayout` (position fixe, `view-transition-name`).
 - HTML/CSS natif d'abord, JS (`<script>` ou îlot) en dernier recours.
 
 ## i18n (FR/EN uniquement)
