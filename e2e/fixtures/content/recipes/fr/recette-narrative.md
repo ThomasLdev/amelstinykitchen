@@ -21,5 +21,5 @@ media:
     alt: Photo de couverture.
 sections:
   - title: Une section
-    content: <p>Texte de la section narrative.</p>
+    content: Texte de la section narrative.
 ---

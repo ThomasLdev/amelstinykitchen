@@ -219,8 +219,9 @@ const related = selectRelatedRecipes(recipe, recipes).map((entry) => recipeCard(
             </Button>
           </Ingredients>
 
-          <section class="recipe-steps">
+          <section class="recipe-steps" aria-labelledby="recipe-steps-title">
             <SectionTitle
+              id="recipe-steps-title"
               class="recipe-steps__title"
               title={t.recipe.steps.title}
               titleEm={t.recipe.steps.titleEm}

@@ -1,4 +1,6 @@
 import Ingredients from "@components/Ingredients.astro";
+import enDict from "@i18n/en";
+import frDict from "@i18n/fr";
 import { describe, expect, it } from "vitest";
 import { count, createContainer } from "../helpers";
 
@@ -53,7 +55,8 @@ describe("Ingredients", () => {
 
     expect(fr).toMatch(/<output[^>]*aria-labelledby="ingredients-portions-tarte"/);
     expect(fr).toContain('id="ingredients-portions-tarte"');
-    expect(fr).toMatch(/data-recipe-checklist-count[^>]*>0<\/span>\s*\/ 3 prêts/);
-    expect(en).toMatch(/data-recipe-checklist-count[^>]*>0<\/span>\s*\/ 3 ready/);
+    const after = (template: string) => template.replace("%total%", "3").split("%count%")[1];
+    expect(fr).toContain(`>0</span>${after(frDict.recipe.ingredients.progress)}`);
+    expect(en).toContain(`>0</span>${after(enDict.recipe.ingredients.progress)}`);
   });
 });

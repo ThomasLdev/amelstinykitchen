@@ -1,4 +1,5 @@
 import Footer from "@components/Footer.astro";
+import fr from "@i18n/fr";
 import { describe, expect, it } from "vitest";
 import { createContainer } from "../helpers";
 
@@ -17,12 +18,12 @@ describe("Footer", () => {
     const html = await container.renderToString(Footer, {
       props: { locale: "en", alternates: { fr: "recipes/tarte", en: "recipes/pie" } },
     });
-    const link = html.match(/<a[^>]*class="footer__lang[^>]*>/)?.[0] ?? "";
+    const link = html.match(/<a[^>]*hreflang=[^>]*>/)?.[0] ?? "";
 
     expect(link).toMatch(/href="\/fr\/recipes\/tarte\/?"/);
     expect(link).toContain('hreflang="fr"');
     expect(link).toContain('lang="fr"');
-    expect(html).toContain("Français");
+    expect(html).toContain(fr.footer.languageName);
   });
 
   it.each([
@@ -31,6 +32,6 @@ describe("Footer", () => {
   ])("hides the language switch %s", async (_, alternates) => {
     const html = await container.renderToString(Footer, { props: { locale: "fr", alternates } });
 
-    expect(html).not.toContain("footer__lang");
+    expect(html).not.toMatch(/<a[^>]*hreflang=/);
   });
 });
