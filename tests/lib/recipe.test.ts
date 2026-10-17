@@ -60,7 +60,9 @@ describe("selectRelatedRecipes", () => {
     ]);
   });
 
-  it("builds a valid view-transition name from a nested entry id", () => {
-    expect(recipeTransitionName({ id: "fr/tarte.citron" })).toBe("recipe-media-fr-tarte-citron");
+  it("builds a valid view-transition name from the translation key", () => {
+    expect(recipeTransitionName({ data: { translationKey: "tarte.citron" } })).toBe(
+      "recipe-media-tarte-citron",
+    );
   });
 });

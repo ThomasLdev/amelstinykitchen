@@ -16,13 +16,14 @@ import Section from "@components/Section.astro";
 import SectionHead from "@components/SectionHead.astro";
 import SectionTitle from "@components/SectionTitle.astro";
 import SegmentedControl from "@components/SegmentedControl.astro";
-import { type Locale, languages, useTranslations } from "@i18n";
+import { type Locale, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
-import { translate } from "@lib/content/i18n";
+import { assertTranslations, inLocale, translationsOf } from "@lib/content/i18n";
 import {
   formatDuration,
   ingredientCount,
   isPublished,
+  recipeSharedFields,
   recipeTransitionName,
   selectRelatedRecipes,
   totalTime,
@@ -34,36 +35,38 @@ import { recipePath, resolveRecipe } from "@lib/seo/resolve";
 import { siteConfig, socialProfiles } from "@site";
 
 export async function getStaticPaths() {
+  assertTranslations(await getCollection("recipes"), recipeSharedFields);
   const recipes = await getCollection("recipes", (entry) =>
     isPublished(entry, import.meta.env.PROD),
   );
-  const locales = Object.keys(languages) as Locale[];
 
-  return recipes.flatMap((recipe) =>
-    locales.map((locale) => ({
-      params: { lang: locale, slug: recipe.data.paths[locale] },
-      props: { recipe, recipes, locale },
-    })),
-  );
+  return recipes.map((recipe) => ({
+    params: { lang: recipe.data.locale, slug: recipe.data.paths },
+    props: {
+      recipe,
+      recipes: recipes.filter(inLocale(recipe.data.locale)),
+      translations: translationsOf(recipe, recipes),
+    },
+  }));
 }
 
 interface Props {
   recipe: CollectionEntry<"recipes">;
-  /** Every published recipe, for the related recipes block. */
+  /** Every published recipe in the same locale, for the related recipes block. */
   recipes: CollectionEntry<"recipes">[];
-  locale: Locale;
+  /** Published translations only: a missing one gets no hreflang nor language link. */
+  translations: Partial<Record<Locale, CollectionEntry<"recipes">>>;
 }
 
-const { recipe, recipes, locale } = Astro.props;
+const { recipe, recipes, translations } = Astro.props;
+const { locale } = recipe.data;
 const t = useTranslations(locale);
 const data = recipe.data;
 
 const category = await getEntry(data.category);
 const tags = await getEntries(data.tags);
-const tagLabels = tags.map((tag) => translate(tag.data.title, locale));
-const kicker = [category && translate(category.data.title, locale), ...tagLabels]
-  .filter(Boolean)
-  .join(" · ");
+const tagLabels = tags.map((tag) => tag.data[locale].title);
+const kicker = [category?.data[locale].title, ...tagLabels].filter(Boolean).join(" · ");
 
 const preparationTime = formatDuration(data.preparationTime, locale);
 const cookingTime = formatDuration(data.cookingTime, locale);
@@ -78,47 +81,28 @@ const breadcrumbItems: { label: string; href?: string }[] = [
   { label: t.recipe.breadcrumb.recipes, href: getRelativeLocaleUrl(locale, "recipes") },
 ];
 if (category) {
-  breadcrumbItems.push({ label: translate(category.data.title, locale) });
+  breadcrumbItems.push({ label: category.data[locale].title });
 }
 
 const groups = data.ingredientGroups.map((group, groupIndex) => ({
-  label: translate(group.label, locale) || undefined,
+  label: group.label || undefined,
   ingredients: group.ingredients.map((ingredient, index) => ({
-    id: `${recipe.id}-${groupIndex}-${index}`,
-    name: translate(ingredient.name, locale),
-    quantity: ingredient.quantity,
-    unit: translate(ingredient.unit, locale),
-    display: ingredient.display ? translate(ingredient.display, locale) : undefined,
+    ...ingredient,
+    id: `${data.translationKey}-${groupIndex}-${index}`,
   })),
 }));
 
-const steps = data.steps.map((step, index) => ({
-  index: index + 1,
-  title: translate(step.title, locale),
-  content: translate(step.content, locale),
-  tip: step.tip ? { type: step.tip.type, text: translate(step.tip.text, locale) } : undefined,
-  media: step.media.map((item) => ({
-    src: item.src,
-    alt: translate(item.alt, locale),
-  })),
-}));
-
-const recipeMedia = data.media.map((item) => ({
-  src: item.src,
-  alt: translate(item.alt, locale),
-}));
+const steps = data.steps.map((step, index) => ({ ...step, index: index + 1 }));
 
 // Below 720px a multi-image carousel shows 85% wide slides; the page gutter
 // is 4vw on phones, hence 92vw for a full-bleed image.
 const mobileSlide = (count: number) => (count > 1 ? "78vw" : "92vw");
 
 const site = Astro.site ?? new URL(Astro.url.origin);
-const resolved = await resolveRecipe(recipe, locale, site);
-const title = data.metaTitle
-  ? translate(data.metaTitle, locale)
-  : `${resolved.title} · ${siteConfig.name}`;
+const resolved = await resolveRecipe(recipe, site);
+const title = data.metaTitle ?? `${resolved.title} · ${siteConfig.name}`;
 const hero = data.media[0];
-const shareImage = hero && (await ogImage(hero.src, translate(hero.alt, locale), site));
+const shareImage = hero && (await ogImage(hero.src, hero.alt, site));
 const homeUrl = getAbsoluteLocaleUrl(locale, "");
 const jsonLd = [
   recipeLd(resolved, { name: siteConfig.author.name, url: homeUrl, sameAs: socialProfiles() }),
@@ -131,12 +115,12 @@ const jsonLd = [
   ]),
 ];
 const alternates = Object.fromEntries(
-  (Object.keys(languages) as Locale[]).map((lang) => [lang, recipePath(recipe, lang)]),
+  Object.entries(translations).map(([lang, entry]) => [lang, recipePath(entry)]),
 );
 
 const related = selectRelatedRecipes(recipe, recipes).map((entry) => ({
-  href: getRelativeLocaleUrl(locale, recipePath(entry, locale)),
-  title: translate(entry.data.title, locale),
+  href: getRelativeLocaleUrl(locale, recipePath(entry)),
+  title: entry.data.title,
   meta: [
     formatDuration(totalTime(entry.data.preparationTime, entry.data.cookingTime), locale),
     t.recipe.difficulty[entry.data.difficulty],
@@ -146,13 +130,6 @@ const related = selectRelatedRecipes(recipe, recipes).map((entry) => ({
   image: entry.data.media[0]?.src,
   transitionName: recipeTransitionName(entry),
 }));
-
-const chefNote = data.chefNote
-  ? {
-      title: translate(data.chefNote.title, locale),
-      body: translate(data.chefNote.body, locale),
-    }
-  : undefined;
 ---
 
 <BaseLayout
@@ -170,7 +147,7 @@ const chefNote = data.chefNote
   <Breadcrumb
     slot="breadcrumb"
     items={breadcrumbItems}
-    current={translate(data.title, locale)}
+    current={data.title}
     label={t.a11y.breadcrumb}
   />
 
@@ -184,9 +161,9 @@ const chefNote = data.chefNote
     <Container>
       <RecipeHead
         locale={locale}
-        title={translate(data.title, locale)}
+        title={data.title}
         tags={tagLabels}
-        excerpt={translate(data.excerpt, locale)}
+        excerpt={data.excerpt}
         kicker={kicker}
         recipeAnchor={steps.length > 0 ? recipeAnchor : undefined}
       >
@@ -209,7 +186,7 @@ const chefNote = data.chefNote
 
         <MediaCarousel
           slot="media"
-          media={recipeMedia}
+          media={data.media}
           locale={locale}
           variant="hero"
           widths={[480, 720, 960, 1280]}
@@ -239,7 +216,7 @@ const chefNote = data.chefNote
             groups={groups}
             total={ingredientsCount}
             servings={data.servings}
-            recipeId={recipe.id}
+            recipeId={data.translationKey}
             locale={locale}
           >
             <Button slot="footer" class="recipe-body__done" data-recipe-view-show="steps" hidden>
@@ -260,7 +237,9 @@ const chefNote = data.chefNote
               ))}
             </ol>
 
-            {chefNote && <ChefNote title={chefNote.title} body={chefNote.body} locale={locale} />}
+            {data.chefNote && (
+              <ChefNote title={data.chefNote.title} body={data.chefNote.body} locale={locale} />
+            )}
           </section>
         </div>
       </Container>
@@ -270,16 +249,11 @@ const chefNote = data.chefNote
           <div class="recipe-sections">
             {data.sections.map((section) => (
               <section class="post-section">
-                {translate(section.title, locale) && (
-                  <h2 class="post-section__title">{translate(section.title, locale)}</h2>
-                )}
-                <Prose html={translate(section.content, locale)} />
+                {section.title && <h2 class="post-section__title">{section.title}</h2>}
+                <Prose html={section.content} />
                 {section.media.length > 0 && (
                   <MediaCarousel
-                    media={section.media.map((item) => ({
-                      src: item.src,
-                      alt: translate(item.alt, locale),
-                    }))}
+                    media={section.media}
                     locale={locale}
                     sizes={`(min-width: 900px) 42rem, (min-width: 720px) 92vw, ${mobileSlide(section.media.length)}`}
                   />

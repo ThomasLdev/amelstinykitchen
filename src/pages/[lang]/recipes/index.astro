@@ -8,7 +8,7 @@ import RecipeBrowser from "@components/RecipeBrowser.astro";
 import { defaultLocale, isLocale, languages, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import type { Season } from "@lib/content/home";
-import { translate } from "@lib/content/i18n";
+import { inLocale, localize } from "@lib/content/i18n";
 import { formatDuration, isPublished, recipeTransitionName, totalTime } from "@lib/content/recipe";
 import { type RecipeFacet, sortRecipes } from "@lib/content/recipe-filters";
 import { breadcrumbLd, itemListLd } from "@lib/seo/jsonld";
@@ -21,9 +21,16 @@ const { lang } = Astro.params;
 const locale = isLocale(lang) ? lang : defaultLocale;
 const t = useTranslations(locale);
 
-const recipes = await getCollection("recipes", (entry) => isPublished(entry, import.meta.env.PROD));
-const categories = new Map((await getCollection("categories")).map((entry) => [entry.id, entry]));
-const tags = new Map((await getCollection("tags")).map((entry) => [entry.id, entry]));
+const recipes = await getCollection(
+  "recipes",
+  (entry) => isPublished(entry, import.meta.env.PROD) && inLocale(locale)(entry),
+);
+const categories = new Map(
+  (await getCollection("categories")).map((entry) => [entry.id, localize(entry, locale)]),
+);
+const tags = new Map(
+  (await getCollection("tags")).map((entry) => [entry.id, localize(entry, locale)]),
+);
 
 const SEASONS: Season[] = ["spring", "summer", "autumn", "winter"];
 
@@ -35,12 +42,12 @@ const items = recipes.map((recipe) => {
   const seasons = SEASONS.filter((season) => recipeTags.some((tag) => tag.data.season === season));
   const plainTags = recipeTags.filter((tag) => !tag.data.season);
   const time = totalTime(data.preparationTime, data.cookingTime);
-  const title = translate(data.title, locale);
-  const categoryLabel = category ? translate(category.data.title, locale) : "";
-  const tagLabels = recipeTags.map((tag) => translate(tag.data.title, locale));
+  const title = data.title;
+  const categoryLabel = category?.data.title ?? "";
+  const tagLabels = recipeTags.map((tag) => tag.data.title);
 
   const facet: RecipeFacet = {
-    id: recipe.id,
+    id: data.translationKey,
     category: data.category.id,
     seasons,
     tags: plainTags.map((tag) => tag.id),
@@ -52,9 +59,9 @@ const items = recipes.map((recipe) => {
 
   return {
     facet,
-    url: getAbsoluteLocaleUrl(locale, `recipes/${data.paths[locale]}`),
+    url: getAbsoluteLocaleUrl(locale, `recipes/${data.paths}`),
     card: {
-      href: getRelativeLocaleUrl(locale, `recipes/${data.paths[locale]}`),
+      href: getRelativeLocaleUrl(locale, `recipes/${data.paths}`),
       title,
       kicker: [categoryLabel, ...seasons.map((season) => t.recipes.seasons[season])]
         .filter(Boolean)
@@ -92,7 +99,7 @@ const byLabel = (a: { label: string }, b: { label: string }) =>
 const categoryOptions = [...categories.values()]
   .filter((entry) => usedCategories.has(entry.id))
   .sort((a, b) => a.data.position - b.data.position || a.id.localeCompare(b.id))
-  .map((entry) => ({ value: entry.id, label: translate(entry.data.title, locale) }));
+  .map((entry) => ({ value: entry.id, label: entry.data.title }));
 
 const seasonOptions = SEASONS.map((season) => ({
   value: season,
@@ -101,7 +108,7 @@ const seasonOptions = SEASONS.map((season) => ({
 
 const tagOptions = [...tags.values()]
   .filter((entry) => usedTags.has(entry.id))
-  .map((entry) => ({ value: entry.id, label: translate(entry.data.title, locale) }))
+  .map((entry) => ({ value: entry.id, label: entry.data.title }))
   .sort(byLabel);
 ---
 

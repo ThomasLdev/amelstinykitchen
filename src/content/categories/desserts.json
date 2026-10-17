@@ -1,10 +1,16 @@
 {
-  "title": { "fr": "Desserts", "en": "Desserts" },
-  "paths": { "fr": "desserts", "en": "desserts" },
-  "description": {
-    "fr": "Pour finir le repas en douceur.",
-    "en": "To end the meal on a sweet note."
+  "fr": {
+    "title": "Desserts",
+    "paths": "desserts",
+    "description": "Pour finir le repas en douceur.",
+    "isFeatured": false,
+    "position": 2
   },
-  "isFeatured": false,
-  "position": 2
+  "en": {
+    "title": "Desserts",
+    "paths": "desserts",
+    "description": "To end the meal on a sweet note.",
+    "isFeatured": false,
+    "position": 2
+  }
 }

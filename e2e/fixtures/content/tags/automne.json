@@ -1,6 +1,14 @@
 {
-  "title": { "fr": "Automne", "en": "Autumn" },
-  "paths": { "fr": "automne", "en": "autumn" },
-  "isFeatured": true,
-  "season": "autumn"
+  "fr": {
+    "title": "Automne",
+    "paths": "automne",
+    "isFeatured": true,
+    "season": "autumn"
+  },
+  "en": {
+    "title": "Autumn",
+    "paths": "autumn",
+    "isFeatured": true,
+    "season": "autumn"
+  }
 }

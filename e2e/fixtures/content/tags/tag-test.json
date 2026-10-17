@@ -1,5 +1,12 @@
 {
-  "title": { "fr": "Tag test", "en": "Test tag" },
-  "paths": { "fr": "tag-test", "en": "test-tag" },
-  "isFeatured": true
+  "fr": {
+    "title": "Tag test",
+    "paths": "tag-test",
+    "isFeatured": true
+  },
+  "en": {
+    "title": "Test tag",
+    "paths": "test-tag",
+    "isFeatured": true
+  }
 }

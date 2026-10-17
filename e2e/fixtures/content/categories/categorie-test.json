@@ -1,4 +1,10 @@
 {
-  "title": { "fr": "Catégorie test", "en": "Test category" },
-  "paths": { "fr": "categorie-test", "en": "test-category" }
+  "fr": {
+    "title": "Catégorie test",
+    "paths": "categorie-test"
+  },
+  "en": {
+    "title": "Test category",
+    "paths": "test-category"
+  }
 }

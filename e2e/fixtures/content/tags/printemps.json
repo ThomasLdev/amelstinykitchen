@@ -1,6 +1,14 @@
 {
-  "title": { "fr": "Printemps", "en": "Spring" },
-  "paths": { "fr": "printemps", "en": "spring" },
-  "isFeatured": true,
-  "season": "spring"
+  "fr": {
+    "title": "Printemps",
+    "paths": "printemps",
+    "isFeatured": true,
+    "season": "spring"
+  },
+  "en": {
+    "title": "Spring",
+    "paths": "spring",
+    "isFeatured": true,
+    "season": "spring"
+  }
 }

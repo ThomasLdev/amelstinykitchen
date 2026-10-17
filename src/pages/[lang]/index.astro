@@ -13,7 +13,7 @@ import ViewAllLink from "@components/ViewAllLink.astro";
 import { defaultLocale, isLocale, languages, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { selectFeaturedTags, selectHeroRecipe, selectPopularRecipes } from "@lib/content/home";
-import { translate } from "@lib/content/i18n";
+import { inLocale, localize } from "@lib/content/i18n";
 import { formatDuration, isPublished, recipeTransitionName, totalTime } from "@lib/content/recipe";
 import { ogImage } from "@lib/seo/images";
 import { websiteLd } from "@lib/seo/jsonld";
@@ -27,11 +27,14 @@ const { lang } = Astro.params;
 const locale = isLocale(lang) ? lang : defaultLocale;
 const t = useTranslations(locale);
 
-const recipes = await getCollection("recipes", (entry) => isPublished(entry, import.meta.env.PROD));
-const tags = await getCollection("tags");
+const recipes = await getCollection(
+  "recipes",
+  (entry) => isPublished(entry, import.meta.env.PROD) && inLocale(locale)(entry),
+);
+const tags = (await getCollection("tags")).map((tag) => localize(tag, locale));
 
 const recipeHref = (recipe: CollectionEntry<"recipes">) =>
-  getRelativeLocaleUrl(locale, `recipes/${recipe.data.paths[locale]}`);
+  getRelativeLocaleUrl(locale, `recipes/${recipe.data.paths}`);
 
 const recipeFacts = ({ data }: CollectionEntry<"recipes">) => [
   formatDuration(totalTime(data.preparationTime, data.cookingTime), locale),
@@ -47,20 +50,20 @@ const searchHref = (query: string) => `${searchUrl}?q=${encodeURIComponent(query
 const heroRecipe = selectHeroRecipe(recipes);
 const hero = heroRecipe && {
   href: recipeHref(heroRecipe),
-  title: translate(heroRecipe.data.title, locale),
+  title: heroRecipe.data.title,
   meta: factsLine([
     ...recipeFacts(heroRecipe),
-    ...(await getEntries(heroRecipe.data.tags)).map((tag) => translate(tag.data.title, locale)),
+    ...(await getEntries(heroRecipe.data.tags)).map((tag) => tag.data[locale].title),
   ]),
   image: heroRecipe.data.media[0]?.src,
-  imageAlt: heroRecipe.data.media[0] ? translate(heroRecipe.data.media[0].alt, locale) : "",
+  imageAlt: heroRecipe.data.media[0]?.alt ?? "",
   transitionName: recipeTransitionName(heroRecipe),
 };
 
 const popular = selectPopularRecipes(recipes).map((recipe) => ({
   href: recipeHref(recipe),
-  title: translate(recipe.data.title, locale),
-  excerpt: translate(recipe.data.excerpt, locale) || undefined,
+  title: recipe.data.title,
+  excerpt: recipe.data.excerpt || undefined,
   meta: factsLine(recipeFacts(recipe)),
   image: recipe.data.media[0]?.src,
   // Names must be unique per page and the hero may also be popular.
@@ -70,7 +73,7 @@ const popular = selectPopularRecipes(recipes).map((recipe) => ({
 // Built statically: "in season" is evaluated at build time.
 const featuredTags = selectFeaturedTags(tags, recipes, new Date()).map(
   ({ tag, recipeCount, inSeason }) => ({
-    name: translate(tag.data.title, locale),
+    name: tag.data.title,
     meta: t.home.tags.recipesCount(recipeCount),
     seasonLabel: inSeason ? t.home.tags.inSeason : undefined,
   }),
@@ -79,8 +82,7 @@ const featuredTags = selectFeaturedTags(tags, recipes, new Date()).map(
 const site = Astro.site ?? new URL(Astro.url.origin);
 const homeUrl = getAbsoluteLocaleUrl(locale, "");
 const heroMedia = heroRecipe?.data.media[0];
-const shareImage =
-  heroMedia && (await ogImage(heroMedia.src, translate(heroMedia.alt, locale), site));
+const shareImage = heroMedia && (await ogImage(heroMedia.src, heroMedia.alt, site));
 const jsonLd = [
   websiteLd({
     url: homeUrl,

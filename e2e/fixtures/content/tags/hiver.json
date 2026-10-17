@@ -1,6 +1,14 @@
 {
-  "title": { "fr": "Hiver", "en": "Winter" },
-  "paths": { "fr": "hiver", "en": "winter" },
-  "isFeatured": true,
-  "season": "winter"
+  "fr": {
+    "title": "Hiver",
+    "paths": "hiver",
+    "isFeatured": true,
+    "season": "winter"
+  },
+  "en": {
+    "title": "Winter",
+    "paths": "winter",
+    "isFeatured": true,
+    "season": "winter"
+  }
 }

@@ -1,6 +1,7 @@
 // @ts-check
 import sitemap from "@astrojs/sitemap";
 import { defineConfig, fontProviders } from "astro/config";
+import cmsAdmin from "./cms/integration.mjs";
 
 const fontDir = "./src/assets/fonts";
 
@@ -71,6 +72,7 @@ export default defineConfig({
     },
   ],
   integrations: [
+    cmsAdmin(),
     sitemap({
       // `/` is only a redirect to the default locale; hreflang lives in each page's <head>
       // because FR and EN slugs differ, which the sitemap `i18n` option cannot pair.

@@ -1,3 +1,4 @@
+import type { CollectionEntry } from "astro:content";
 import type { Locale } from "@i18n";
 
 /**
@@ -34,8 +35,25 @@ export function ingredientCount(groups: Array<{ ingredients: unknown[] }>): numb
   return groups.reduce((total, group) => total + group.ingredients.length, 0);
 }
 
-export function recipeTransitionName(recipe: { id: string }): string {
-  return `recipe-media-${recipe.id.replace(/[^a-z0-9_-]/gi, "-")}`;
+/** Keyed by `translationKey`: the same name for a recipe whatever its locale. */
+export function recipeTransitionName(recipe: { data: { translationKey: string } }): string {
+  return `recipe-media-${recipe.data.translationKey.replace(/[^a-z0-9_-]/gi, "-")}`;
+}
+
+/** Fields entered once in the CMS and copied to every translation. */
+export function recipeSharedFields({ data }: CollectionEntry<"recipes">) {
+  return {
+    category: data.category.id,
+    tags: data.tags.map((tag) => tag.id),
+    difficulty: data.difficulty,
+    preparationTime: data.preparationTime,
+    cookingTime: data.cookingTime,
+    servings: data.servings,
+    publishDate: data.publishDate,
+    isFeatured: data.isFeatured,
+    media: data.media.map((item) => item.src),
+    quantities: data.ingredientGroups.map((group) => group.ingredients.map((i) => i.quantity)),
+  };
 }
 
 export function isPublished(recipe: { data: { draft: boolean } }, production: boolean): boolean {

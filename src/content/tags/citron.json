@@ -1,5 +1,12 @@
 {
-  "title": { "fr": "Citron", "en": "Lemon" },
-  "paths": { "fr": "citron", "en": "lemon" },
-  "isFeatured": false
+  "fr": {
+    "title": "Citron",
+    "paths": "citron",
+    "isFeatured": false
+  },
+  "en": {
+    "title": "Lemon",
+    "paths": "lemon",
+    "isFeatured": false
+  }
 }
