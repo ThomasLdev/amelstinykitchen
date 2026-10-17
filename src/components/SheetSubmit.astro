@@ -1,0 +1,32 @@
+---
+/** Full-width main button for the `foot` slot of a Sheet (e.g. "Show 3 recipes"). */
+interface Props {
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { class: className, ...rest } = Astro.props;
+---
+
+<button type="button" class:list={["sheet-submit", className]} {...rest}>
+  <slot />
+</button>
+
+<style>
+@layer components {
+  .sheet-submit {
+    inline-size: 100%;
+    min-block-size: 3.25rem;
+    border-radius: var(--radius-pill);
+    background: var(--ink);
+    color: var(--on-ink);
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background var(--transition-base);
+
+    &:hover {
+      background: var(--accent-ink);
+    }
+  }
+}
+</style>

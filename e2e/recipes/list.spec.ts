@@ -60,6 +60,51 @@ test.describe("recipes list (desktop)", () => {
     await expect(page.getByRole("searchbox", { name: fr.recipes.search.label })).toHaveValue("");
   });
 
+  test("searches ingredients by relevance, then falls back to the newest", async ({ page }) => {
+    await page.goto(RECIPES_FR);
+    const sort = page.getByRole("combobox", { name: fr.recipes.sort.label });
+    const searchbox = page.getByRole("searchbox", { name: fr.recipes.search.label });
+    await expect(sort).toHaveValue("recent");
+
+    await searchbox.fill(COMPLETE.ingredient.toLowerCase());
+    await expect(titles(page)).toHaveText([COMPLETE.title.fr]);
+    await expect(sort).toHaveValue("relevance");
+    // The card does not list ingredients: the match line and highlight say why it is there.
+    await expect(
+      recipeList(page).getByText(fr.recipes.match.replace("%list%", COMPLETE.ingredient)),
+    ).toBeVisible();
+    await expect
+      .poll(() => page.evaluate(() => CSS.highlights.get("recipe-search")?.size ?? 0))
+      .toBeGreaterThan(0);
+
+    await searchbox.fill("");
+    await expect(titles(page)).toHaveText([...LIST_FR]);
+    await expect(sort).toHaveValue("recent");
+    await expect(
+      page.getByText(fr.recipes.match.replace("%list%", COMPLETE.ingredient)),
+    ).toBeHidden();
+  });
+
+  test("keeps a sort picked with the query and resets an automatic one with its chip", async ({
+    page,
+  }) => {
+    const sort = page.getByRole("combobox", { name: fr.recipes.sort.label });
+    const query = COMPLETE.ingredient.toLowerCase();
+
+    await page.goto(`${RECIPES_FR}?q=${query}&sort=recent`);
+    await expect(sort).toHaveValue("recent");
+    await expect(page).toHaveURL(/sort=recent/);
+
+    await page.goto(`${RECIPES_FR}?q=${query}`);
+    await expect(sort).toHaveValue("relevance");
+    const label = fr.recipes.active.query.replace("%query%", query);
+    await page
+      .getByRole("button", { name: fr.recipes.active.remove.replace("%label%", label) })
+      .click();
+    await expect(sort).toHaveValue("recent");
+    await expect(titles(page)).toHaveText([...LIST_FR]);
+  });
+
   test("sorts by duration and restores the state from the URL", async ({ page }) => {
     await page.goto(`${RECIPES_FR}?sort=quick&tag=${FEATURED_TAG.id}`);
 

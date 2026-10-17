@@ -1,0 +1,202 @@
+---
+import Icon from "@components/Icon.astro";
+import Sheet from "@components/Sheet.astro";
+import { type Locale, useTranslations } from "@i18n";
+import { searchIndexUrl } from "@lib/content/recipe-catalog";
+
+interface Props {
+  locale: Locale;
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { locale, class: className, ...rest } = Astro.props;
+const { header, recipes } = useTranslations(locale);
+const t = header.searchDialog;
+
+// Read by src/scripts/search-dialog.ts for the labels it writes.
+const strings = JSON.stringify({
+  count: t.count,
+  empty: t.empty,
+  loading: t.loading,
+  error: t.error,
+  match: recipes.match,
+});
+const indexUrl = searchIndexUrl(locale);
+---
+
+<Sheet
+  class:list={["search-sheet", className]}
+  id="search-dialog"
+  title={header.search}
+  closeLabel={t.close}
+  data-search-dialog
+  data-index={indexUrl}
+  data-strings={strings}
+  {...rest}
+>
+  <div class="search-dialog">
+    <div class="search-dialog__bar">
+      <label class="search-dialog__field">
+        <Icon name="search" size={18} class="search-dialog__icon" />
+        <input
+          class="search-dialog__input"
+          type="search"
+          aria-label={t.label}
+          placeholder={t.placeholder}
+          autocomplete="off"
+          enterkeyhint="search"
+          data-search-input
+        >
+      </label>
+    </div>
+    <p class="search-dialog__status" aria-live="polite" data-search-status></p>
+    <ul class="search-dialog__results" data-search-results></ul>
+  </div>
+
+  <template data-search-result>
+    <li class="search-dialog__result">
+      <!-- biome-ignore lint/a11y/useValidAnchor: href and text are set per result by the script. -->
+      <!-- biome-ignore lint/a11y/useAnchorContent: href and text are set per result by the script. -->
+      <a class="search-dialog__link">
+        <img class="search-dialog__thumb" alt="" width="56" height="56" loading="lazy">
+        <span class="search-dialog__text">
+          <span class="search-dialog__title" data-search-title></span>
+          <span class="search-dialog__meta" data-search-meta></span>
+          <span class="search-dialog__match" data-search-match hidden></span>
+        </span>
+      </a>
+    </li>
+  </template>
+</Sheet>
+
+<script>
+import "@scripts/search-dialog";
+</script>
+
+<style>
+@layer components {
+  /* Phones: the filters' proportion, fixed so the sheet does not grow while typing; results scroll inside. */
+  .search-sheet {
+    @media (width < 720px) {
+      block-size: min(70dvh, 40rem);
+    }
+  }
+
+  .search-dialog {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  /* Stays in view while the results scroll under it, over the sheet's top padding too. */
+  .search-dialog__bar {
+    position: sticky;
+    inset-block-start: -1.25rem;
+    z-index: 1;
+    margin-block-start: -1.25rem;
+    padding-block: 1.25rem 0.25rem;
+    background: var(--surface);
+  }
+
+  .search-dialog__field {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-inline-size: 0;
+    block-size: 3rem;
+    padding-inline: 1rem;
+    border-radius: var(--radius-pill);
+    background: var(--bg);
+
+    &:has(.search-dialog__input:focus-visible) {
+      outline: 2px solid var(--accent-ink);
+      outline-offset: 2px;
+    }
+  }
+
+  .search-dialog__icon {
+    flex: none;
+    color: var(--ink-3);
+  }
+
+  .search-dialog__input {
+    flex: 1;
+    min-inline-size: 0;
+    border: 0;
+    background: none;
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+  .search-dialog__status {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .search-dialog__result {
+    border-block-end: 1px solid var(--line);
+  }
+
+  .search-dialog__link {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding-block: 0.625rem;
+  }
+
+  .search-dialog__thumb {
+    flex: none;
+    inline-size: 3.5rem;
+    block-size: 3.5rem;
+    border-radius: var(--radius-sm);
+    background: var(--accent-bg);
+    object-fit: cover;
+  }
+
+  .search-dialog__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-inline-size: 0;
+  }
+
+  .search-dialog__title {
+    font-family: var(--font-serif);
+    font-size: 1.125rem;
+    line-height: 1.25;
+    transition: color var(--transition-base);
+
+    .search-dialog__link:hover & {
+      color: var(--accent-ink);
+    }
+
+    &::highlight(search-dialog) {
+      background-color: var(--accent-soft);
+      color: var(--ink);
+    }
+  }
+
+  .search-dialog__match {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-3);
+
+    &::highlight(search-dialog) {
+      background-color: var(--accent-soft);
+      color: var(--ink);
+    }
+  }
+
+  .search-dialog__meta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-3);
+  }
+}
+</style>

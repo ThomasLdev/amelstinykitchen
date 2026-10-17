@@ -16,6 +16,8 @@ export const NARRATIVE_FR_SLUG_EN = "/en/recipes/recette-narrative/";
 /** recette-complete.md: 4 servings, 4 ingredients (2 scalable), 2 steps, 2 cover photos. */
 export const COMPLETE = {
   ingredients: 4,
+  /** Only this recipe lists it. */
+  ingredient: "Farine",
   steps: 2,
   title: { fr: "Recette complète", en: "Complete recipe" },
 } as const;
@@ -33,7 +35,7 @@ export const ingredientQuantity = (page: Page, name: string) =>
 export const RECIPES_FR = "/fr/recipes/";
 export const RECIPES_EN = "/en/recipes/";
 
-/** Published recipes on the list, in the default ("most loved") order. */
+/** Published recipes on the list, in the default (newest first) order. */
 export const LIST_FR = [COMPLETE.title.fr, NARRATIVE_TITLE_FR, "Recette filtre"] as const;
 export const LIST_EN = [COMPLETE.title.en, "Filter recipe"] as const;
 /** recette-filtre.md: alone in its category and in winter, the quickest recipe. */

@@ -7,8 +7,9 @@ import PageHeader from "@components/PageHeader.astro";
 import RecipeBrowser from "@components/RecipeBrowser.astro";
 import { defaultLocale, isLocale, languages, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
-import { inLocale, localize } from "@lib/content/i18n";
-import { formatDuration, isPublished, recipeTransitionName, totalTime } from "@lib/content/recipe";
+import { localize } from "@lib/content/i18n";
+import { formatDuration, recipeTransitionName } from "@lib/content/recipe";
+import { loadRecipeCatalog, searchIndexUrl } from "@lib/content/recipe-catalog";
 import { type RecipeFacet, sortRecipes } from "@lib/content/recipe-filters";
 import { SEASONS } from "@lib/content/season";
 import { breadcrumbLd, itemListLd } from "@lib/seo/jsonld";
@@ -21,10 +22,8 @@ const { lang } = Astro.params;
 const locale = isLocale(lang) ? lang : defaultLocale;
 const t = useTranslations(locale);
 
-const recipes = await getCollection(
-  "recipes",
-  (entry) => isPublished(entry, import.meta.env.PROD) && inLocale(locale)(entry),
-);
+const catalog = await loadRecipeCatalog(locale);
+const indexUrl = searchIndexUrl(locale);
 const categories = new Map(
   (await getCollection("categories")).map((entry) => [entry.id, localize(entry, locale)]),
 );
@@ -32,47 +31,38 @@ const tags = new Map(
   (await getCollection("tags")).map((entry) => [entry.id, localize(entry, locale)]),
 );
 
-const items = recipes.map((recipe) => {
-  const { data } = recipe;
-  const category = categories.get(data.category.id);
-  const recipeTags = data.tags.flatMap((ref) => tags.get(ref.id) ?? []);
-  const seasons = SEASONS.filter((season) => data.seasons.includes(season));
-  const seasonLabels = seasons.map((season) => t.recipes.seasons[season]);
-  const time = totalTime(data.preparationTime, data.cookingTime);
-  const title = data.title;
-  const categoryLabel = category?.data.title ?? "";
-  const tagLabels = recipeTags.map((tag) => tag.data.title);
+const items = catalog.map(
+  ({ recipe, categoryLabel, tags: recipeTags, seasons, seasonLabels, time }) => {
+    const { data } = recipe;
+    const facet: RecipeFacet = {
+      id: data.translationKey,
+      category: data.category.id,
+      seasons,
+      tags: recipeTags.map((tag) => tag.id),
+      time,
+      date: data.publishDate.valueOf(),
+    };
 
-  const facet: RecipeFacet = {
-    id: data.translationKey,
-    category: data.category.id,
-    seasons,
-    tags: recipeTags.map((tag) => tag.id),
-    time,
-    date: data.publishDate.valueOf(),
-    featured: data.isFeatured,
-    search: [title, categoryLabel, ...tagLabels, ...seasonLabels].join(" "),
-  };
-
-  return {
-    facet,
-    url: getAbsoluteLocaleUrl(locale, `recipes/${data.paths}`),
-    card: {
-      href: getRelativeLocaleUrl(locale, `recipes/${data.paths}`),
-      title,
-      kicker: [categoryLabel, ...seasonLabels].filter(Boolean).join(" · "),
-      meta: [formatDuration(time, locale), t.recipe.difficulty[data.difficulty]]
-        .filter(Boolean)
-        .join(" · "),
-      image: data.media[0]?.src,
-      transitionName: recipeTransitionName(recipe),
-    },
-  };
-});
+    return {
+      facet,
+      url: getAbsoluteLocaleUrl(locale, `recipes/${data.paths}`),
+      card: {
+        href: getRelativeLocaleUrl(locale, `recipes/${data.paths}`),
+        title: data.title,
+        kicker: [categoryLabel, ...seasonLabels].filter(Boolean).join(" · "),
+        meta: [formatDuration(time, locale), t.recipe.difficulty[data.difficulty]]
+          .filter(Boolean)
+          .join(" · "),
+        image: data.media[0]?.src,
+        transitionName: recipeTransitionName(recipe),
+      },
+    };
+  },
+);
 
 const sorted = sortRecipes(
   items.map((item) => ({ ...item.facet, item })),
-  "popular",
+  "recent",
 ).map(({ item }) => item);
 
 const title = `${t.recipes.meta.title} · ${t.meta.title}`;
@@ -114,6 +104,8 @@ const tagOptions = [...tags.values()]
   alternates={{ fr: "recipes", en: "recipes" }}
   jsonLd={jsonLd}
 >
+  <!-- Fetched by the list as soon as it runs: a `?q=` link is filtered without waiting. -->
+  <link slot="head" rel="preload" href={indexUrl} as="fetch" crossorigin>
   <Breadcrumb
     slot="breadcrumb"
     items={[{ label: t.recipe.breadcrumb.home, href: getRelativeLocaleUrl(locale, "") }]}
@@ -130,6 +122,7 @@ const tagOptions = [...tags.values()]
       categories={categoryOptions}
       seasons={seasonOptions}
       tags={tagOptions}
+      data-search-index={indexUrl}
     />
   </Container>
 </BaseLayout>

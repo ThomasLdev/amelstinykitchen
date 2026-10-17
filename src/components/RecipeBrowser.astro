@@ -1,9 +1,11 @@
 ---
 import Button from "@components/Button.astro";
 import FilterGroup from "@components/FilterGroup.astro";
-import FilterSheet from "@components/FilterSheet.astro";
 import Icon from "@components/Icon.astro";
 import RecipeGrid from "@components/RecipeGrid.astro";
+import Sheet from "@components/Sheet.astro";
+import SheetAction from "@components/SheetAction.astro";
+import SheetSubmit from "@components/SheetSubmit.astro";
 import SrOnly from "@components/SrOnly.astro";
 import { type Locale, useTranslations } from "@i18n";
 import { plural, type RecipeFacet, SORT_KEYS } from "@lib/content/recipe-filters";
@@ -17,7 +19,7 @@ interface Option {
 
 interface Props {
   locale: Locale;
-  /** Already in the default ("popular") order. */
+  /** Already in the default ("recent") order. */
   items: Array<{ card: Card; facet: RecipeFacet }>;
   categories: Option[];
   seasons: Option[];
@@ -48,6 +50,7 @@ const strings = JSON.stringify({
   apply: t.apply,
   remove: t.active.remove,
   query: t.active.query,
+  match: t.match,
 });
 ---
 
@@ -94,7 +97,12 @@ const strings = JSON.stringify({
         <span class="browser__sort-label" aria-hidden="true">{t.sort.label}</span>
         <span class="browser__select">
           <select class="browser__select-input" name="sort">
-            {SORT_KEYS.map((key) => <option value={key}>{t.sort[key]}</option>)}
+            {SORT_KEYS.map((key) => (
+              // Relevance needs a query: the script offers it once one is typed.
+              <option value={key} hidden={key === "relevance"} disabled={key === "relevance"}>
+                {t.sort[key]}
+              </option>
+            ))}
           </select>
           <Icon name="chevron-down" size={16} class="browser__select-icon" />
         </span>
@@ -116,14 +124,15 @@ const strings = JSON.stringify({
     </fieldset>
   </div>
 
-  <FilterSheet
+  <Sheet
     class="browser__filters"
     id="recipes-filters"
     title={t.filters.title}
     closeLabel={t.filters.close}
-    resetLabel={t.filters.reset}
-    applyLabel={plural(t.apply, total)}
+    desktop="sidebar"
+    data-filters
   >
+    <SheetAction slot="start" data-filters-reset>{t.filters.reset}</SheetAction>
     {categories.length > 1 && (
       <FilterGroup
         type="radio"
@@ -149,7 +158,8 @@ const strings = JSON.stringify({
         appearance="switch"
       />
     )}
-  </FilterSheet>
+    <SheetSubmit slot="foot" data-filters-apply>{plural(t.apply, total)}</SheetSubmit>
+  </Sheet>
 
   <section class="browser__results">
     <div class="browser__status">
@@ -181,6 +191,7 @@ const strings = JSON.stringify({
       variant="tile"
       items={items.map(({ card, facet }) => ({
         ...card,
+        searchable: true,
         "data-recipe-item": facet.id,
         "data-facet": JSON.stringify(facet),
       }))}

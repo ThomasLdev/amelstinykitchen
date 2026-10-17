@@ -2,6 +2,7 @@
 import { getRelativeLocaleUrl } from "astro:i18n";
 import Icon from "@components/Icon.astro";
 import Logo from "@components/Logo.astro";
+import SearchDialog from "@components/SearchDialog.astro";
 import { type Locale, useTranslations } from "@i18n";
 
 interface Props {
@@ -44,7 +45,7 @@ const isCurrent = (href: string) => normalize(currentPath) === normalize(href);
           </li>
         ))}
         <li>
-          <button type="button" class="nav__item">
+          <button type="button" class="nav__item" aria-haspopup="dialog" data-search-open>
             <Icon name="search" size={18} />
             <span class="nav__item-label">{t.header.search}</span>
           </button>
@@ -52,6 +53,7 @@ const isCurrent = (href: string) => normalize(currentPath) === normalize(href);
       </ul>
     </div>
   </nav>
+  <SearchDialog locale={locale} />
 </header>
 
 <script>

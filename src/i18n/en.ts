@@ -24,6 +24,15 @@ const en: Dictionary = {
     home: "Home",
     recipes: "Recipes",
     search: "Search",
+    searchDialog: {
+      label: "Search for a recipe",
+      placeholder: "A recipe, an ingredient…",
+      close: "Close the search",
+      empty: "No recipe matches.",
+      loading: "Loading…",
+      error: "Search is unavailable, please try again later.",
+      count: { zero: "0 recipes", one: "1 recipe", other: "%count% recipes" },
+    },
   },
   footer: {
     /** Name of this language, in itself (language switch). */
@@ -167,7 +176,7 @@ const en: Dictionary = {
     },
     sort: {
       label: "Sort by",
-      popular: "Most loved",
+      relevance: "Relevance",
       recent: "Most recent",
       quick: "Quickest",
     },
@@ -188,6 +197,7 @@ const en: Dictionary = {
       autumn: "Autumn",
       winter: "Winter",
     },
+    match: "Contains: %list%",
     active: {
       remove: "Remove the %label% filter",
       query: "“%query%”",

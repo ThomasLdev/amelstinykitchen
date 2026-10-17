@@ -2,6 +2,7 @@ import type { Locale } from "@i18n";
 
 interface SiteConfig {
   name: string;
+  shortName: string;
   author: { name: string };
   /** Profile URLs; an empty value hides the link and leaves it out of `sameAs`. */
   social: { instagram: string; pinterest: string };
@@ -18,6 +19,7 @@ interface SiteConfig {
  */
 export const siteConfig: SiteConfig = {
   name: "Amel's Tiny Kitchen",
+  shortName: "Tiny Kitchen",
   author: { name: "Amel" },
   social: { instagram: "", pinterest: "" },
   pinterestDomainVerify: "",
