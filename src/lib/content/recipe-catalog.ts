@@ -37,37 +37,44 @@ export async function loadTaxonomies(locale: Locale) {
   };
 }
 
+type Taxonomies = Awaited<ReturnType<typeof loadTaxonomies>>;
+
+export function catalogRecipe(
+  recipe: CollectionEntry<"recipes">,
+  { categories, tags }: Taxonomies,
+  locale: Locale,
+): CatalogRecipe {
+  const { data } = recipe;
+  const categoryLabel = categories.get(data.category.id)?.data.title ?? "";
+  const recipeTags = data.tags.flatMap((ref) => {
+    const tag = tags.get(ref.id);
+    return tag ? [{ id: tag.id, title: tag.data.title }] : [];
+  });
+  const seasons = SEASONS.filter((season) => data.seasons.includes(season));
+  const seasonLabels = seasons.map((season) => useTranslations(locale).recipes.seasons[season]);
+
+  return {
+    recipe,
+    categoryLabel,
+    tags: recipeTags,
+    seasons,
+    seasonLabels,
+    time: totalTime(data.preparationTime, data.cookingTime),
+    search: recipeSearchFields(data, [
+      categoryLabel,
+      ...recipeTags.map((tag) => tag.title),
+      ...seasonLabels,
+    ]),
+  };
+}
+
 /**
  * Published recipes of a locale with their localized labels:
  * shared by the recipes list and the search index so both search the same text.
  */
 export async function loadRecipeCatalog(locale: Locale): Promise<CatalogRecipe[]> {
-  const t = useTranslations(locale);
-  const recipes = await getPublishedRecipes(locale);
-  const { categories, tags } = await loadTaxonomies(locale);
-
-  return recipes.map((recipe) => {
-    const { data } = recipe;
-    const categoryLabel = categories.get(data.category.id)?.data.title ?? "";
-    const recipeTags = data.tags.flatMap((ref) => {
-      const tag = tags.get(ref.id);
-      return tag ? [{ id: tag.id, title: tag.data.title }] : [];
-    });
-    const seasons = SEASONS.filter((season) => data.seasons.includes(season));
-    const seasonLabels = seasons.map((season) => t.recipes.seasons[season]);
-
-    return {
-      recipe,
-      categoryLabel,
-      tags: recipeTags,
-      seasons,
-      seasonLabels,
-      time: totalTime(data.preparationTime, data.cookingTime),
-      search: recipeSearchFields(data, [
-        categoryLabel,
-        ...recipeTags.map((tag) => tag.title),
-        ...seasonLabels,
-      ]),
-    };
-  });
+  const taxonomies = await loadTaxonomies(locale);
+  return (await getPublishedRecipes(locale)).map((recipe) =>
+    catalogRecipe(recipe, taxonomies, locale),
+  );
 }

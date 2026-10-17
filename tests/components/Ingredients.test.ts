@@ -55,8 +55,8 @@ describe("Ingredients", () => {
 
     expect(fr).toMatch(/<output[^>]*aria-labelledby="ingredients-portions-tarte"/);
     expect(fr).toContain('id="ingredients-portions-tarte"');
-    const after = (template: string) => template.replace("%total%", "3").split("%count%")[1];
-    expect(fr).toContain(`>0</span>${after(frDict.recipe.ingredients.progress)}`);
-    expect(en).toContain(`>0</span>${after(enDict.recipe.ingredients.progress)}`);
+    const progressEnd = (template: string) => template.replace("%total%", "3").split("%count%")[1];
+    expect(fr).toContain(`>0</span>${progressEnd(frDict.recipe.ingredients.progress)}`);
+    expect(en).toContain(`>0</span>${progressEnd(enDict.recipe.ingredients.progress)}`);
   });
 });
