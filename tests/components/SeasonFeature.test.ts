@@ -1,4 +1,5 @@
 import SeasonFeature from "@components/SeasonFeature.astro";
+import fr from "@i18n/fr";
 import { describe, expect, it } from "vitest";
 import cover from "../fixtures/cover.png";
 import { createContainer } from "../helpers";
@@ -7,11 +8,11 @@ const container = await createContainer();
 
 const props = {
   season: "winter" as const,
-  title: ["L'", "hiver", " en cuisine"] as [string, string, string],
-  badge: "De saison",
+  title: [...fr.home.tags.seasonTitle.winter] as [string, string, string],
+  badge: fr.home.tags.inSeason,
   image: cover,
   recipes: [{ href: "/fr/recipes/soupe/", title: "Soupe", meta: "30 min", image: cover }],
-  cta: { href: "/fr/recipes/?season=winter", label: "La recette d'hiver" },
+  cta: { href: "/fr/recipes/?season=winter", label: fr.home.tags.seasonRecipes.winter(1) },
 };
 
 describe("SeasonFeature", () => {

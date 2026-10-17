@@ -1,19 +1,14 @@
-import { getCollection } from "astro:content";
 import { getAbsoluteLocaleUrl } from "astro:i18n";
-import { type Locale, languages, useTranslations } from "@i18n";
+import { type Locale, locales, useTranslations } from "@i18n";
 import { inLocale } from "@lib/content/i18n";
-import { isPublished } from "@lib/content/recipe";
+import { getPublishedRecipes } from "@lib/content/recipe-catalog";
 import type { ResolvedRecipe } from "@lib/seo/recipe";
 import { resolveRecipe } from "@lib/seo/resolve";
-
-export const locales = Object.keys(languages) as Locale[];
 
 /** Published recipes resolved per locale, newest first. */
 export async function resolvedRecipesByLocale(): Promise<Record<Locale, ResolvedRecipe[]>> {
   const site = new URL(import.meta.env.SITE);
-  const recipes = (
-    await getCollection("recipes", (entry) => isPublished(entry, import.meta.env.PROD))
-  ).sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf());
+  const recipes = await getPublishedRecipes();
 
   const entries = await Promise.all(
     locales.map(

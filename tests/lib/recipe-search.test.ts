@@ -1,10 +1,12 @@
 // cspell:ignore citon choco chocolt coeur crme oeufs
 import {
-  createRecipeSearch,
+  byRelevance,
   findTerms,
   matchedIngredients,
+  recipeSearchFields,
   type SearchFields,
 } from "@lib/content/recipe-search";
+import { createRecipeSearch } from "@lib/content/recipe-search-engine";
 import { describe, expect, it } from "vitest";
 
 const recipe = (id: string, fields: Partial<SearchFields>) => ({
@@ -99,5 +101,49 @@ describe("matchedIngredients", () => {
       "Chocolat noir",
       "Beurre",
     ]);
+  });
+});
+
+describe("byRelevance", () => {
+  const hit = (score: number) => ({ score, terms: new Set<string>() });
+
+  it("orders by score, then the newest, then the id for a stable order", () => {
+    const hits = new Map([
+      ["b", hit(1)],
+      ["a", hit(1)],
+      ["c", hit(1)],
+      ["d", hit(5)],
+    ]);
+    const entries = [
+      { id: "b", date: 1 },
+      { id: "a", date: 1 },
+      { id: "c", date: 2 },
+      { id: "d", date: 0 },
+    ];
+    expect(entries.sort(byRelevance(hits)).map(({ id }) => id)).toEqual(["d", "c", "a", "b"]);
+  });
+});
+
+describe("recipeSearchFields", () => {
+  it("indexes the labels with the SEO keywords, and each ingredient by name", () => {
+    const fields = recipeSearchFields(
+      {
+        title: "Tarte",
+        keywords: ["dessert"],
+        excerpt: "Acidulée",
+        ingredientGroups: [
+          { ingredients: [{ name: "Farine" }] },
+          { ingredients: [{ name: "Citron" }] },
+        ],
+      },
+      ["Tartes", "Été"],
+    );
+
+    expect(fields).toEqual({
+      title: "Tarte",
+      labels: "Tartes Été dessert",
+      ingredients: ["Farine", "Citron"],
+      excerpt: "Acidulée",
+    });
   });
 });

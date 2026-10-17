@@ -26,7 +26,7 @@ const t = useTranslations(locale);
     <link rel="manifest" href="/manifest.webmanifest">
     <meta name="generator" content={Astro.generator}>
     <Seo {...Astro.props} />
-    <!-- Ordre des cascade layers déclaré avant tout style de composant (voir design-system) -->
+    <!-- Layer order declared before any component style (see the design-system skill). -->
     <style is:global is:inline>
     @layer tokens, base, components;
     </style>

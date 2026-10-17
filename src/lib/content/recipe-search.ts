@@ -3,8 +3,6 @@
  * client (the index itself), so both read the same fields the same way.
  */
 
-import MiniSearch from "minisearch";
-
 /** Searchable text of a recipe; steps are left out, too generic ("four", "mélanger"). */
 export interface SearchFields {
   title: string;
@@ -15,18 +13,23 @@ export interface SearchFields {
   excerpt: string;
 }
 
-/** One recipe of the header search index (`/[lang]/search-index.json`). */
-export interface SearchEntry {
-  id: string;
-  href: string;
+interface RecipeText {
   title: string;
-  /** Category and total time. */
-  meta: string;
-  /** 112 px square thumbnail. */
-  image?: string;
-  /** Publication timestamp (ms), to order equal scores. */
-  date: number;
-  search: SearchFields;
+  keywords: string[];
+  excerpt: string;
+  ingredientGroups: Array<{ ingredients: Array<{ name: string }> }>;
+}
+
+/** `labels`: localized category, tags and seasons. */
+export function recipeSearchFields(recipe: RecipeText, labels: string[]): SearchFields {
+  return {
+    title: recipe.title,
+    labels: [...labels, ...recipe.keywords].join(" "),
+    ingredients: recipe.ingredientGroups.flatMap((group) =>
+      group.ingredients.map((ingredient) => ingredient.name),
+    ),
+    excerpt: recipe.excerpt,
+  };
 }
 
 interface SearchHit {
@@ -59,17 +62,14 @@ const STOP_WORDS = new Set(
   ),
 );
 
-const processTerm = (term: string): string | null => {
+export const processTerm = (term: string): string | null => {
   const normalized = normalizeText(term);
   return normalized && !STOP_WORDS.has(normalized) ? normalized : null;
 };
 
 /** Shorter query words ("b", "be") would match nearly every recipe: they wait for a third letter. */
 const MIN_QUERY_TERM = 3;
-/** Below this, one typo is a different word ("sel" / "sol"). */
-const MIN_FUZZY_TERM = 5;
-
-const processQueryTerm = (term: string): string | null => {
+export const processQueryTerm = (term: string): string | null => {
   const normalized = processTerm(term);
   return normalized && normalized.length >= MIN_QUERY_TERM ? normalized : null;
 };
@@ -78,38 +78,12 @@ const processQueryTerm = (term: string): string | null => {
 export const hasQuery = (query: string): boolean =>
   query.split(/[\p{Z}\p{P}]+/u).some(processQueryTerm);
 
-export function createRecipeSearch(
-  recipes: Array<{ id: string; search: SearchFields }>,
-): (query: string) => SearchHits {
-  const index = new MiniSearch<{ id: string } & SearchFields>({
-    fields: ["title", "labels", "ingredients", "excerpt"],
-    extractField: (doc, field) => {
-      const value = doc[field as keyof typeof doc];
-      return Array.isArray(value) ? value.join(" ") : value;
-    },
-    processTerm,
-    searchOptions: {
-      boost: { title: 3, labels: 2, ingredients: 1.5 },
-      processTerm: processQueryTerm,
-      combineWith: "AND",
-      prefix: true,
-      fuzzy: (term) => (term.length >= MIN_FUZZY_TERM ? 0.2 : false),
-    },
-  });
-  index.addAll(recipes.map(({ id, search }) => ({ id, ...search })));
-
-  return (query) => {
-    if (!hasQuery(query)) return undefined;
-    return new Map(
-      index
-        .search(query)
-        .map((hit) => [
-          String(hit.id),
-          { score: hit.score, terms: new Set(Object.keys(hit.match)) },
-        ]),
-    );
-  };
-}
+export const byRelevance =
+  (hits: SearchHits) =>
+  (a: { id: string; date: number }, b: { id: string; date: number }): number =>
+    (hits?.get(b.id)?.score ?? 0) - (hits?.get(a.id)?.score ?? 0) ||
+    b.date - a.date ||
+    a.id.localeCompare(b.id);
 
 /** Where the matched words sit in a displayed text, as [start, end) offsets. */
 export function findTerms(text: string, terms: ReadonlySet<string>): Array<[number, number]> {

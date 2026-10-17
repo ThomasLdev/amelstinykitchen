@@ -1,14 +1,4 @@
-/**
- * Servings scaler: rescales ingredient quantities.
- * Ported from the Symfony `recipe_portions` Stimulus controller.
- */
-
-export function formatQuantity(value: number, locale: string): string {
-  if (value >= 10) return String(Math.round(value));
-  if (Number.isInteger(value)) return String(value);
-  const rounded = String(Math.round(value * 10) / 10);
-  return locale === "fr" ? rounded.replace(".", ",") : rounded;
-}
+import { formatQuantity } from "@lib/content/quantity";
 
 export function initPortions(root: HTMLElement): void {
   const base = Number(root.dataset.recipePortionsBase ?? "4");

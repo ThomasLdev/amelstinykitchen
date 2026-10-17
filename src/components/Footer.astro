@@ -3,7 +3,8 @@ import { getRelativeLocaleUrl } from "astro:i18n";
 import Container from "@components/Container.astro";
 import Icon from "@components/Icon.astro";
 import Logo from "@components/Logo.astro";
-import { type Locale, languages, useTranslations } from "@i18n";
+import { type Locale, locales, useTranslations } from "@i18n";
+import { SEASONS } from "@lib/content/season";
 import { siteConfig } from "@site";
 
 interface Props {
@@ -19,12 +20,16 @@ const t = useTranslations(locale);
 const year = new Date().getFullYear();
 const homeHref = getRelativeLocaleUrl(locale, "");
 const recipesHref = getRelativeLocaleUrl(locale, "recipes");
+const seasonLinks = SEASONS.map((season) => ({
+  label: t.recipes.seasons[season],
+  href: `${recipesHref}?season=${season}`,
+}));
 const socials = [
   { label: t.footer.instagram, href: siteConfig.social.instagram },
   { label: t.footer.pinterest, href: siteConfig.social.pinterest },
 ].filter((social) => social.href !== "");
 
-const switchLocale = (Object.keys(languages) as Locale[]).find((lang) => lang !== locale);
+const switchLocale = locales.find((lang) => lang !== locale);
 const switchPath = switchLocale && alternates[switchLocale];
 const languageSwitch =
   switchLocale && switchPath !== undefined
@@ -56,10 +61,10 @@ const languageSwitch =
           </summary>
           <div class="footer__body">
             <ul class="footer__links" aria-label={t.footer.recipesAriaLabel}>
-              {t.footer.recipesLinks.map((label) => (
+              {seasonLinks.map((link) => (
                 <li>
-                  <a href={recipesHref} class="footer__link">
-                    {label}
+                  <a href={link.href} class="footer__link">
+                    {link.label}
                   </a>
                 </li>
               ))}

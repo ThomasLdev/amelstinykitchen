@@ -1,30 +1,28 @@
 /**
- * Recipe list filters. The form controls hold the state; this module mirrors
- * it on the rendered list (visibility, order, counts, active chips) and in the
- * URL. On phones the filters live in a modal sheet whose changes stay a draft
- * until "Show N recipes" is pressed; from 900px they apply immediately.
+ * Recipe list filters. The form controls hold the state, mirrored on the list
+ * and in the URL. On phones the filters live in a modal sheet whose changes
+ * stay a draft until "Show N recipes" is pressed; from 900px they apply
+ * immediately.
  */
 
+import type { Plural } from "@i18n/plural";
 import {
-  activeFilterCount,
-  categoryCounts,
   DEFAULT_STATE,
   type FilterState,
-  followDefaultSort,
-  isSortKey,
-  matches,
-  type Plural,
-  plural,
-  type RecipeFacet,
-  sortRecipes,
+  removeFilter,
   stateFromParams,
   stateToParams,
 } from "@lib/content/recipe-filters";
-import { hasQuery, type SearchHits } from "@lib/content/recipe-search";
-import { loadRecipeSearch, type RecipeSearch } from "../search-index";
+import type { SearchHits } from "@lib/content/recipe-search";
+import { loadRecipeSearch, type RecipeSearch } from "../search/load-index";
+import { createActiveFilters } from "./active-filters";
+import { createFilterCounts } from "./filter-counts";
+import { checkRadio, readState, writeState } from "./form-state";
 import { renderMatches } from "./highlight";
+import { createResults, readCards } from "./results";
+import { createSortControl } from "./sort-control";
 
-interface Strings {
+export interface BrowserStrings {
   count: Plural;
   apply: Plural;
   remove: string;
@@ -32,28 +30,17 @@ interface Strings {
   match: string;
 }
 
-const DESKTOP = "(min-width: 900px)";
-/** Lets typing settle before the result count is announced. */
-const ANNOUNCE_DELAY = 600;
-
 export function initRecipeBrowser(form: HTMLFormElement): void {
-  const strings = JSON.parse(form.dataset.strings ?? "{}") as Strings;
+  const strings = JSON.parse(form.dataset.strings ?? "{}") as BrowserStrings;
   const list = form.querySelector<HTMLElement>("[data-recipe-list]");
-  const dialog = form.querySelector<HTMLDialogElement>("[data-filters]");
-  if (!list || !dialog) return;
+  const sheet = form.querySelector<HTMLDialogElement>("[data-filters]");
+  if (!list || !sheet) return;
 
-  const rows = new Map<string, HTMLElement>();
-  const recipes: RecipeFacet[] = [];
-  for (const card of form.querySelectorAll<HTMLElement>("[data-recipe-item]")) {
-    const facet = JSON.parse(card.dataset.facet ?? "{}") as RecipeFacet;
-    recipes.push(facet);
-    rows.set(facet.id, card.closest("li") ?? card);
-  }
+  const cards = readCards(form);
   // Until the index is there, a query filters nothing; it applies once loaded.
   let index: RecipeSearch | undefined;
   let lastQuery: string | undefined;
   let lastHits: SearchHits;
-  /** Controls and results ask for the same query in a row: search it once. */
   const hitsFor = (query: string): SearchHits => {
     if (query !== lastQuery) {
       lastQuery = query;
@@ -62,143 +49,40 @@ export function initRecipeBrowser(form: HTMLFormElement): void {
     return lastHits;
   };
 
-  const openButton = form.querySelector<HTMLButtonElement>("[data-filters-open]");
-  const badge = form.querySelector<HTMLElement>("[data-filters-badge]");
-  const applyButton = dialog.querySelector<HTMLButtonElement>("[data-filters-apply]");
-  const countLabel = form.querySelector<HTMLElement>("[data-results-count]");
-  const empty = form.querySelector<HTMLElement>("[data-results-empty]");
-  const status = form.querySelector<HTMLElement>("[data-results-status]");
-  const queryLabel = form.querySelector<HTMLElement>("[data-filter-query]");
-  const search = form.querySelector<HTMLInputElement>('input[name="q"]');
-  const chips = [...form.querySelectorAll<HTMLButtonElement>("[data-filter-remove]")];
-  const clearButtons = [...form.querySelectorAll<HTMLButtonElement>("[data-filters-clear]")];
-  const statusClear = form.querySelector<HTMLButtonElement>('[data-filters-clear="status"]');
-  const quickChips = [...form.querySelectorAll<HTMLButtonElement>("[data-quick-category]")];
+  const initial = stateFromParams(new URLSearchParams(location.search));
+  let applied = initial;
+  const syncSort = createSortControl(form, initial);
+  const renderCounts = createFilterCounts(form, cards.recipes, strings.apply);
+  const renderList = createResults(form, list, cards, strings.count);
 
-  const read = (): FilterState => {
-    const data = new FormData(form);
-    const sort = data.get("sort");
-    return {
-      category: String(data.get("category") ?? ""),
-      season: String(data.get("season") ?? ""),
-      tags: data.getAll("tag").map(String),
-      query: String(data.get("q") ?? ""),
-      sort: typeof sort === "string" && isSortKey(sort) ? sort : DEFAULT_STATE.sort,
-    };
-  };
+  const write = (state: FilterState): void => writeState(form, syncSort(state));
+  const isDraft = (): boolean => sheet.matches(":modal");
 
-  /** Unknown values (stale URL) fall back to "all" instead of leaving a group empty. */
-  const checkRadio = (name: string, value: string): void => {
-    const radios = [...form.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`)];
-    const target = radios.find((radio) => radio.value === value) ?? radios[0];
-    if (target) target.checked = true;
-  };
+  const renderActive = createActiveFilters(form, strings, {
+    remove: (name, value) => {
+      write(removeFilter(applied, name, value));
+      commit();
+    },
+    clear: () => {
+      write({ ...DEFAULT_STATE, sort: applied.sort });
+      commit();
+    },
+    pickCategory: (value) => {
+      checkRadio(form, "category", value);
+      commit();
+    },
+  });
 
-  const sortSelect = form.elements.namedItem("sort");
-  const relevance =
-    sortSelect instanceof HTMLSelectElement
-      ? sortSelect.querySelector<HTMLOptionElement>('option[value="relevance"]')
-      : null;
-  let lastSort = DEFAULT_STATE;
-
-  /** Follows the default sort while the query changes, and offers relevance only with one. */
-  const syncSort = (state: FilterState): FilterState => {
-    const next = followDefaultSort(lastSort, state);
-    lastSort = next;
-    const noQuery = !hasQuery(next.query);
-    if (relevance) {
-      relevance.hidden = noQuery;
-      relevance.disabled = noQuery;
-    }
-    if (sortSelect instanceof HTMLSelectElement) sortSelect.value = next.sort;
-    return next;
-  };
-
-  const write = (input: FilterState): void => {
-    const state = syncSort(input);
-    checkRadio("category", state.category);
-    checkRadio("season", state.season);
-    for (const box of form.querySelectorAll<HTMLInputElement>('input[name="tag"]')) {
-      box.checked = state.tags.includes(box.value);
-    }
-    if (search) search.value = state.query;
-  };
-
-  const isDraft = (): boolean => dialog.matches(":modal");
-
-  /** Counts that follow the controls, including a draft in the open sheet. */
-  const renderControls = (state: FilterState): void => {
-    const hits = hitsFor(state.query);
-    const counts = categoryCounts(recipes, state, hits);
-    for (const count of form.querySelectorAll<HTMLElement>("[data-filter-count]")) {
-      count.textContent = String(counts.get(count.dataset.filterCount ?? "") ?? 0);
-    }
-    if (applyButton) {
-      applyButton.textContent = plural(
-        strings.apply,
-        recipes.filter((recipe) => matches(recipe, state, hits)).length,
-      );
-    }
-  };
-
-  let applied = read();
-  let announce: number | undefined;
-
+  const renderControls = (state: FilterState): void => renderCounts(state, hitsFor(state.query));
   const renderResults = (state: FilterState): void => {
     const hits = hitsFor(state.query);
-    const visible = new Set(
-      recipes.filter((recipe) => matches(recipe, state, hits)).map((r) => r.id),
-    );
-    for (const recipe of sortRecipes(recipes, state.sort, hits)) {
-      const row = rows.get(recipe.id);
-      if (!row) continue;
-      row.hidden = !visible.has(recipe.id);
-      list.append(row);
-    }
-    renderMatches(rows, index?.entries, hits, strings.match);
-    if (empty) empty.hidden = visible.size > 0;
-    const countText = plural(strings.count, visible.size);
-    if (countLabel) countLabel.textContent = countText;
-    window.clearTimeout(announce);
-    announce = window.setTimeout(() => {
-      if (status) status.textContent = countText;
-    }, ANNOUNCE_DELAY);
-
-    const isActive = (name: string, value: string): boolean =>
-      name === "category"
-        ? state.category === value
-        : name === "season"
-          ? state.season === value
-          : state.tags.includes(value);
-    const query = state.query.trim();
-    for (const chip of chips) {
-      const { filterRemove: name = "", filterValue: value = "" } = chip.dataset;
-      chip.hidden = name === "q" ? !query : !isActive(name, value);
-    }
-    if (queryLabel && query) {
-      const label = strings.query.replace("%query%", query);
-      queryLabel.textContent = label;
-      queryLabel
-        .closest("button")
-        ?.setAttribute("aria-label", strings.remove.replace("%label%", label));
-    }
-
-    const filterCount = activeFilterCount(state);
-    if (statusClear) statusClear.hidden = filterCount === 0 && !query;
-    if (badge) {
-      badge.textContent = String(filterCount);
-      badge.hidden = filterCount === 0;
-    }
-    openButton?.toggleAttribute("data-active", filterCount > 0);
-    for (const chip of quickChips) {
-      chip.setAttribute("aria-pressed", String(chip.dataset.quickCategory === state.category));
-    }
-
+    renderList(state, hits);
+    renderMatches(cards.rows, index?.entries, hits, strings.match);
+    renderActive(state);
     const params = stateToParams(state).toString();
     history.replaceState(history.state, "", `${location.pathname}${params ? `?${params}` : ""}`);
   };
-
-  const commit = (state: FilterState = read()): void => {
+  const commit = (state: FilterState = readState(form)): void => {
     applied = state;
     renderControls(state);
     renderResults(state);
@@ -206,73 +90,32 @@ export function initRecipeBrowser(form: HTMLFormElement): void {
 
   form.addEventListener("submit", (event) => event.preventDefault());
   form.addEventListener("input", () => {
-    const state = syncSort(read());
+    const state = syncSort(readState(form));
     if (isDraft()) renderControls(state);
     else commit(state);
   });
 
-  openButton?.addEventListener("click", () => {
-    dialog.returnValue = "";
-    dialog.showModal();
+  form.querySelector("[data-filters-open]")?.addEventListener("click", () => {
+    sheet.returnValue = "";
+    sheet.showModal();
   });
-  applyButton?.addEventListener("click", () => {
+  sheet.querySelector("[data-filters-apply]")?.addEventListener("click", () => {
     commit();
-    dialog.close("apply");
+    sheet.close("apply");
   });
-  dialog.querySelector("[data-filters-reset]")?.addEventListener("click", () => {
-    write({ ...read(), category: "", season: "", tags: [] });
-    renderControls(read());
+  sheet.querySelector("[data-filters-reset]")?.addEventListener("click", () => {
+    write({ ...readState(form), category: "", season: "", tags: [] });
+    renderControls(readState(form));
   });
-  // Closing without applying (close button, Esc, backdrop) drops the draft.
-  dialog.addEventListener("close", () => {
-    if (dialog.returnValue === "apply") return;
+  // Closing without applying (close button, Esc, backdrop, back to wide screen) drops the draft.
+  sheet.addEventListener("close", () => {
+    if (sheet.returnValue === "apply") return;
     write(applied);
     renderControls(applied);
   });
 
-  // From 900px the sheet is the sidebar: open but not modal. The attribute is
-  // set directly because show() would move focus into it on page load.
-  const desktop = window.matchMedia(DESKTOP);
-  const syncLayout = (): void => {
-    if (dialog.matches(":modal")) dialog.close();
-    dialog.toggleAttribute("open", desktop.matches);
-  };
-  desktop.addEventListener("change", syncLayout);
-
-  for (const chip of chips) {
-    chip.addEventListener("click", () => {
-      const { filterRemove: name, filterValue: value } = chip.dataset;
-      write({
-        ...applied,
-        category: name === "category" ? "" : applied.category,
-        season: name === "season" ? "" : applied.season,
-        tags: name === "tag" ? applied.tags.filter((tag) => tag !== value) : applied.tags,
-        query: name === "q" ? "" : applied.query,
-      });
-      commit();
-      // The pressed chip is now hidden: keep focus in the filters area.
-      (chips.find((other) => !other.hidden) ?? search)?.focus();
-    });
-  }
-  for (const button of clearButtons) {
-    button.addEventListener("click", () => {
-      write({ ...DEFAULT_STATE, sort: applied.sort });
-      commit();
-      search?.focus();
-    });
-  }
-  for (const chip of quickChips) {
-    chip.addEventListener("click", () => {
-      checkRadio("category", chip.dataset.quickCategory ?? "");
-      commit();
-    });
-  }
-
-  // Compared with itself, so a sort from the URL counts as picked, not as a default to follow.
-  lastSort = stateFromParams(new URLSearchParams(location.search));
-  write(lastSort);
+  write(initial);
   commit();
-  syncLayout();
   for (const element of form.querySelectorAll<HTMLElement>("[data-enhanced]")) {
     element.hidden = false;
   }
@@ -282,7 +125,7 @@ export function initRecipeBrowser(form: HTMLFormElement): void {
     (loaded) => {
       index = loaded;
       lastQuery = undefined;
-      renderControls(isDraft() ? read() : applied);
+      renderControls(isDraft() ? readState(form) : applied);
       renderResults(applied);
     },
     () => {},

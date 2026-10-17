@@ -40,8 +40,7 @@ const fr = {
     languageName: "Français",
     tagline: "Des recettes simples et généreuses, à partager sans façon.",
     recipesTitle: "Recettes",
-    recipesAriaLabel: "Catégories de recettes",
-    recipesLinks: ["Printemps", "Été", "Automne", "Hiver"],
+    recipesAriaLabel: "Recettes par saison",
     copyright: "Tous droits réservés.",
     socialsAriaLabel: "Réseaux sociaux",
     instagram: "Instagram",
@@ -144,6 +143,9 @@ const fr = {
     chef: {
       label: "L'astuce pour cette recette",
     },
+  },
+  units: {
+    hour: "h",
   },
   markdown: {
     /** French typography: a space before the colon. */

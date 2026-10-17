@@ -22,24 +22,24 @@ import { assertTranslations, inLocale, translationsOf } from "@lib/content/i18n"
 import {
   formatDuration,
   ingredientCount,
-  isPublished,
+  recipePath,
   recipeSharedFields,
   recipeTransitionName,
   selectRelatedRecipes,
   totalTime,
 } from "@lib/content/recipe";
+import { factsLine, recipeCard } from "@lib/content/recipe-card";
+import { getPublishedRecipes } from "@lib/content/recipe-catalog";
 import { SEASONS } from "@lib/content/season";
 import { ogImage } from "@lib/seo/images";
 import { breadcrumbLd, recipeLd } from "@lib/seo/jsonld";
 import { isoDuration } from "@lib/seo/recipe";
-import { recipePath, resolveRecipe } from "@lib/seo/resolve";
+import { resolveRecipe } from "@lib/seo/resolve";
 import { siteConfig, socialProfiles } from "@site";
 
 export async function getStaticPaths() {
   assertTranslations(await getCollection("recipes"), recipeSharedFields);
-  const recipes = await getCollection("recipes", (entry) =>
-    isPublished(entry, import.meta.env.PROD),
-  );
+  const recipes = await getPublishedRecipes();
 
   return recipes.map((recipe) => ({
     params: { lang: recipe.data.locale, slug: recipe.data.paths },
@@ -72,7 +72,7 @@ const chipLabels = [
     (season) => t.recipes.seasons[season],
   ),
 ];
-const kicker = [category?.data[locale].title, ...chipLabels].filter(Boolean).join(" · ");
+const kicker = factsLine([category?.data[locale].title, ...chipLabels]);
 
 const preparationTime = formatDuration(data.preparationTime, locale);
 const cookingTime = formatDuration(data.cookingTime, locale);
@@ -124,18 +124,7 @@ const alternates = Object.fromEntries(
   Object.entries(translations).map(([lang, entry]) => [lang, recipePath(entry)]),
 );
 
-const related = selectRelatedRecipes(recipe, recipes).map((entry) => ({
-  href: getRelativeLocaleUrl(locale, recipePath(entry)),
-  title: entry.data.title,
-  meta: [
-    formatDuration(totalTime(entry.data.preparationTime, entry.data.cookingTime), locale),
-    t.recipe.difficulty[entry.data.difficulty],
-  ]
-    .filter(Boolean)
-    .join(" · "),
-  image: entry.data.media[0]?.src,
-  transitionName: recipeTransitionName(entry),
-}));
+const related = selectRelatedRecipes(recipe, recipes).map((entry) => recipeCard(entry, locale));
 ---
 
 <BaseLayout
@@ -230,8 +219,9 @@ const related = selectRelatedRecipes(recipe, recipes).map((entry) => ({
             </Button>
           </Ingredients>
 
-          <section class="recipe-steps">
+          <section class="recipe-steps" aria-labelledby="recipe-steps-title">
             <SectionTitle
+              id="recipe-steps-title"
               class="recipe-steps__title"
               title={t.recipe.steps.title}
               titleEm={t.recipe.steps.titleEm}
@@ -256,7 +246,7 @@ const related = selectRelatedRecipes(recipe, recipes).map((entry) => ({
             {data.sections.map((section) => (
               <section class="post-section">
                 {section.title && <h2 class="post-section__title">{section.title}</h2>}
-                <Prose html={section.content} />
+                <Prose text={section.content} />
                 {section.media.length > 0 && (
                   <MediaCarousel
                     media={section.media}

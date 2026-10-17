@@ -5,13 +5,13 @@ import { createContainer } from "../helpers";
 const container = await createContainer();
 
 describe("Header", () => {
-  it("marks the active locale route with aria-current", async () => {
+  it("marks only the link of the current page with aria-current", async () => {
     const html = await container.renderToString(Header, {
       props: { locale: "fr" },
-      request: new Request("https://example.com/fr/"),
+      request: new Request("https://example.com/fr/recipes"),
     });
 
-    expect(html).toContain('aria-current="page"');
-    expect(html).toContain("Navigation principale");
+    expect(html).toMatch(/<a[^>]*href="\/fr\/recipes\/?"[^>]*aria-current="page"/);
+    expect(html).not.toMatch(/<a[^>]*href="\/fr\/?"[^>]*aria-current/);
   });
 });

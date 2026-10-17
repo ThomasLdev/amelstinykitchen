@@ -1,9 +1,9 @@
 import { type CollectionEntry, getEntries, getEntry } from "astro:content";
 import { getAbsoluteLocaleUrl } from "astro:i18n";
+import { renderMarkdown } from "@lib/content/markdown";
+import { recipePath } from "@lib/content/recipe";
 import { schemaImages, stepImage } from "@lib/seo/images";
 import { type ResolvedRecipe, stripHtml } from "@lib/seo/recipe";
-
-export const recipePath = (recipe: CollectionEntry<"recipes">) => `recipes/${recipe.data.paths}`;
 
 /** Absolute URL of the Markdown twin served by `[slug].md.ts`. */
 const recipeMarkdownUrl = (recipe: CollectionEntry<"recipes">) =>
@@ -45,13 +45,13 @@ export async function resolveRecipe(
     steps: await Promise.all(
       data.steps.map(async (step) => ({
         title: step.title,
-        text: stripHtml(step.content),
+        text: stripHtml(await renderMarkdown(step.content)),
         image: images && step.media[0] ? await stepImage(step.media[0].src, site) : undefined,
       })),
     ),
     chefNote: data.chefNote && {
       title: data.chefNote.title,
-      body: stripHtml(data.chefNote.body),
+      body: data.chefNote.body,
     },
   };
 }

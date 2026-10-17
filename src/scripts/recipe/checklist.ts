@@ -3,7 +3,7 @@
  * Used by the ingredient list (shopping list).
  */
 
-export function initChecklist(root: HTMLElement): void {
+function initChecklist(root: HTMLElement): void {
   const storageKey = root.dataset.recipeChecklistStorage ?? "";
   const items = Array.from(root.querySelectorAll<HTMLInputElement>("[data-recipe-checklist-item]"));
   const countEl = root.querySelector<HTMLElement>("[data-recipe-checklist-count]");
@@ -49,3 +49,5 @@ export function initChecklist(root: HTMLElement): void {
   restore();
   update();
 }
+
+document.querySelectorAll<HTMLElement>("[data-recipe-checklist]").forEach(initChecklist);

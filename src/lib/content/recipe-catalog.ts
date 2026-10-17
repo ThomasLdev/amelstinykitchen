@@ -1,15 +1,9 @@
 import { type CollectionEntry, getCollection } from "astro:content";
-import { getRelativeLocaleUrl } from "astro:i18n";
 import { type Locale, useTranslations } from "@i18n";
 import { inLocale, localize } from "@lib/content/i18n";
 import { isPublished, totalTime } from "@lib/content/recipe";
-import type { SearchFields } from "@lib/content/recipe-search";
+import { recipeSearchFields, type SearchFields } from "@lib/content/recipe-search";
 import { SEASONS, type Season } from "@lib/content/season";
-
-/** The search index of a locale (src/pages/[lang]/search-index.json.ts). */
-export const searchIndexUrl = (locale: Locale): string =>
-  // Endpoints with an extension are served without the trailing slash.
-  getRelativeLocaleUrl(locale, "search-index.json").replace(/\/$/, "");
 
 interface CatalogRecipe {
   recipe: CollectionEntry<"recipes">;
@@ -22,57 +16,65 @@ interface CatalogRecipe {
   search: SearchFields;
 }
 
-/**
- * Published recipes of a locale with their localized labels, shared by the
- * recipes list and the search index so both search the same text.
- */
-export async function loadRecipeCatalog(locale: Locale): Promise<CatalogRecipe[]> {
-  const t = useTranslations(locale);
+/** Drafts show in dev only. Newest first; every locale when none is given. */
+export async function getPublishedRecipes(locale?: Locale): Promise<CollectionEntry<"recipes">[]> {
   const recipes = await getCollection(
     "recipes",
-    (entry) => isPublished(entry, import.meta.env.PROD) && inLocale(locale)(entry),
+    (entry) => isPublished(entry, import.meta.env.PROD) && (!locale || inLocale(locale)(entry)),
   );
-  const categories = new Map(
-    (await getCollection("categories")).map((entry) => [entry.id, localize(entry, locale)]),
-  );
-  const tags = new Map(
-    (await getCollection("tags")).map((entry) => [entry.id, localize(entry, locale)]),
-  );
-
-  const sorted = recipes.sort(
+  return recipes.sort(
     (a, b) =>
       b.data.publishDate.valueOf() - a.data.publishDate.valueOf() || a.id.localeCompare(b.id),
   );
-  return sorted.map((recipe) => {
-    const { data } = recipe;
-    const categoryLabel = categories.get(data.category.id)?.data.title ?? "";
-    const recipeTags = data.tags.flatMap((ref) => {
-      const tag = tags.get(ref.id);
-      return tag ? [{ id: tag.id, title: tag.data.title }] : [];
-    });
-    const seasons = SEASONS.filter((season) => data.seasons.includes(season));
-    const seasonLabels = seasons.map((season) => t.recipes.seasons[season]);
+}
 
-    return {
-      recipe,
-      categoryLabel,
-      tags: recipeTags,
-      seasons,
-      seasonLabels,
-      time: totalTime(data.preparationTime, data.cookingTime),
-      search: {
-        title: data.title,
-        labels: [
-          categoryLabel,
-          ...recipeTags.map((tag) => tag.title),
-          ...seasonLabels,
-          ...data.keywords,
-        ].join(" "),
-        ingredients: data.ingredientGroups.flatMap((group) =>
-          group.ingredients.map((ingredient) => ingredient.name),
-        ),
-        excerpt: data.excerpt,
-      },
-    };
+export async function loadTaxonomies(locale: Locale) {
+  const localized = <T extends { id: string; data: Record<Locale, unknown> }>(entries: T[]) =>
+    new Map(entries.map((entry) => [entry.id, localize(entry, locale)]));
+  return {
+    categories: localized(await getCollection("categories")),
+    tags: localized(await getCollection("tags")),
+  };
+}
+
+type Taxonomies = Awaited<ReturnType<typeof loadTaxonomies>>;
+
+export function catalogRecipe(
+  recipe: CollectionEntry<"recipes">,
+  { categories, tags }: Taxonomies,
+  locale: Locale,
+): CatalogRecipe {
+  const { data } = recipe;
+  const categoryLabel = categories.get(data.category.id)?.data.title ?? "";
+  const recipeTags = data.tags.flatMap((ref) => {
+    const tag = tags.get(ref.id);
+    return tag ? [{ id: tag.id, title: tag.data.title }] : [];
   });
+  const seasons = SEASONS.filter((season) => data.seasons.includes(season));
+  const seasonLabels = seasons.map((season) => useTranslations(locale).recipes.seasons[season]);
+
+  return {
+    recipe,
+    categoryLabel,
+    tags: recipeTags,
+    seasons,
+    seasonLabels,
+    time: totalTime(data.preparationTime, data.cookingTime),
+    search: recipeSearchFields(data, [
+      categoryLabel,
+      ...recipeTags.map((tag) => tag.title),
+      ...seasonLabels,
+    ]),
+  };
+}
+
+/**
+ * Published recipes of a locale with their localized labels:
+ * shared by the recipes list and the search index so both search the same text.
+ */
+export async function loadRecipeCatalog(locale: Locale): Promise<CatalogRecipe[]> {
+  const taxonomies = await loadTaxonomies(locale);
+  return (await getPublishedRecipes(locale)).map((recipe) =>
+    catalogRecipe(recipe, taxonomies, locale),
+  );
 }

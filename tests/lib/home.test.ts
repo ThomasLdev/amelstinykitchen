@@ -60,7 +60,7 @@ describe("selectPopularRecipes", () => {
 });
 
 describe("selectFeaturedTags", () => {
-  it("keeps featured tags and counts the recipes using each one", () => {
+  it("keeps featured tags in use and counts the recipes using each one", () => {
     const recipes = [
       recipe("r1", { tags: ["citron"] }),
       recipe("r2", { tags: ["citron", "chocolat"] }),
@@ -69,10 +69,7 @@ describe("selectFeaturedTags", () => {
 
     expect(
       selectFeaturedTags(tags, recipes).map(({ tag: t, recipeCount }) => [t.id, recipeCount]),
-    ).toEqual([
-      ["citron", 2],
-      ["vegan", 0],
-    ]);
+    ).toEqual([["citron", 2]]);
   });
 });
 

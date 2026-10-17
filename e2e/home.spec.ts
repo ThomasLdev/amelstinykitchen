@@ -24,12 +24,14 @@ test("root redirects to the French locale", async ({ page }) => {
 
 test("intro search opens the recipes list filtered by the typed query", async ({ page }) => {
   await page.goto(HOME_FR);
-  await expect(page.locator("main h1")).toContainText(fr.home.intro.titleEm);
-  await page.getByLabel(fr.home.search.label).fill("filtre");
+  await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toContainText(
+    fr.home.intro.titleEm,
+  );
+  await page.getByLabel(fr.home.search.label).fill(FILTER_RECIPE.query);
   await page.getByRole("button", { name: fr.home.search.submit }).click();
 
   await expect(page.getByRole("searchbox", { name: fr.recipes.search.label })).toHaveValue(
-    "filtre",
+    FILTER_RECIPE.query,
   );
   await expect(recipeList(page).getByRole("heading", { level: 3 })).toHaveText([
     FILTER_RECIPE.title,
@@ -38,7 +40,7 @@ test("intro search opens the recipes list filtered by the typed query", async ({
 
 test("featured card shows the newest published recipe, never a draft", async ({ page }) => {
   await page.goto(HOME_FR);
-  const featured = page.locator("article", { hasText: fr.home.featured.badge });
+  const featured = page.getByRole("article").filter({ hasText: fr.home.featured.badge });
   await expect(featured.getByRole("heading", { level: 2 })).toHaveText(COMPLETE.title.fr);
   await featured.getByRole("link").click();
   await expect(page).toHaveURL(RECIPE_FR);
@@ -80,14 +82,14 @@ test("cravings block features the visitor's season, not the build's", async ({ p
   ]);
 });
 
-test('desktop shows a single "all recipes" link, next to the title', async ({ page }) => {
+test('exposes a single "all recipes" link on desktop', async ({ page }) => {
   await page.goto(HOME_FR);
   await expect(page.getByRole("link", { name: fr.home.popular.viewAll })).toHaveCount(1);
 });
 
 test("English home links to the English recipe URLs", async ({ page }) => {
   await page.goto(HOME_EN);
-  const featured = page.locator("article", { hasText: en.home.featured.badge });
+  const featured = page.getByRole("article").filter({ hasText: en.home.featured.badge });
   await expect(featured.getByRole("heading", { level: 2 })).toHaveText(COMPLETE.title.en);
   await expect(featured.getByRole("link")).toHaveAttribute("href", RECIPE_EN);
 });

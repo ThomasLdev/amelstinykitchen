@@ -5,7 +5,8 @@ import { RECIPE_FR } from "../fixtures";
 test.describe("hero gallery", () => {
   test("browses the hero gallery with its controls", async ({ page }) => {
     await page.goto(RECIPE_FR);
-    const hero = page.locator(".recipe-head [data-carousel]");
+    // The hero is the first gallery of the page.
+    const hero = page.getByRole("region", { name: fr.a11y.carousel }).first();
     const prev = hero.getByRole("button", { name: fr.a11y.carouselPrevious });
     const dots = hero.locator("[data-carousel-dot]");
 

@@ -1,5 +1,5 @@
 import fr from "@i18n/fr";
-import { plural } from "@lib/content/recipe-filters";
+import { plural } from "@i18n/plural";
 import { expect, test } from "@playwright/test";
 import {
   COMPLETE,
@@ -49,7 +49,7 @@ test.describe("recipes list (desktop)", () => {
     await page.getByRole("radio", { name: FILTER_RECIPE.season }).check();
     await expect(titles(page)).toHaveText([FILTER_RECIPE.title]);
 
-    await page.getByRole("searchbox", { name: fr.recipes.search.label }).fill("complete");
+    await page.getByRole("searchbox", { name: fr.recipes.search.label }).fill(COMPLETE.query);
     await expect(page.getByRole("heading", { name: fr.recipes.empty.title })).toBeVisible();
 
     await page

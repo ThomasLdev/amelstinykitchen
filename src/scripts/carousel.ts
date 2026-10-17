@@ -3,7 +3,7 @@
  * kept in sync with the native scroll-snap position.
  */
 
-export function initCarousel(root: HTMLElement): void {
+function initCarousel(root: HTMLElement): void {
   const track = root.querySelector<HTMLElement>("[data-carousel-track]");
   const prev = root.querySelector<HTMLButtonElement>("[data-carousel-prev]");
   const next = root.querySelector<HTMLButtonElement>("[data-carousel-next]");
@@ -62,3 +62,5 @@ export function initCarousel(root: HTMLElement): void {
   track.addEventListener("scroll", () => window.requestAnimationFrame(sync), { passive: true });
   sync();
 }
+
+document.querySelectorAll<HTMLElement>("[data-carousel]").forEach(initCarousel);

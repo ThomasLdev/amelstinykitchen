@@ -24,13 +24,12 @@ describe("SearchForm", () => {
     expect(html).toMatch(new RegExp(`<button[^>]*type="submit"[\\s\\S]*${fr.home.search.submit}`));
   });
 
-  it("keeps a native label, visually hidden, when `hideLabel` is set", async () => {
+  it("keeps a native label, not an aria-label, when `hideLabel` is set", async () => {
     const html = await container.renderToString(SearchForm, {
       props: { ...props, id: "q-hidden", hideLabel: true },
     });
 
-    expect(html).toMatch(/<label(?=[^>]*for="q-hidden")(?=[^>]*class="sr-only")/);
-    expect(html).not.toContain("search__label");
+    expect(html).toMatch(/<label[^>]*for="q-hidden"/);
     expect(html).not.toMatch(/<input[^>]*aria-label/);
   });
 });

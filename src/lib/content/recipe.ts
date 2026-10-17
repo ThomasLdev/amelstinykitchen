@@ -1,5 +1,7 @@
 import type { CollectionEntry } from "astro:content";
-import type { Locale } from "@i18n";
+import { type Locale, useTranslations } from "@i18n";
+
+export const recipePath = (recipe: { data: { paths: string } }) => `recipes/${recipe.data.paths}`;
 
 /**
  * Format a duration expressed in minutes for display.
@@ -12,7 +14,7 @@ export function formatDuration(minutes: number, locale: Locale): string | null {
 
   const hours = Math.floor(minutes / 60);
   const rest = minutes % 60;
-  const hourUnit = locale === "fr" ? "h" : "hr";
+  const hourUnit = useTranslations(locale).units.hour;
 
   if (hours === 0) {
     return `${rest} min`;

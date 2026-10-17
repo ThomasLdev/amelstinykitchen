@@ -1,60 +1,45 @@
 ---
-import { getCollection } from "astro:content";
 import { getAbsoluteLocaleUrl, getRelativeLocaleUrl } from "astro:i18n";
 import Breadcrumb from "@components/Breadcrumb.astro";
 import Container from "@components/Container.astro";
 import PageHeader from "@components/PageHeader.astro";
 import RecipeBrowser from "@components/RecipeBrowser.astro";
-import { defaultLocale, isLocale, languages, useTranslations } from "@i18n";
+import { localeParams, toLocale, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
-import { localize } from "@lib/content/i18n";
-import { formatDuration, recipeTransitionName } from "@lib/content/recipe";
-import { loadRecipeCatalog, searchIndexUrl } from "@lib/content/recipe-catalog";
+import { recipePath } from "@lib/content/recipe";
+import { factsLine, recipeCard } from "@lib/content/recipe-card";
+import { loadRecipeCatalog, loadTaxonomies } from "@lib/content/recipe-catalog";
 import { type RecipeFacet, sortRecipes } from "@lib/content/recipe-filters";
+import { searchIndexUrl } from "@lib/content/search-index";
 import { SEASONS } from "@lib/content/season";
 import { breadcrumbLd, itemListLd } from "@lib/seo/jsonld";
 
-export function getStaticPaths() {
-  return Object.keys(languages).map((lang) => ({ params: { lang } }));
-}
+export const getStaticPaths = localeParams;
 
-const { lang } = Astro.params;
-const locale = isLocale(lang) ? lang : defaultLocale;
+const locale = toLocale(Astro.params.lang);
 const t = useTranslations(locale);
 
 const catalog = await loadRecipeCatalog(locale);
+const { categories, tags } = await loadTaxonomies(locale);
 const indexUrl = searchIndexUrl(locale);
-const categories = new Map(
-  (await getCollection("categories")).map((entry) => [entry.id, localize(entry, locale)]),
-);
-const tags = new Map(
-  (await getCollection("tags")).map((entry) => [entry.id, localize(entry, locale)]),
-);
 
 const items = catalog.map(
   ({ recipe, categoryLabel, tags: recipeTags, seasons, seasonLabels, time }) => {
-    const { data } = recipe;
     const facet: RecipeFacet = {
-      id: data.translationKey,
-      category: data.category.id,
+      id: recipe.data.translationKey,
+      category: recipe.data.category.id,
       seasons,
       tags: recipeTags.map((tag) => tag.id),
       time,
-      date: data.publishDate.valueOf(),
+      date: recipe.data.publishDate.valueOf(),
     };
 
     return {
       facet,
-      url: getAbsoluteLocaleUrl(locale, `recipes/${data.paths}`),
+      url: getAbsoluteLocaleUrl(locale, recipePath(recipe)),
       card: {
-        href: getRelativeLocaleUrl(locale, `recipes/${data.paths}`),
-        title: data.title,
-        kicker: [categoryLabel, ...seasonLabels].filter(Boolean).join(" · "),
-        meta: [formatDuration(time, locale), t.recipe.difficulty[data.difficulty]]
-          .filter(Boolean)
-          .join(" · "),
-        image: data.media[0]?.src,
-        transitionName: recipeTransitionName(recipe),
+        ...recipeCard(recipe, locale),
+        kicker: factsLine([categoryLabel, ...seasonLabels]),
       },
     };
   },

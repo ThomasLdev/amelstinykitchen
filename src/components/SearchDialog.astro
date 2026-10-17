@@ -2,7 +2,8 @@
 import Icon from "@components/Icon.astro";
 import Sheet from "@components/Sheet.astro";
 import { type Locale, useTranslations } from "@i18n";
-import { searchIndexUrl } from "@lib/content/recipe-catalog";
+import { searchIndexUrl } from "@lib/content/search-index";
+import type { SearchDialogStrings } from "@scripts/search/dialog";
 
 interface Props {
   locale: Locale;
@@ -14,14 +15,13 @@ const { locale, class: className, ...rest } = Astro.props;
 const { header, recipes } = useTranslations(locale);
 const t = header.searchDialog;
 
-// Read by src/scripts/search-dialog.ts for the labels it writes.
 const strings = JSON.stringify({
   count: t.count,
   empty: t.empty,
   loading: t.loading,
   error: t.error,
   match: recipes.match,
-});
+} satisfies SearchDialogStrings);
 const indexUrl = searchIndexUrl(locale);
 ---
 
@@ -71,7 +71,7 @@ const indexUrl = searchIndexUrl(locale);
 </Sheet>
 
 <script>
-import "@scripts/search-dialog";
+import "@scripts/search/dialog";
 </script>
 
 <style>

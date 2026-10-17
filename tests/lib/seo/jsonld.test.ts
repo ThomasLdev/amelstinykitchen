@@ -1,4 +1,4 @@
-import { breadcrumbLd, recipeLd, serializeJsonLd } from "@lib/seo/jsonld";
+import { breadcrumbLd, itemListLd, recipeLd, serializeJsonLd } from "@lib/seo/jsonld";
 import { describe, expect, it } from "vitest";
 import { recipe } from "./fixture";
 
@@ -61,6 +61,21 @@ describe("breadcrumbLd", () => {
         { position: 2, name: "Tarte" },
       ],
     });
+  });
+});
+
+describe("itemListLd", () => {
+  it("numbers the recipe URLs from 1, in the given order", () => {
+    const list = itemListLd({
+      url: "https://x.test/fr/recipes/",
+      name: "Recettes",
+      items: ["a", "b"],
+    });
+
+    expect(list.itemListElement).toEqual([
+      { "@type": "ListItem", position: 1, url: "a" },
+      { "@type": "ListItem", position: 2, url: "b" },
+    ]);
   });
 });
 

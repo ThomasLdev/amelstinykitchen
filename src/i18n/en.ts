@@ -39,8 +39,7 @@ const en: Dictionary = {
     languageName: "English",
     tagline: "Simple, generous recipes meant to be shared.",
     recipesTitle: "Recipes",
-    recipesAriaLabel: "Recipe categories",
-    recipesLinks: ["Spring", "Summer", "Autumn", "Winter"],
+    recipesAriaLabel: "Recipes by season",
     copyright: "All rights reserved.",
     socialsAriaLabel: "Social media",
     instagram: "Instagram",
@@ -142,6 +141,9 @@ const en: Dictionary = {
     chef: {
       label: "A word from the pastry chef",
     },
+  },
+  units: {
+    hour: "hr",
   },
   markdown: {
     separator: ": ",

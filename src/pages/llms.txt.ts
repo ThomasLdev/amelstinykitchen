@@ -1,5 +1,5 @@
-import { useTranslations } from "@i18n";
-import { llmsIntro, locales, resolvedRecipesByLocale } from "@lib/seo/llms";
+import { locales, useTranslations } from "@i18n";
+import { llmsIntro, resolvedRecipesByLocale } from "@lib/seo/llms";
 import { siteConfig } from "@site";
 import type { APIRoute } from "astro";
 
