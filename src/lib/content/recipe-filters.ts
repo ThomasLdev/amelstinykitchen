@@ -3,7 +3,9 @@
  * statically rendered list and drive the client-side filters.
  */
 
-export const SORT_KEYS = ["popular", "recent", "quick"] as const;
+import { hasQuery, type SearchFields, type SearchHits } from "@lib/content/recipe-search";
+
+export const SORT_KEYS = ["relevance", "recent", "quick"] as const;
 
 export type SortKey = (typeof SORT_KEYS)[number];
 
@@ -16,9 +18,7 @@ export interface RecipeFacet {
   time: number;
   /** Publication timestamp (ms). */
   date: number;
-  featured: boolean;
-  /** Title, category and tag labels matched by the search field (normalized by the caller). */
-  search: string;
+  search: SearchFields;
 }
 
 export interface FilterState {
@@ -36,43 +36,62 @@ export const DEFAULT_STATE: FilterState = {
   season: "",
   tags: [],
   query: "",
-  sort: "popular",
+  sort: "recent",
 };
 
-/** Case- and accent-insensitive form, so "tarte" finds "Tarte" and "ete" finds "Été". */
-export function normalizeText(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase()
-    .trim();
+/** Relevance only means something for a query; without one the newest come first. */
+const defaultSort = (query: string): SortKey => (hasQuery(query) ? "relevance" : "recent");
+
+/**
+ * Keeps the sort on its default while the visitor has not picked one, so
+ * typing a query switches to relevance and clearing it switches back.
+ */
+export function followDefaultSort(previous: FilterState, next: FilterState): FilterState {
+  const untouched = next.sort === previous.sort && previous.sort === defaultSort(previous.query);
+  if (untouched) return { ...next, sort: defaultSort(next.query) };
+  if (next.sort === "relevance" && !hasQuery(next.query)) return { ...next, sort: "recent" };
+  return next;
 }
 
-export function matches(recipe: RecipeFacet, state: FilterState, skip?: "category"): boolean {
+export function matches(
+  recipe: RecipeFacet,
+  state: FilterState,
+  hits: SearchHits,
+  skip?: "category",
+): boolean {
   if (skip !== "category" && state.category && recipe.category !== state.category) return false;
   if (state.season && !recipe.seasons.includes(state.season)) return false;
   if (!state.tags.every((tag) => recipe.tags.includes(tag))) return false;
-  const query = normalizeText(state.query);
-  return !query || recipe.search.includes(query);
+  return !hits || hits.has(recipe.id);
 }
 
+type Compare = (a: RecipeFacet, b: RecipeFacet, hits: SearchHits) => number;
+
 /** The id breaks ties: getCollection() order is not deterministic. */
-const compare: Record<SortKey, (a: RecipeFacet, b: RecipeFacet) => number> = {
-  popular: (a, b) => Number(b.featured) - Number(a.featured) || b.date - a.date,
+const compare: Record<SortKey, Compare> = {
+  relevance: (a, b, hits) => (hits?.get(b.id) ?? 0) - (hits?.get(a.id) ?? 0) || b.date - a.date,
   recent: (a, b) => b.date - a.date,
   // Recipes without a known time go last rather than first.
   quick: (a, b) => (a.time || Infinity) - (b.time || Infinity) || b.date - a.date,
 };
 
-export function sortRecipes<T extends RecipeFacet>(recipes: T[], sort: SortKey): T[] {
-  return [...recipes].sort((a, b) => compare[sort](a, b) || a.id.localeCompare(b.id));
+export function sortRecipes<T extends RecipeFacet>(
+  recipes: T[],
+  sort: SortKey,
+  hits?: SearchHits,
+): T[] {
+  return [...recipes].sort((a, b) => compare[sort](a, b, hits) || a.id.localeCompare(b.id));
 }
 
 /** Matches per category given the other filters; "" counts every category. */
-export function categoryCounts(recipes: RecipeFacet[], state: FilterState): Map<string, number> {
+export function categoryCounts(
+  recipes: RecipeFacet[],
+  state: FilterState,
+  hits: SearchHits,
+): Map<string, number> {
   const counts = new Map<string, number>([["", 0]]);
   for (const recipe of recipes) {
-    if (!matches(recipe, state, "category")) continue;
+    if (!matches(recipe, state, hits, "category")) continue;
     counts.set("", (counts.get("") ?? 0) + 1);
     counts.set(recipe.category, (counts.get(recipe.category) ?? 0) + 1);
   }
@@ -88,13 +107,15 @@ export const isSortKey = (value: string | null): value is SortKey =>
   SORT_KEYS.includes(value as SortKey);
 
 export function stateFromParams(params: URLSearchParams): FilterState {
+  const query = params.get("q") ?? "";
   const sort = params.get("sort");
   return {
     category: params.get("category") ?? "",
     season: params.get("season") ?? "",
     tags: params.getAll("tag"),
-    query: params.get("q") ?? "",
-    sort: isSortKey(sort) ? sort : DEFAULT_STATE.sort,
+    query,
+    sort:
+      isSortKey(sort) && !(sort === "relevance" && !hasQuery(query)) ? sort : defaultSort(query),
   };
 }
 
@@ -105,7 +126,7 @@ export function stateToParams(state: FilterState): URLSearchParams {
   if (state.season) params.set("season", state.season);
   for (const tag of state.tags) params.append("tag", tag);
   if (state.query.trim()) params.set("q", state.query.trim());
-  if (state.sort !== DEFAULT_STATE.sort) params.set("sort", state.sort);
+  if (state.sort !== defaultSort(state.query)) params.set("sort", state.sort);
   return params;
 }
 

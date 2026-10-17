@@ -50,8 +50,14 @@ const items = recipes.map((recipe) => {
     tags: recipeTags.map((tag) => tag.id),
     time,
     date: data.publishDate.valueOf(),
-    featured: data.isFeatured,
-    search: [title, categoryLabel, ...tagLabels, ...seasonLabels].join(" "),
+    search: {
+      title,
+      labels: [categoryLabel, ...tagLabels, ...seasonLabels, ...data.keywords].join(" "),
+      ingredients: data.ingredientGroups
+        .flatMap((group) => group.ingredients.map((ingredient) => ingredient.name))
+        .join(" "),
+      excerpt: data.excerpt,
+    },
   };
 
   return {
@@ -72,7 +78,7 @@ const items = recipes.map((recipe) => {
 
 const sorted = sortRecipes(
   items.map((item) => ({ ...item.facet, item })),
-  "popular",
+  "recent",
 ).map(({ item }) => item);
 
 const title = `${t.recipes.meta.title} · ${t.meta.title}`;

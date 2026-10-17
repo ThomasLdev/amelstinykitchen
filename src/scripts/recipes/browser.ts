@@ -10,9 +10,9 @@ import {
   categoryCounts,
   DEFAULT_STATE,
   type FilterState,
+  followDefaultSort,
   isSortKey,
   matches,
-  normalizeText,
   type Plural,
   plural,
   type RecipeFacet,
@@ -20,6 +20,7 @@ import {
   stateFromParams,
   stateToParams,
 } from "@lib/content/recipe-filters";
+import { createRecipeSearch, hasQuery, type SearchHits } from "@lib/content/recipe-search";
 
 interface Strings {
   count: Plural;
@@ -42,9 +43,20 @@ export function initRecipeBrowser(form: HTMLFormElement): void {
   const recipes: RecipeFacet[] = [];
   for (const card of form.querySelectorAll<HTMLElement>("[data-recipe-item]")) {
     const facet = JSON.parse(card.dataset.facet ?? "{}") as RecipeFacet;
-    recipes.push({ ...facet, search: normalizeText(facet.search) });
+    recipes.push(facet);
     rows.set(facet.id, card.closest("li") ?? card);
   }
+  const searchIndex = createRecipeSearch(recipes);
+  let lastQuery: string | undefined;
+  let lastHits: SearchHits;
+  /** Controls and results ask for the same query in a row: search it once. */
+  const hitsFor = (query: string): SearchHits => {
+    if (query !== lastQuery) {
+      lastQuery = query;
+      lastHits = searchIndex(query);
+    }
+    return lastHits;
+  };
 
   const openButton = form.querySelector<HTMLButtonElement>("[data-filters-open]");
   const badge = form.querySelector<HTMLElement>("[data-filters-badge]");
@@ -78,29 +90,49 @@ export function initRecipeBrowser(form: HTMLFormElement): void {
     if (target) target.checked = true;
   };
 
-  const write = (state: FilterState): void => {
+  const sortSelect = form.elements.namedItem("sort");
+  const relevance =
+    sortSelect instanceof HTMLSelectElement
+      ? sortSelect.querySelector<HTMLOptionElement>('option[value="relevance"]')
+      : null;
+  let lastSort = DEFAULT_STATE;
+
+  /** Follows the default sort while the query changes, and offers relevance only with one. */
+  const syncSort = (state: FilterState): FilterState => {
+    const next = followDefaultSort(lastSort, state);
+    lastSort = next;
+    const noQuery = !hasQuery(next.query);
+    if (relevance) {
+      relevance.hidden = noQuery;
+      relevance.disabled = noQuery;
+    }
+    if (sortSelect instanceof HTMLSelectElement) sortSelect.value = next.sort;
+    return next;
+  };
+
+  const write = (input: FilterState): void => {
+    const state = syncSort(input);
     checkRadio("category", state.category);
     checkRadio("season", state.season);
     for (const box of form.querySelectorAll<HTMLInputElement>('input[name="tag"]')) {
       box.checked = state.tags.includes(box.value);
     }
     if (search) search.value = state.query;
-    const sort = form.elements.namedItem("sort");
-    if (sort instanceof HTMLSelectElement) sort.value = state.sort;
   };
 
   const isDraft = (): boolean => dialog.matches(":modal");
 
   /** Counts that follow the controls, including a draft in the open sheet. */
   const renderControls = (state: FilterState): void => {
-    const counts = categoryCounts(recipes, state);
+    const hits = hitsFor(state.query);
+    const counts = categoryCounts(recipes, state, hits);
     for (const count of form.querySelectorAll<HTMLElement>("[data-filter-count]")) {
       count.textContent = String(counts.get(count.dataset.filterCount ?? "") ?? 0);
     }
     if (applyButton) {
       applyButton.textContent = plural(
         strings.apply,
-        recipes.filter((recipe) => matches(recipe, state)).length,
+        recipes.filter((recipe) => matches(recipe, state, hits)).length,
       );
     }
   };
@@ -109,8 +141,11 @@ export function initRecipeBrowser(form: HTMLFormElement): void {
   let announce: number | undefined;
 
   const renderResults = (state: FilterState): void => {
-    const visible = new Set(recipes.filter((recipe) => matches(recipe, state)).map((r) => r.id));
-    for (const recipe of sortRecipes(recipes, state.sort)) {
+    const hits = hitsFor(state.query);
+    const visible = new Set(
+      recipes.filter((recipe) => matches(recipe, state, hits)).map((r) => r.id),
+    );
+    for (const recipe of sortRecipes(recipes, state.sort, hits)) {
       const row = rows.get(recipe.id);
       if (!row) continue;
       row.hidden = !visible.has(recipe.id);
@@ -165,7 +200,11 @@ export function initRecipeBrowser(form: HTMLFormElement): void {
   };
 
   form.addEventListener("submit", (event) => event.preventDefault());
-  form.addEventListener("input", () => (isDraft() ? renderControls(read()) : commit()));
+  form.addEventListener("input", () => {
+    const state = syncSort(read());
+    if (isDraft()) renderControls(state);
+    else commit(state);
+  });
 
   openButton?.addEventListener("click", () => {
     dialog.returnValue = "";
@@ -229,7 +268,9 @@ export function initRecipeBrowser(form: HTMLFormElement): void {
     });
   }
 
-  write(stateFromParams(new URLSearchParams(location.search)));
+  // Compared with itself, so a sort from the URL counts as picked, not as a default to follow.
+  lastSort = stateFromParams(new URLSearchParams(location.search));
+  write(lastSort);
   commit();
   syncLayout();
   for (const element of form.querySelectorAll<HTMLElement>("[data-enhanced]")) {

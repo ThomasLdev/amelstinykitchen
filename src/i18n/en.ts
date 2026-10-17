@@ -167,7 +167,7 @@ const en: Dictionary = {
     },
     sort: {
       label: "Sort by",
-      popular: "Most loved",
+      relevance: "Relevance",
       recent: "Most recent",
       quick: "Quickest",
     },

@@ -17,7 +17,7 @@ interface Option {
 
 interface Props {
   locale: Locale;
-  /** Already in the default ("popular") order. */
+  /** Already in the default ("recent") order. */
   items: Array<{ card: Card; facet: RecipeFacet }>;
   categories: Option[];
   seasons: Option[];
@@ -94,7 +94,12 @@ const strings = JSON.stringify({
         <span class="browser__sort-label" aria-hidden="true">{t.sort.label}</span>
         <span class="browser__select">
           <select class="browser__select-input" name="sort">
-            {SORT_KEYS.map((key) => <option value={key}>{t.sort[key]}</option>)}
+            {SORT_KEYS.map((key) => (
+              // Relevance needs a query: the script offers it once one is typed.
+              <option value={key} hidden={key === "relevance"} disabled={key === "relevance"}>
+                {t.sort[key]}
+              </option>
+            ))}
           </select>
           <Icon name="chevron-down" size={16} class="browser__select-icon" />
         </span>

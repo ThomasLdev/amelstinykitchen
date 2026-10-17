@@ -169,7 +169,7 @@ const fr = {
     },
     sort: {
       label: "Trier par",
-      popular: "Les plus aimées",
+      relevance: "Pertinence",
       recent: "Les plus récentes",
       quick: "Les plus rapides",
     },
