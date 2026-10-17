@@ -13,6 +13,8 @@ interface Props {
   transitionName?: string;
   /** `list`: thumbnail row on phones; `tile`: always stacked (2-column grids). */
   variant?: "list" | "tile";
+  /** Hooks for the recipes search: words to highlight and the matched-ingredients line. */
+  searchable?: boolean;
   class?: string;
   [key: string]: unknown;
 }
@@ -26,6 +28,7 @@ const {
   image,
   transitionName,
   variant = "list",
+  searchable = false,
   class: className,
   ...rest
 } = Astro.props;
@@ -37,6 +40,7 @@ const sizes = {
 
 // The card is one link: name it by its title, not by every fact inside it.
 const titleId = `recipe-card-${href.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "")}`;
+const searchText = searchable ? { "data-search-text": "" } : {};
 ---
 
 <a
@@ -59,10 +63,19 @@ const titleId = `recipe-card-${href.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/
   </div>
 
   <div class="recipe-card__body">
-    {kicker && <p class="recipe-card__kicker">{kicker}</p>}
+    {kicker && (
+      <p class="recipe-card__kicker" {...searchText}>
+        {kicker}
+      </p>
+    )}
     {meta && <p class="recipe-card__meta">{meta}</p>}
-    <h3 class="recipe-card__title" id={titleId}>{title}</h3>
-    {excerpt && <p class="recipe-card__excerpt">{excerpt}</p>}
+    <h3 class="recipe-card__title" id={titleId} {...searchText}>{title}</h3>
+    {excerpt && (
+      <p class="recipe-card__excerpt" {...searchText}>
+        {excerpt}
+      </p>
+    )}
+    {searchable && <p class="recipe-card__match" data-search-match {...searchText} hidden />}
   </div>
 </a>
 
@@ -130,6 +143,22 @@ const titleId = `recipe-card-${href.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/
     }
   }
 
+  .recipe-card__match {
+    order: 3;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--ink-3);
+  }
+
+  /* Ranges set by the recipes search (CSS Custom Highlight API): no markup is added. */
+  .recipe-card__kicker::highlight(recipe-search),
+  .recipe-card__title::highlight(recipe-search),
+  .recipe-card__excerpt::highlight(recipe-search),
+  .recipe-card__match::highlight(recipe-search) {
+    background-color: var(--accent-soft);
+    color: var(--ink);
+  }
+
   .recipe-card__meta {
     order: 1;
     margin: 0;
@@ -185,6 +214,22 @@ const titleId = `recipe-card-${href.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/
 
     .recipe-card__media {
       inline-size: 100%;
+    }
+
+    .recipe-card__match {
+      order: 3;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--ink-3);
+    }
+
+    /* Ranges set by the recipes search (CSS Custom Highlight API): no markup is added. */
+    .recipe-card__kicker::highlight(recipe-search),
+    .recipe-card__title::highlight(recipe-search),
+    .recipe-card__excerpt::highlight(recipe-search),
+    .recipe-card__match::highlight(recipe-search) {
+      background-color: var(--accent-soft);
+      color: var(--ink);
     }
 
     .recipe-card__meta {

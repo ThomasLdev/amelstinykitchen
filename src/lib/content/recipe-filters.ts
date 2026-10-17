@@ -69,7 +69,8 @@ type Compare = (a: RecipeFacet, b: RecipeFacet, hits: SearchHits) => number;
 
 /** The id breaks ties: getCollection() order is not deterministic. */
 const compare: Record<SortKey, Compare> = {
-  relevance: (a, b, hits) => (hits?.get(b.id) ?? 0) - (hits?.get(a.id) ?? 0) || b.date - a.date,
+  relevance: (a, b, hits) =>
+    (hits?.get(b.id)?.score ?? 0) - (hits?.get(a.id)?.score ?? 0) || b.date - a.date,
   recent: (a, b) => b.date - a.date,
   // Recipes without a known time go last rather than first.
   quick: (a, b) => (a.time || Infinity) - (b.time || Infinity) || b.date - a.date,

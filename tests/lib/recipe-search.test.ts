@@ -1,27 +1,27 @@
-// cspell:ignore citon choco oeufs
-import { createRecipeSearch, type SearchFields } from "@lib/content/recipe-search";
+// cspell:ignore citon choco chocolt coeur crme oeufs
+import { createRecipeSearch, findTerms, type SearchFields } from "@lib/content/recipe-search";
 import { describe, expect, it } from "vitest";
 
 const recipe = (id: string, fields: Partial<SearchFields>) => ({
   id,
-  search: { title: "", labels: "", ingredients: "", excerpt: "", ...fields },
+  search: { title: "", labels: "", ingredients: [], excerpt: "", ...fields },
 });
 
 const search = createRecipeSearch([
   recipe("tarte", {
     title: "Tarte au citron meringuée",
     labels: "Pâtisserie Citron Végétarien Hiver",
-    ingredients: "Farine Beurre Citrons Sucre",
+    ingredients: ["Farine", "Beurre", "Citrons", "Sucre"],
   }),
   recipe("fondant", {
     title: "Fondant au chocolat",
     labels: "Desserts Chocolat",
-    ingredients: "Chocolat noir Beurre Œufs",
+    ingredients: ["Chocolat noir", "Beurre", "Œufs"],
   }),
   recipe("soupe", {
     title: "Velouté d'hiver",
     labels: "Plats",
-    ingredients: "Poireaux Pommes de terre Crème",
+    ingredients: ["Poireaux", "Pommes de terre", "Crème"],
   }),
 ]);
 
@@ -49,8 +49,40 @@ describe("createRecipeSearch", () => {
     expect(ids("hiver")).toEqual(["soupe", "tarte"]);
   });
 
-  it("treats an empty or stop-word-only query as no search", () => {
+  it("treats an empty, stop-word-only or too short query as no search", () => {
     expect(search("  ")).toBeUndefined();
     expect(search("de la")).toBeUndefined();
+    expect(search("b")).toBeUndefined();
+    expect(search("be")).toBeUndefined();
+  });
+
+  it("waits for three letters to search word starts, ignoring shorter words", () => {
+    expect(ids("beu").sort()).toEqual(["fondant", "tarte"]);
+    expect(ids("chocolat b")).toEqual(["fondant"]);
+  });
+
+  it("tolerates typos only on long enough words", () => {
+    // "crme" is one letter away from "creme": a typo on a long word, a different word on a short one.
+    expect(ids("crme")).toEqual([]);
+    expect(ids("chocolt")).toEqual(["fondant"]);
+  });
+});
+
+describe("findTerms", () => {
+  it("returns the recipe words that matched, whatever the query's spelling", () => {
+    expect([...(search("choco")?.get("fondant")?.terms ?? [])]).toEqual(["chocolat"]);
+    expect([...(search("chocolt beurre")?.get("fondant")?.terms ?? [])].sort()).toEqual([
+      "beurre",
+      "chocolat",
+    ]);
+  });
+
+  it("locates them in a displayed text, accents and ligatures included", () => {
+    const terms = new Set(["veloute", "coeur"]);
+    const text = "Un velouté au cœur fondant";
+    expect(findTerms(text, terms).map(([start, end]) => text.slice(start, end))).toEqual([
+      "velouté",
+      "cœur",
+    ]);
   });
 });

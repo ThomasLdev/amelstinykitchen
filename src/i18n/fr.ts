@@ -190,6 +190,8 @@ const fr = {
       autumn: "Automne",
       winter: "Hiver",
     },
+    /** Under a search result, the ingredients that matched. */
+    match: "Contient : %list%",
     active: {
       remove: "Retirer le filtre %label%",
       query: "« %query% »",

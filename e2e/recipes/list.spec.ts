@@ -69,10 +69,20 @@ test.describe("recipes list (desktop)", () => {
     await searchbox.fill(COMPLETE.ingredient.toLowerCase());
     await expect(titles(page)).toHaveText([COMPLETE.title.fr]);
     await expect(sort).toHaveValue("relevance");
+    // The card does not list ingredients: the match line and highlight say why it is there.
+    await expect(
+      recipeList(page).getByText(fr.recipes.match.replace("%list%", COMPLETE.ingredient)),
+    ).toBeVisible();
+    await expect
+      .poll(() => page.evaluate(() => CSS.highlights.get("recipe-search")?.size ?? 0))
+      .toBeGreaterThan(0);
 
     await searchbox.fill("");
     await expect(titles(page)).toHaveText([...LIST_FR]);
     await expect(sort).toHaveValue("recent");
+    await expect(
+      page.getByText(fr.recipes.match.replace("%list%", COMPLETE.ingredient)),
+    ).toBeHidden();
   });
 
   test("keeps a sort picked with the query and resets an automatic one with its chip", async ({

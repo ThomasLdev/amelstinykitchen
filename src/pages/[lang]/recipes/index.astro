@@ -53,9 +53,9 @@ const items = recipes.map((recipe) => {
     search: {
       title,
       labels: [categoryLabel, ...tagLabels, ...seasonLabels, ...data.keywords].join(" "),
-      ingredients: data.ingredientGroups
-        .flatMap((group) => group.ingredients.map((ingredient) => ingredient.name))
-        .join(" "),
+      ingredients: data.ingredientGroups.flatMap((group) =>
+        group.ingredients.map((ingredient) => ingredient.name),
+      ),
       excerpt: data.excerpt,
     },
   };

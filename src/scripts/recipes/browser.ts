@@ -21,12 +21,14 @@ import {
   stateToParams,
 } from "@lib/content/recipe-filters";
 import { createRecipeSearch, hasQuery, type SearchHits } from "@lib/content/recipe-search";
+import { renderMatches } from "./highlight";
 
 interface Strings {
   count: Plural;
   apply: Plural;
   remove: string;
   query: string;
+  match: string;
 }
 
 const DESKTOP = "(min-width: 900px)";
@@ -151,6 +153,7 @@ export function initRecipeBrowser(form: HTMLFormElement): void {
       row.hidden = !visible.has(recipe.id);
       list.append(row);
     }
+    renderMatches(recipes, rows, hits, strings.match);
     if (empty) empty.hidden = visible.size > 0;
     const countText = plural(strings.count, visible.size);
     if (countLabel) countLabel.textContent = countText;

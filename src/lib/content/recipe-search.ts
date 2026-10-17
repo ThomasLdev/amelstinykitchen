@@ -10,12 +10,19 @@ export interface SearchFields {
   title: string;
   /** Category, tags, seasons and SEO keywords. */
   labels: string;
-  ingredients: string;
+  /** One entry per ingredient, so a match can be shown with its full name. */
+  ingredients: string[];
   excerpt: string;
 }
 
-/** Recipe id → relevance score; `undefined` when no query is typed. */
-export type SearchHits = ReadonlyMap<string, number> | undefined;
+interface SearchHit {
+  score: number;
+  /** Recipe words that matched, normalized, whatever the query spelling (typo, word start). */
+  terms: ReadonlySet<string>;
+}
+
+/** Recipe id → hit; `undefined` when no query is typed. */
+export type SearchHits = ReadonlyMap<string, SearchHit> | undefined;
 
 /** Case- and accent-insensitive form, so "tarte" finds "Tarte" and "ete" finds "Été". */
 function normalizeText(value: string): string {
@@ -43,26 +50,59 @@ const processTerm = (term: string): string | null => {
   return normalized && !STOP_WORDS.has(normalized) ? normalized : null;
 };
 
-/** Only stop words ("de") is no query yet, rather than a query without results. */
-export const hasQuery = (query: string): boolean => query.split(/[\p{Z}\p{P}]+/u).some(processTerm);
+/** Shorter query words ("b", "be") would match nearly every recipe: they wait for a third letter. */
+const MIN_QUERY_TERM = 3;
+/** Below this, one typo is a different word ("sel" / "sol"). */
+const MIN_FUZZY_TERM = 5;
+
+const processQueryTerm = (term: string): string | null => {
+  const normalized = processTerm(term);
+  return normalized && normalized.length >= MIN_QUERY_TERM ? normalized : null;
+};
+
+/** Only stop words or short words ("de", "b") is no query yet, rather than a query without results. */
+export const hasQuery = (query: string): boolean =>
+  query.split(/[\p{Z}\p{P}]+/u).some(processQueryTerm);
 
 export function createRecipeSearch(
   recipes: Array<{ id: string; search: SearchFields }>,
 ): (query: string) => SearchHits {
   const index = new MiniSearch<{ id: string } & SearchFields>({
     fields: ["title", "labels", "ingredients", "excerpt"],
+    extractField: (doc, field) => {
+      const value = doc[field as keyof typeof doc];
+      return Array.isArray(value) ? value.join(" ") : value;
+    },
     processTerm,
     searchOptions: {
       boost: { title: 3, labels: 2, ingredients: 1.5 },
+      processTerm: processQueryTerm,
       combineWith: "AND",
       prefix: true,
-      fuzzy: 0.2,
+      fuzzy: (term) => (term.length >= MIN_FUZZY_TERM ? 0.2 : false),
     },
   });
   index.addAll(recipes.map(({ id, search }) => ({ id, ...search })));
 
   return (query) => {
     if (!hasQuery(query)) return undefined;
-    return new Map(index.search(query).map((hit) => [String(hit.id), hit.score]));
+    return new Map(
+      index
+        .search(query)
+        .map((hit) => [
+          String(hit.id),
+          { score: hit.score, terms: new Set(Object.keys(hit.match)) },
+        ]),
+    );
   };
+}
+
+/** Where the matched words sit in a displayed text, as [start, end) offsets. */
+export function findTerms(text: string, terms: ReadonlySet<string>): Array<[number, number]> {
+  const ranges: Array<[number, number]> = [];
+  for (const word of text.matchAll(/[\p{L}\p{N}]+/gu)) {
+    const term = processTerm(word[0]);
+    if (term && terms.has(term)) ranges.push([word.index, word.index + word[0].length]);
+  }
+  return ranges;
 }

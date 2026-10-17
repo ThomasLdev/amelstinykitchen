@@ -188,6 +188,7 @@ const en: Dictionary = {
       autumn: "Autumn",
       winter: "Winter",
     },
+    match: "Contains: %list%",
     active: {
       remove: "Remove the %label% filter",
       query: "“%query%”",

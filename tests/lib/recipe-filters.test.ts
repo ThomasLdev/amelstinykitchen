@@ -20,9 +20,11 @@ const facet = (id: string, overrides: Partial<RecipeFacet> = {}): RecipeFacet =>
   tags: [],
   time: 30,
   date: 0,
-  search: { title: id, labels: "", ingredients: "", excerpt: "" },
+  search: { title: id, labels: "", ingredients: [], excerpt: "" },
   ...overrides,
 });
+
+const hit = (score: number) => ({ score, terms: new Set<string>() });
 
 const state = (overrides: Partial<FilterState> = {}): FilterState => ({
   ...DEFAULT_STATE,
@@ -42,7 +44,7 @@ describe("matches", () => {
   });
 
   it("keeps only the search hits while a query is typed", () => {
-    expect(matches(tart, state(), new Map([["tarte au citron", 1]]))).toBe(true);
+    expect(matches(tart, state(), new Map([["tarte au citron", hit(1)]]))).toBe(true);
     expect(matches(tart, state(), new Map())).toBe(false);
   });
 
@@ -63,9 +65,9 @@ describe("sortRecipes", () => {
 
   it("orders by relevance score, the newest first on equal scores", () => {
     const hits = new Map([
-      ["b-old", 5],
-      ["a-new", 2],
-      ["c-quick", 2],
+      ["b-old", hit(5)],
+      ["a-new", hit(2)],
+      ["c-quick", hit(2)],
     ]);
     expect(ids(sortRecipes(recipes, "relevance", hits))).toEqual(["b-old", "a-new", "c-quick"]);
   });
