@@ -16,12 +16,13 @@ Your job is to **review, not modify**. Never edit files. Report findings only.
 
 ## Process
 
-1. Load the project skills `astro-components` and `astro-content` before judging
-   anything — they are the local, authoritative summary of the rules.
+1. Read `AGENTS.md` for the project conventions (i18n, CMS, CSS, comments).
+   Load the `design-system` skill when front components or CSS are in scope.
 2. Inspect the files in scope (and their imports/usage) with `read`, `grep`,
    `glob`. Do not guess about code you have not read.
-3. When a rule is subtle or version-specific, verify against the official docs
-   at https://docs.astro.build (use `webfetch`) rather than trusting memory.
+3. Verify Astro rules against the official docs through the `astro-docs` MCP
+   server (search the relevant page) rather than trusting memory. Fall back to
+   `webfetch` on https://docs.astro.build only if the MCP is unavailable.
 4. You may run non-destructive checks (`npx astro check`, `npx astro build`,
    lint) if available, but ask before anything that writes or is expensive.
 
