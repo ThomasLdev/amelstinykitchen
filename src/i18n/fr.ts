@@ -1,3 +1,5 @@
+import type { Season } from "@lib/content/season";
+
 const fr = {
   meta: {
     title: "Amel's Tiny Kitchen",
@@ -45,7 +47,6 @@ const fr = {
       label: "Que cuisine-t-on aujourd'hui ?",
       placeholder: "Une recette, un ingrédient…",
       submit: "Chercher",
-      ideas: "Idées :",
     },
     featured: {
       badge: "À la une",
@@ -55,9 +56,26 @@ const fr = {
       title: "Parcourir les",
       titleEm: "envies",
       sub: "Des idées pour cuisiner selon l'humeur du jour.",
+      nav: "Envies",
+      all: "Tout voir",
       inSeason: "De saison",
-      recipesCount: (count: number) =>
-        count === 0 ? "Aucune recette" : count === 1 ? "1 recette" : `${count} recettes`,
+      /** Before, emphasized, after: the article depends on the season. */
+      seasonTitle: {
+        spring: ["Le ", "printemps", " en cuisine"],
+        summer: ["L'", "été", " en cuisine"],
+        autumn: ["L'", "automne", " en cuisine"],
+        winter: ["L'", "hiver", " en cuisine"],
+      } satisfies Record<Season, [string, string, string]>,
+      seasonRecipes: {
+        spring: (count: number) =>
+          count === 1 ? "La recette de printemps" : `Les ${count} recettes de printemps`,
+        summer: (count: number) =>
+          count === 1 ? "La recette d'été" : `Les ${count} recettes d'été`,
+        autumn: (count: number) =>
+          count === 1 ? "La recette d'automne" : `Les ${count} recettes d'automne`,
+        winter: (count: number) =>
+          count === 1 ? "La recette d'hiver" : `Les ${count} recettes d'hiver`,
+      },
     },
     popular: {
       kicker: "En ce moment",

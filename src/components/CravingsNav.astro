@@ -1,0 +1,163 @@
+---
+import { Picture } from "astro:assets";
+import Icon from "@components/Icon.astro";
+import type { ImageMetadata } from "astro";
+
+interface Item {
+  name: string;
+  href: string;
+  image?: ImageMetadata | undefined;
+}
+
+interface Props {
+  label: string;
+  items: Item[];
+  all: { href: string; label: string };
+  class?: string;
+  [key: string]: unknown;
+}
+
+const { label, items, all, class: className, ...rest } = Astro.props;
+---
+
+<nav class:list={["cravings-nav", className]} aria-label={label} {...rest}>
+  <ul class="cravings-nav__list">
+    {items.map((item) => (
+      <li class="cravings-nav__item">
+        <a class="cravings-nav__link" href={item.href}>
+          {item.image ? (
+            <Picture
+              src={item.image}
+              alt=""
+              formats={["avif", "webp"]}
+              widths={[160, 240]}
+              sizes="6.5rem"
+              class="cravings-nav__disc"
+            />
+          ) : (
+            <span class="cravings-nav__disc cravings-nav__disc--initial" aria-hidden="true">
+              {item.name.charAt(0).toLocaleUpperCase()}
+            </span>
+          )}
+          <span class="cravings-nav__name">{item.name}</span>
+        </a>
+      </li>
+    ))}
+    <li class="cravings-nav__item">
+      <a class="cravings-nav__link" href={all.href}>
+        <span class="cravings-nav__disc cravings-nav__disc--all" aria-hidden="true">
+          <Icon name="arrow-right" size={24} />
+        </span>
+        <span class="cravings-nav__name">{all.label}</span>
+      </a>
+    </li>
+  </ul>
+</nav>
+
+<style>
+@layer components {
+  /* Phones: a row to swipe, bleeding to the screen edges, without a scrollbar. */
+  .cravings-nav {
+    margin-inline: calc(var(--gutter) * -1);
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Without a scrollbar a mouse cannot scroll: from 720px the discs wrap instead. */
+    @media (min-width: 720px) {
+      margin-inline: 0;
+      overflow: visible;
+    }
+  }
+
+  .cravings-nav__list {
+    display: flex;
+    gap: 0.875rem;
+    inline-size: max-content;
+    margin: 0;
+    /* Room for the focus ring, which the scroll container would clip. */
+    padding: 0.375rem var(--gutter);
+    list-style: none;
+
+    @media (min-width: 720px) {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+      gap: 1.5rem 1rem;
+      inline-size: auto;
+      padding: 0;
+    }
+  }
+
+  .cravings-nav__item {
+    flex: none;
+    scroll-snap-align: start;
+  }
+
+  .cravings-nav__link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    inline-size: 4.75rem;
+    text-align: center;
+
+    @media (min-width: 720px) {
+      gap: 0.625rem;
+      inline-size: auto;
+    }
+  }
+
+  .cravings-nav__disc {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 4.75rem;
+    block-size: 4.75rem;
+    border-radius: 50%;
+    object-fit: cover;
+    transition: transform var(--transition-base);
+
+    .cravings-nav__link:hover & {
+      transform: scale(1.04);
+    }
+
+    @media (min-width: 720px) {
+      inline-size: 6.5rem;
+      block-size: 6.5rem;
+    }
+  }
+
+  .cravings-nav__disc--initial {
+    background: var(--accent-bg);
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    font-style: italic;
+    color: var(--accent-ink);
+  }
+
+  .cravings-nav__disc--all {
+    border: 1px solid var(--line);
+    color: var(--ink);
+  }
+
+  .cravings-nav__name {
+    font-size: 0.8125rem;
+    transition: color var(--transition-base);
+
+    .cravings-nav__link:hover & {
+      color: var(--accent-ink);
+    }
+
+    @media (min-width: 720px) {
+      font-family: var(--font-serif);
+      font-size: 1.125rem;
+    }
+  }
+}
+</style>

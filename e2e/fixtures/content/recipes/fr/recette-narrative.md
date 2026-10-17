@@ -3,6 +3,7 @@
 # Homepage: featured but older than recette-complete (second popular card).
 # French only: the missing English translation is hidden (no EN page, list entry
 # or hreflang), never served from the French file.
+# Summer: a second season card on the homepage, hidden outside summer.
 locale: fr
 translationKey: recette-narrative
 title: Recette narrative
@@ -11,6 +12,8 @@ paths: recette-narrative
 metaDescription: Description SEO de la recette narrative.
 category: categorie-test
 difficulty: easy
+seasons:
+  - summer
 isFeatured: true
 publishDate: 2026-01-02
 media:

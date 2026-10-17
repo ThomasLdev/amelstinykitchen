@@ -2,11 +2,13 @@
   "fr": {
     "title": "Végétarien",
     "paths": "vegetarien",
-    "isFeatured": true
+    "isFeatured": true,
+    "image": "/src/assets/tags/vegetarian.webp"
   },
   "en": {
     "title": "Vegetarian",
     "paths": "vegetarian",
-    "isFeatured": true
+    "isFeatured": true,
+    "image": "/src/assets/tags/vegetarian.webp"
   }
 }

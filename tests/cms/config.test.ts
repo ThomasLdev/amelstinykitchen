@@ -34,6 +34,10 @@ const recipe = z.object({
     .array(reference)
     .default([])
     .meta(cms({ label: "Tags" })),
+  seasons: z
+    .array(z.enum(["spring", "winter"]).meta(cms({ label: "Saison" })))
+    .default([])
+    .meta(cms({ label: "Saisons" })),
   publishDate: z.coerce.date().meta(cms({ label: "Date" })),
   steps: z
     .array(
@@ -71,6 +75,7 @@ describe("CMS config generator", () => {
       "paths",
       "difficulty",
       "tags",
+      "seasons",
       "publishDate",
       "steps",
     ]);
@@ -87,6 +92,7 @@ describe("CMS config generator", () => {
       multiple: true,
       required: false,
     });
+    expect(field("seasons")).toMatchObject({ widget: "select", multiple: true, required: false });
     expect(field("paths").pattern).toEqual(["^[a-z-]+$", "Minuscules et tirets."]);
     expect(field("publishDate")).toMatchObject({ widget: "datetime", format: "YYYY-MM-DD" });
     expect(field("steps").fields[1]).toMatchObject({ widget: "number", value_type: "int", min: 1 });
@@ -99,7 +105,7 @@ describe("CMS config generator", () => {
   it("edits a both-locales-in-one-file collection from its default-locale shape", () => {
     const tag = z.object({ title: z.string().meta(cms({ label: "Titre", translate: true })) });
     const taxonomy = jsonSchema(z.object({ fr: tag, en: tag }));
-    const { collections } = buildConfig({
+    const { collections, output } = buildConfig({
       recipes: jsonSchema(recipe),
       posts: jsonSchema(recipe),
       categories: taxonomy,
@@ -111,5 +117,7 @@ describe("CMS config generator", () => {
       i18n: { structure: "single_file" },
       fields: [{ name: "title", label: "Titre", widget: "string", i18n: true }],
     });
+    // Empty optional fields written as '' or null would fail the Zod schemas.
+    expect(output).toEqual({ omit_empty_optional_fields: true });
   });
 });

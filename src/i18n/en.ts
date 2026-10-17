@@ -47,7 +47,6 @@ const en: Dictionary = {
       label: "What are we cooking today?",
       placeholder: "A recipe, an ingredient…",
       submit: "Search",
-      ideas: "Ideas:",
     },
     featured: {
       badge: "Featured",
@@ -57,9 +56,25 @@ const en: Dictionary = {
       title: "Browse",
       titleEm: "cravings",
       sub: "Ideas to cook whatever you feel like today.",
+      nav: "Cravings",
+      all: "See all",
       inSeason: "In season",
-      recipesCount: (count: number) =>
-        count === 0 ? "No recipes" : count === 1 ? "1 recipe" : `${count} recipes`,
+      seasonTitle: {
+        spring: ["", "Spring", " in the kitchen"],
+        summer: ["", "Summer", " in the kitchen"],
+        autumn: ["", "Autumn", " in the kitchen"],
+        winter: ["", "Winter", " in the kitchen"],
+      },
+      seasonRecipes: {
+        spring: (count: number) =>
+          count === 1 ? "The spring recipe" : `All ${count} spring recipes`,
+        summer: (count: number) =>
+          count === 1 ? "The summer recipe" : `All ${count} summer recipes`,
+        autumn: (count: number) =>
+          count === 1 ? "The autumn recipe" : `All ${count} autumn recipes`,
+        winter: (count: number) =>
+          count === 1 ? "The winter recipe" : `All ${count} winter recipes`,
+      },
     },
     popular: {
       kicker: "Right now",

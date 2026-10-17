@@ -12,13 +12,4 @@ test.describe("home (mobile)", () => {
     await expect(viewAll).toHaveCount(1);
     await expect(viewAll).toBeVisible();
   });
-
-  test("the in-season tag spans the full row", async ({ page }) => {
-    await page.goto(HOME_FR);
-    const seasonal = page.getByRole("listitem").filter({ hasText: fr.home.tags.inSeason });
-    const grid = seasonal.locator("..");
-
-    const [item, list] = await Promise.all([seasonal.boundingBox(), grid.boundingBox()]);
-    expect(item?.width).toBeCloseTo(list?.width ?? 0, 0);
-  });
 });

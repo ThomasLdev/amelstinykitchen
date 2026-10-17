@@ -1,27 +1,23 @@
 ---
-locale: fr
 translationKey: tarte-au-citron-meringuee
+locale: fr
 title: Tarte au citron meringuée
 paths: tarte-au-citron-meringuee
-excerpt: "Une pâte sablée, une crème acidulée et une meringue aérienne : le grand classique."
+excerpt: 'Une pâte sablée, une crème acidulée et une meringue aérienne : le grand classique.'
 metaTitle: Tarte au citron meringuée
 metaDescription: La recette pas à pas de la tarte au citron meringuée, pâte sablée et crème maison.
 category: patisserie
 tags:
   - citron
   - vegetarien
+seasons:
+  - autumn
+  - winter
 cuisine: Française
 keywords:
   - tarte au citron
   - meringue
   - pâte sablée
-difficulty: medium
-preparationTime: 40
-cookingTime: 25
-servings: 8
-isFeatured: true
-draft: false
-publishDate: 2026-03-01
 media:
   - src: /src/assets/recipes/tarte-au-citron-meringuee.jpeg
     alt: Tarte au citron meringuée posée sur une assiette.
@@ -29,6 +25,13 @@ media:
   - src: /src/assets/recipes/tarte-citron-meringuee-gel-citron-300x200.jpg
     alt: Meringue dorée au chalumeau.
     title: La meringue dorée au chalumeau
+difficulty: medium
+preparationTime: 40
+cookingTime: 25
+servings: 8
+isFeatured: true
+draft: false
+publishDate: 2026-03-01
 ingredientGroups:
   - label: Pâte sablée
     ingredients:
@@ -66,7 +69,7 @@ steps:
     content: Foncez un moule beurré, piquez le fond et cuisez à blanc 15 minutes à 180 °C.
     tip:
       type: warning
-      text: "Surveillez les bords : ils ne doivent pas trop dorer."
+      text: 'Surveillez les bords : ils ne doivent pas trop dorer.'
     media:
       - src: /src/assets/recipes/tarte-citron-meringuee-pochage-meringue-italienne-300x200.jpg
         alt: Meringue dorée au chalumeau.

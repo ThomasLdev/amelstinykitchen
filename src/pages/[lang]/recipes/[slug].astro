@@ -28,6 +28,7 @@ import {
   selectRelatedRecipes,
   totalTime,
 } from "@lib/content/recipe";
+import { SEASONS } from "@lib/content/season";
 import { ogImage } from "@lib/seo/images";
 import { breadcrumbLd, recipeLd } from "@lib/seo/jsonld";
 import { isoDuration } from "@lib/seo/recipe";
@@ -65,8 +66,13 @@ const data = recipe.data;
 
 const category = await getEntry(data.category);
 const tags = await getEntries(data.tags);
-const tagLabels = tags.map((tag) => tag.data[locale].title);
-const kicker = [category?.data[locale].title, ...tagLabels].filter(Boolean).join(" · ");
+const chipLabels = [
+  ...tags.map((tag) => tag.data[locale].title),
+  ...SEASONS.filter((season) => data.seasons.includes(season)).map(
+    (season) => t.recipes.seasons[season],
+  ),
+];
+const kicker = [category?.data[locale].title, ...chipLabels].filter(Boolean).join(" · ");
 
 const preparationTime = formatDuration(data.preparationTime, locale);
 const cookingTime = formatDuration(data.cookingTime, locale);
@@ -162,7 +168,7 @@ const related = selectRelatedRecipes(recipe, recipes).map((entry) => ({
       <RecipeHead
         locale={locale}
         title={data.title}
-        tags={tagLabels}
+        tags={chipLabels}
         excerpt={data.excerpt}
         kicker={kicker}
         recipeAnchor={steps.length > 0 ? recipeAnchor : undefined}

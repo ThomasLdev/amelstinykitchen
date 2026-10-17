@@ -6,6 +6,8 @@ const settings = {
   // Root-absolute: Vite resolves `/src/…` from the project root, so `image()` accepts it.
   public_folder: "/src/assets",
   slug: { encoding: "ascii", clean_accents: true },
+  // Otherwise empty optional fields are written as '' or null, which the Zod schemas reject.
+  output: { omit_empty_optional_fields: true },
   i18n: {
     structure: "multiple_folders",
     locales: ["fr", "en"],
@@ -127,7 +129,7 @@ function widget(node, hints, path) {
       return { widget: "object", fields: toFields(value, path) };
     case "array": {
       const items = value.items;
-      if (items.cms?.widget === "relation") {
+      if (items.cms?.widget === "relation" || items.enum) {
         return { ...widget(items, items.cms, `${path}[]`), multiple: true };
       }
       if (items.type === "object") return { widget: "list", fields: toFields(items, path) };

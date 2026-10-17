@@ -5,12 +5,13 @@ import {
   COMPLETE,
   DRAFT_TITLE_FR,
   FEATURED_TAG,
+  FILTER_RECIPE,
   HOME_EN,
   HOME_FR,
   NARRATIVE_TITLE_FR,
   RECIPE_EN,
   RECIPE_FR,
-  SEASON_TAGS_FR,
+  recipeList,
 } from "./fixtures";
 
 const block = (page: Page, titleEm: string) =>
@@ -21,12 +22,18 @@ test("root redirects to the French locale", async ({ page }) => {
   await expect(page).toHaveURL(/\/fr\/?$/);
 });
 
-test("intro searches with the typed query", async ({ page }) => {
+test("intro search opens the recipes list filtered by the typed query", async ({ page }) => {
   await page.goto(HOME_FR);
   await expect(page.locator("main h1")).toContainText(fr.home.intro.titleEm);
-  await page.getByLabel(fr.home.search.label).fill("citron");
+  await page.getByLabel(fr.home.search.label).fill("filtre");
   await page.getByRole("button", { name: fr.home.search.submit }).click();
-  await expect(page).toHaveURL(/\/fr\/search\/?\?q=citron$/);
+
+  await expect(page.getByRole("searchbox", { name: fr.recipes.search.label })).toHaveValue(
+    "filtre",
+  );
+  await expect(recipeList(page).getByRole("heading", { level: 3 })).toHaveText([
+    FILTER_RECIPE.title,
+  ]);
 });
 
 test("featured card shows the newest published recipe, never a draft", async ({ page }) => {
@@ -51,26 +58,26 @@ test("popular block lists featured published recipes", async ({ page }) => {
   await expect(page.getByText(DRAFT_TITLE_FR)).toHaveCount(0);
 });
 
-test("cravings block counts published recipes and puts the current season first", async ({
-  page,
-}) => {
+test("cravings discs link each featured tag to its filter", async ({ page }) => {
+  await page.goto(HOME_FR);
+  const discs = page.getByRole("navigation", { name: fr.home.tags.nav });
+  await discs.getByRole("link", { name: FEATURED_TAG.title }).click();
+  await expect(page.getByRole("checkbox", { name: FEATURED_TAG.title })).toBeChecked();
+});
+
+test("cravings block features the visitor's season, not the build's", async ({ page }) => {
+  await page.clock.setFixedTime(new Date(2027, 0, 15));
   await page.goto(HOME_FR);
   const cravings = block(page, fr.home.tags.titleEm);
-  const tagCard = cravings
-    .getByRole("listitem")
-    .filter({ has: page.getByRole("heading", { name: FEATURED_TAG.title }) });
-  await expect(tagCard).toBeVisible();
-  // The draft also carries the tag but is not published.
-  await expect(
-    tagCard.getByText(fr.home.tags.recipesCount(FEATURED_TAG.publishedRecipes)),
-  ).toBeVisible();
+  const [before, em, after] = fr.home.tags.seasonTitle.winter;
+  await expect(cravings.getByRole("heading", { level: 3 })).toHaveText(`${before}${em}${after}`);
+  await expect(cravings.getByRole("link", { name: FILTER_RECIPE.title })).toBeVisible();
 
-  await expect(cravings.getByText(fr.home.tags.inSeason)).toHaveCount(1);
-  const first = cravings.getByRole("listitem").first();
-  await expect(first).toContainText(fr.home.tags.inSeason);
-  await expect(first.getByRole("heading")).toHaveText(
-    new RegExp(`^(${SEASON_TAGS_FR.join("|")})$`),
-  );
+  await cravings.getByRole("link", { name: fr.home.tags.seasonRecipes.winter(1) }).click();
+  await expect(page.getByRole("radio", { name: FILTER_RECIPE.season })).toBeChecked();
+  await expect(recipeList(page).getByRole("heading", { level: 3 })).toHaveText([
+    FILTER_RECIPE.title,
+  ]);
 });
 
 test('desktop shows a single "all recipes" link, next to the title', async ({ page }) => {

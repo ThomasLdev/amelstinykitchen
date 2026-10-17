@@ -2,19 +2,26 @@
 import { type CollectionEntry, getCollection, getEntries } from "astro:content";
 import { getAbsoluteLocaleUrl, getRelativeLocaleUrl } from "astro:i18n";
 import Container from "@components/Container.astro";
+import Cravings from "@components/Cravings.astro";
 import FeaturedRecipe from "@components/FeaturedRecipe.astro";
 import HomeHero from "@components/HomeHero.astro";
 import RecipeGrid from "@components/RecipeGrid.astro";
 import SearchForm from "@components/SearchForm.astro";
 import Section from "@components/Section.astro";
 import SectionHead from "@components/SectionHead.astro";
-import TagGrid from "@components/TagGrid.astro";
 import ViewAllLink from "@components/ViewAllLink.astro";
 import { defaultLocale, isLocale, languages, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
-import { selectFeaturedTags, selectHeroRecipe, selectPopularRecipes } from "@lib/content/home";
+import {
+  selectFeaturedTags,
+  selectHeroRecipe,
+  selectPopularRecipes,
+  selectSeasonRecipes,
+} from "@lib/content/home";
 import { inLocale, localize } from "@lib/content/i18n";
 import { formatDuration, isPublished, recipeTransitionName, totalTime } from "@lib/content/recipe";
+import { currentSeason, SEASONS } from "@lib/content/season";
+import { seasonImages } from "@lib/content/season-images";
 import { ogImage } from "@lib/seo/images";
 import { websiteLd } from "@lib/seo/jsonld";
 import { siteConfig, socialProfiles } from "@site";
@@ -44,8 +51,6 @@ const recipeFacts = ({ data }: CollectionEntry<"recipes">) => [
 const factsLine = (facts: Array<string | null | undefined>) => facts.filter(Boolean).join(" · ");
 
 const recipesUrl = getRelativeLocaleUrl(locale, "recipes");
-const searchUrl = getRelativeLocaleUrl(locale, "search");
-const searchHref = (query: string) => `${searchUrl}?q=${encodeURIComponent(query)}`;
 
 const heroRecipe = selectHeroRecipe(recipes);
 const hero = heroRecipe && {
@@ -70,14 +75,38 @@ const popular = selectPopularRecipes(recipes).map((recipe) => ({
   transitionName: recipe === heroRecipe ? undefined : recipeTransitionName(recipe),
 }));
 
-// Built statically: "in season" is evaluated at build time.
-const featuredTags = selectFeaturedTags(tags, recipes, new Date()).map(
-  ({ tag, recipeCount, inSeason }) => ({
+const cravingTags = selectFeaturedTags(tags, recipes, tags.length)
+  .filter(({ recipeCount }) => recipeCount > 0)
+  .slice(0, 7)
+  .map(({ tag }) => ({
     name: tag.data.title,
-    meta: t.home.tags.recipesCount(recipeCount),
-    seasonLabel: inSeason ? t.home.tags.inSeason : undefined,
-  }),
-);
+    href: `${recipesUrl}?tag=${tag.id}`,
+    image: tag.data.image,
+  }));
+
+// Every season with recipes is rendered: the script shows the visitor's, the build's without JS.
+const buildSeason = currentSeason(new Date());
+const seasons = SEASONS.map((season) => ({ season, list: selectSeasonRecipes(recipes, season) }))
+  .filter(({ list }) => list.length > 0)
+  .map(({ season, list }) => ({
+    season,
+    hidden: season !== buildSeason,
+    title: t.home.tags.seasonTitle[season],
+    badge: t.home.tags.inSeason,
+    image: seasonImages[season],
+    recipes: list.slice(0, 3).map((recipe) => ({
+      href: recipeHref(recipe),
+      title: recipe.data.title,
+      meta:
+        formatDuration(totalTime(recipe.data.preparationTime, recipe.data.cookingTime), locale) ??
+        undefined,
+      image: recipe.data.media[0]?.src,
+    })),
+    cta: {
+      href: `${recipesUrl}?season=${season}`,
+      label: t.home.tags.seasonRecipes[season](list.length),
+    },
+  }));
 
 const site = Astro.site ?? new URL(Astro.url.origin);
 const homeUrl = getAbsoluteLocaleUrl(locale, "");
@@ -92,8 +121,6 @@ const jsonLd = [
     publisher: { name: siteConfig.author.name, url: homeUrl, sameAs: socialProfiles() },
   }),
 ];
-
-const ideas = featuredTags.slice(0, 4).map(({ name }) => ({ label: name, href: searchHref(name) }));
 ---
 
 <BaseLayout
@@ -111,18 +138,16 @@ const ideas = featuredTags.slice(0, 4).map(({ name }) => ({ label: name, href: s
       titleEm={t.home.intro.titleEm}
     >
       <SearchForm
-        action={searchUrl}
+        action={recipesUrl}
         label={t.home.search.label}
         placeholder={t.home.search.placeholder}
         submitLabel={t.home.search.submit}
-        ideas={ideas}
-        ideasLabel={t.home.search.ideas}
       />
       {hero && <FeaturedRecipe slot="aside" {...hero} badge={t.home.featured.badge} />}
     </HomeHero>
   </Container>
 
-  {featuredTags.length > 0 && (
+  {(cravingTags.length > 0 || seasons.length > 0) && (
     <Section>
       <Container>
         <SectionHead
@@ -131,7 +156,14 @@ const ideas = featuredTags.slice(0, 4).map(({ name }) => ({ label: name, href: s
           titleEm={t.home.tags.titleEm}
           sub={t.home.tags.sub}
         />
-        <TagGrid items={featuredTags} />
+        <Cravings
+          seasons={seasons}
+          nav={{
+            label: t.home.tags.nav,
+            items: cravingTags,
+            all: { href: recipesUrl, label: t.home.tags.all },
+          }}
+        />
       </Container>
     </Section>
   )}

@@ -7,10 +7,10 @@ import PageHeader from "@components/PageHeader.astro";
 import RecipeBrowser from "@components/RecipeBrowser.astro";
 import { defaultLocale, isLocale, languages, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
-import type { Season } from "@lib/content/home";
 import { inLocale, localize } from "@lib/content/i18n";
 import { formatDuration, isPublished, recipeTransitionName, totalTime } from "@lib/content/recipe";
 import { type RecipeFacet, sortRecipes } from "@lib/content/recipe-filters";
+import { SEASONS } from "@lib/content/season";
 import { breadcrumbLd, itemListLd } from "@lib/seo/jsonld";
 
 export function getStaticPaths() {
@@ -32,15 +32,12 @@ const tags = new Map(
   (await getCollection("tags")).map((entry) => [entry.id, localize(entry, locale)]),
 );
 
-const SEASONS: Season[] = ["spring", "summer", "autumn", "winter"];
-
-// A recipe's seasons come from its season tags; the other tags are filters.
 const items = recipes.map((recipe) => {
   const { data } = recipe;
   const category = categories.get(data.category.id);
   const recipeTags = data.tags.flatMap((ref) => tags.get(ref.id) ?? []);
-  const seasons = SEASONS.filter((season) => recipeTags.some((tag) => tag.data.season === season));
-  const plainTags = recipeTags.filter((tag) => !tag.data.season);
+  const seasons = SEASONS.filter((season) => data.seasons.includes(season));
+  const seasonLabels = seasons.map((season) => t.recipes.seasons[season]);
   const time = totalTime(data.preparationTime, data.cookingTime);
   const title = data.title;
   const categoryLabel = category?.data.title ?? "";
@@ -50,11 +47,11 @@ const items = recipes.map((recipe) => {
     id: data.translationKey,
     category: data.category.id,
     seasons,
-    tags: plainTags.map((tag) => tag.id),
+    tags: recipeTags.map((tag) => tag.id),
     time,
     date: data.publishDate.valueOf(),
     featured: data.isFeatured,
-    search: [title, categoryLabel, ...tagLabels].join(" "),
+    search: [title, categoryLabel, ...tagLabels, ...seasonLabels].join(" "),
   };
 
   return {
@@ -63,9 +60,7 @@ const items = recipes.map((recipe) => {
     card: {
       href: getRelativeLocaleUrl(locale, `recipes/${data.paths}`),
       title,
-      kicker: [categoryLabel, ...seasons.map((season) => t.recipes.seasons[season])]
-        .filter(Boolean)
-        .join(" · "),
+      kicker: [categoryLabel, ...seasonLabels].filter(Boolean).join(" · "),
       meta: [formatDuration(time, locale), t.recipe.difficulty[data.difficulty]]
         .filter(Boolean)
         .join(" · "),

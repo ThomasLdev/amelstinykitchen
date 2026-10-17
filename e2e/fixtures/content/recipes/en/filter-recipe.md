@@ -9,8 +9,8 @@ paths: filter-recipe
 # No excerpt (cards stay without summary): the meta description comes from metaDescription.
 metaDescription: SEO description of the filter recipe.
 category: categorie-filtre
-tags:
-  - hiver
+seasons:
+  - winter
 media:
   - src: /e2e/fixtures/content/assets/cover-2.png
     alt: Filter recipe photo.
