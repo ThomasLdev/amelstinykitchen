@@ -9,7 +9,7 @@ import { defaultLocale, isLocale, languages, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import type { Season } from "@lib/content/home";
 import { translate } from "@lib/content/i18n";
-import { formatDuration, isPublished, totalTime } from "@lib/content/recipe";
+import { formatDuration, isPublished, recipeTransitionName, totalTime } from "@lib/content/recipe";
 import { type RecipeFacet, sortRecipes } from "@lib/content/recipe-filters";
 import { breadcrumbLd, itemListLd } from "@lib/seo/jsonld";
 
@@ -63,6 +63,7 @@ const items = recipes.map((recipe) => {
         .filter(Boolean)
         .join(" · "),
       image: data.media[0]?.src,
+      transitionName: recipeTransitionName(recipe),
     },
   };
 });
@@ -111,15 +112,15 @@ const tagOptions = [...tags.values()]
   alternates={{ fr: "recipes", en: "recipes" }}
   jsonLd={jsonLd}
 >
+  <Breadcrumb
+    slot="breadcrumb"
+    items={[{ label: t.recipe.breadcrumb.home, href: getRelativeLocaleUrl(locale, "") }]}
+    current={t.recipes.breadcrumb}
+    label={t.a11y.breadcrumb}
+  />
+
   <Container>
-    <PageHeader title={t.recipes.title} titleEm={t.recipes.titleEm}>
-      <Breadcrumb
-        slot="breadcrumb"
-        items={[{ label: t.recipe.breadcrumb.home, href: getRelativeLocaleUrl(locale, "") }]}
-        current={t.recipes.breadcrumb}
-        label={t.a11y.breadcrumb}
-      />
-    </PageHeader>
+    <PageHeader title={t.recipes.title} titleEm={t.recipes.titleEm} />
 
     <RecipeBrowser
       locale={locale}

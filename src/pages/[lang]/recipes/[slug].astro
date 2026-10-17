@@ -23,6 +23,7 @@ import {
   formatDuration,
   ingredientCount,
   isPublished,
+  recipeTransitionName,
   selectRelatedRecipes,
   totalTime,
 } from "@lib/content/recipe";
@@ -143,6 +144,7 @@ const related = selectRelatedRecipes(recipe, recipes).map((entry) => ({
     .filter(Boolean)
     .join(" · "),
   image: entry.data.media[0]?.src,
+  transitionName: recipeTransitionName(entry),
 }));
 
 const chefNote = data.chefNote
@@ -165,6 +167,13 @@ const chefNote = data.chefNote
   jsonLd={jsonLd}
   markdownUrl={resolved.markdownUrl}
 >
+  <Breadcrumb
+    slot="breadcrumb"
+    items={breadcrumbItems}
+    current={translate(data.title, locale)}
+    label={t.a11y.breadcrumb}
+  />
+
   <div
     data-recipe-portions
     data-recipe-portions-base={data.servings}
@@ -181,13 +190,6 @@ const chefNote = data.chefNote
         kicker={kicker}
         recipeAnchor={steps.length > 0 ? recipeAnchor : undefined}
       >
-        <Breadcrumb
-          slot="breadcrumb"
-          items={breadcrumbItems}
-          current={translate(data.title, locale)}
-          label={t.a11y.breadcrumb}
-        />
-
         <RecipeStats
           slot="stats"
           prepLabel={t.recipe.prep}
@@ -213,6 +215,7 @@ const chefNote = data.chefNote
           widths={[480, 720, 960, 1280]}
           sizes="(min-width: 1280px) 34rem, (min-width: 900px) 45vw, 92vw"
           eager
+          transitionName={recipeTransitionName(recipe)}
         />
       </RecipeHead>
     </Container>
@@ -289,7 +292,7 @@ const chefNote = data.chefNote
     )}
 
     {related.length > 0 && (
-      <Section>
+      <Section class="recipe-related">
         <Container>
           <SectionHead
             kicker={t.recipe.related.kicker}
@@ -300,11 +303,11 @@ const chefNote = data.chefNote
         </Container>
       </Section>
     )}
-
-    <script>
-    import "@scripts/recipe";
-    </script>
   </div>
+
+  <script>
+  import "@scripts/recipe";
+  </script>
 </BaseLayout>
 
 <style>
@@ -313,14 +316,14 @@ const chefNote = data.chefNote
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
-    padding-block: var(--space-4);
+    padding-block-start: var(--space-4);
 
     @media (min-width: 900px) {
       display: grid;
       grid-template-columns: 23.75rem minmax(0, 1fr);
       gap: var(--space-6);
       align-items: start;
-      padding-block: var(--space-5) var(--space-6);
+      padding-block-start: var(--space-5);
       border-top: 1px solid var(--line);
     }
   }
@@ -358,11 +361,17 @@ const chefNote = data.chefNote
     }
   }
 
+  .recipe-related {
+    @media print {
+      display: none;
+    }
+  }
+
   .recipe-sections {
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
-    padding-block: var(--space-4);
+    padding-block-start: var(--space-4);
 
     .post-section {
       display: flex;

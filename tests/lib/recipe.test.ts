@@ -2,6 +2,7 @@ import {
   formatDuration,
   ingredientCount,
   isPublished,
+  recipeTransitionName,
   selectRelatedRecipes,
   totalTime,
 } from "@lib/content/recipe";
@@ -57,5 +58,9 @@ describe("selectRelatedRecipes", () => {
       "same-category",
       "newer-one-tag",
     ]);
+  });
+
+  it("builds a valid view-transition name from a nested entry id", () => {
+    expect(recipeTransitionName({ id: "fr/tarte.citron" })).toBe("recipe-media-fr-tarte-citron");
   });
 });

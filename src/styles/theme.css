@@ -97,6 +97,13 @@
     border-radius: var(--radius-sm);
   }
 
+  /* The reduced-motion reset below does not reach ::view-transition-* pseudos. */
+  @media (prefers-reduced-motion: no-preference) {
+    @view-transition {
+      navigation: auto;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

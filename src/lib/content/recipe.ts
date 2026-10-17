@@ -34,6 +34,10 @@ export function ingredientCount(groups: Array<{ ingredients: unknown[] }>): numb
   return groups.reduce((total, group) => total + group.ingredients.length, 0);
 }
 
+export function recipeTransitionName(recipe: { id: string }): string {
+  return `recipe-media-${recipe.id.replace(/[^a-z0-9_-]/gi, "-")}`;
+}
+
 export function isPublished(recipe: { data: { draft: boolean } }, production: boolean): boolean {
   return production ? !recipe.data.draft : true;
 }
